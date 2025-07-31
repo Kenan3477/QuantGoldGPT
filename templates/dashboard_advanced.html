@@ -8847,56 +8847,88 @@
             initializeNavigation();
         });
         
-        // Navigation Handler System
+        // Navigation Handler System - FIXED VERSION
         function initializeNavigation() {
-            // Handle sidebar navigation
+            // Handle sidebar navigation with dynamic content loading
             document.querySelectorAll('.nav-item').forEach(button => {
                 button.addEventListener('click', function(e) {
                     e.preventDefault();
                     const section = this.getAttribute('data-section');
                     console.log('🧭 Navigation clicked:', section);
                     
-                    // Handle different navigation sections
+                    // Handle different navigation sections with dynamic loading
                     switch(section) {
                         case 'positions':
-                            // Navigate to positions page
-                            window.location.href = '/positions';
+                        case 'portfolio':
+                            console.log('💼 Showing Portfolio section');
+                            showPortfolioSection();
+                            updateActiveNavigation(this);
                             break;
                         case 'ai-analysis':
-                            // Navigate to AI Analysis dashboard
-                            window.location.href = '/ai-analysis';
+                            console.log('🤖 Showing AI Analysis section');
+                            showAIAnalysisSection();
+                            updateActiveNavigation(this);
+                            break;
+                        case 'ml-predictions':
+                        case 'backtest':
+                            console.log('🧠 Showing ML Predictions section');
+                            showMLPredictionsSection();
+                            updateActiveNavigation(this);
+                            break;
+                        case 'signals':
+                            console.log('📡 Showing Signals section');
+                            showSignalsSection();
+                            updateActiveNavigation(this);
                             break;
                         case 'dashboard':
-                            // Already on dashboard, just update active state
+                            console.log('📊 Showing Dashboard section');
+                            showDashboardSection();
                             updateActiveNavigation(this);
                             break;
                         case 'orders':
                         case 'history':
-                        case 'signals':
-                        case 'backtest':
                             // For future implementation
                             console.log(`📋 ${section} section coming soon...`);
                             showComingSoonMessage(section);
                             break;
                         default:
-                            console.log('🚀 Unknown section:', section);
+                            console.log('🚀 Unknown section, showing dashboard:', section);
+                            showDashboardSection();
+                            updateActiveNavigation(this);
                     }
                 });
             });
             
-            // Handle header navigation
+            // Handle header navigation with dynamic content loading
             document.querySelectorAll('.header-nav-item').forEach(button => {
                 button.addEventListener('click', function(e) {
-                    // Only prevent default for buttons with data-section (not links)
+                    // Only prevent default for buttons with data-section (not external links)
                     if (this.hasAttribute('data-section')) {
                         e.preventDefault();
                         const section = this.getAttribute('data-section');
                         console.log('📊 Header navigation clicked:', section);
                         
-                        // For now, just update active state
+                        // Dynamic content loading for header navigation
+                        switch(section) {
+                            case 'ai-analysis':
+                                showAIAnalysisSection();
+                                break;
+                            case 'ml-predictions':
+                                showMLPredictionsSection();
+                                break;
+                            case 'portfolio':
+                                showPortfolioSection();
+                                break;
+                            case 'signals':
+                                showSignalsSection();
+                                break;
+                            default:
+                                showDashboardSection();
+                        }
+                        
                         updateActiveHeaderNavigation(this);
                     }
-                    // Let links with href navigate normally
+                    // Let external links with href navigate normally
                 });
             });
         }
