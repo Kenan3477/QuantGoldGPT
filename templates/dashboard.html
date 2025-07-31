@@ -18,11 +18,25 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/correlation-analyzer.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/responsive-themes.css') }}">
     
-    <!-- TradingView Lightweight Charts -->
-    <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+    <!-- TradingView Lightweight Charts - Multiple CDN Fallbacks -->
+    <script src="https://unpkg.com/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
+    <script>
+        // Fallback loading for TradingView Charts
+        if (typeof LightweightCharts === 'undefined') {
+            console.log('⚠️ Primary CDN failed, loading fallback...');
+            document.write('<script src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"><\/script>');
+        }
+    </script>
     
     <!-- Socket.IO for real-time updates -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
+    <script>
+        // Fallback for Socket.IO
+        if (typeof io === 'undefined') {
+            console.log('⚠️ Socket.IO primary CDN failed, loading fallback...');
+            document.write('<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"><\/script>');
+        }
+    </script>
     
     <!-- Chart.js for additional visualizations -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -772,46 +786,62 @@
                                          this.createChartContainer();
 
                     console.log('📊 Creating chart with container:', chartContainer);
+                    console.log('📊 LightweightCharts object:', LightweightCharts);
+                    console.log('📊 Available methods:', Object.keys(LightweightCharts));
 
-                    // Initialize TradingView Lightweight Charts
-                    this.chart = LightweightCharts.createChart(chartContainer, {
-                        width: chartContainer.clientWidth || 800,
-                        height: 400,
-                        layout: {
-                            backgroundColor: '#1e1e1e',
-                            textColor: '#d1d4dc',
-                            fontSize: 12,
-                            fontFamily: 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif'
-                        },
-                        grid: {
-                            vertLines: { color: '#2a2a2a' },
-                            horzLines: { color: '#2a2a2a' }
-                        },
-                        crosshair: {
-                            mode: LightweightCharts.CrosshairMode.Normal,
-                        },
-                        rightPriceScale: {
-                            borderColor: '#485c7b',
-                        },
-                        timeScale: {
-                            borderColor: '#485c7b',
-                            timeVisible: true,
-                            secondsVisible: false,
-                        },
-                    });
+                    // Initialize TradingView Lightweight Charts with error handling
+                    try {
+                        this.chart = LightweightCharts.createChart(chartContainer, {
+                            width: chartContainer.clientWidth || 800,
+                            height: 400,
+                            layout: {
+                                backgroundColor: '#1e1e1e',
+                                textColor: '#d1d4dc',
+                                fontSize: 12,
+                                fontFamily: 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif'
+                            },
+                            grid: {
+                                vertLines: { color: '#2a2a2a' },
+                                horzLines: { color: '#2a2a2a' }
+                            },
+                            crosshair: {
+                                mode: LightweightCharts.CrosshairMode ? LightweightCharts.CrosshairMode.Normal : 0,
+                            },
+                            rightPriceScale: {
+                                borderColor: '#485c7b',
+                            },
+                            timeScale: {
+                                borderColor: '#485c7b',
+                                timeVisible: true,
+                                secondsVisible: false,
+                            },
+                        });
 
-                    console.log('✅ Chart created successfully');
+                        console.log('✅ Chart created successfully:', this.chart);
+                        console.log('📊 Chart methods:', Object.keys(this.chart));
 
-                    // Add candlestick series
-                    this.candlestickSeries = this.chart.addCandlestickSeries({
-                        upColor: '#4caf50',
-                        downColor: '#f44336',
-                        borderVisible: false,
-                        wickUpColor: '#4caf50',
-                        wickDownColor: '#f44336',
-                    });
+                        // Verify chart has required methods
+                        if (!this.chart.addCandlestickSeries) {
+                            throw new Error('Chart API missing addCandlestickSeries method');
+                        }
 
-                    console.log('✅ Candlestick series added');
+                        console.log('✅ Chart API verified');
+
+                        // Add candlestick series
+                        this.candlestickSeries = this.chart.addCandlestickSeries({
+                            upColor: '#4caf50',
+                            downColor: '#f44336',
+                            borderVisible: false,
+                            wickUpColor: '#4caf50',
+                            wickDownColor: '#f44336',
+                        });
+
+                        console.log('✅ Candlestick series added');
+
+                    } catch (chartError) {
+                        console.error('❌ Chart creation failed:', chartError);
+                        throw new Error(`Chart creation failed: ${chartError.message}`);
+                    }
 
                     // Setup timeframe buttons
                     this.setupTimeframeButtons();
@@ -1649,18 +1679,47 @@
         
         // Wait for all libraries to load before initializing dashboard
         function waitForLibraries() {
-            return new Promise((resolve) => {
+            return new Promise((resolve, reject) => {
+                let attempts = 0;
+                const maxAttempts = 50; // 5 seconds max wait
+                
                 const checkLibraries = () => {
+                    attempts++;
+                    console.log(`🔍 Library check attempt ${attempts}/${maxAttempts}`);
+                    
                     if (typeof LightweightCharts !== 'undefined' && 
                         typeof io !== 'undefined') {
-                        console.log('✅ All required libraries loaded');
-                        resolve();
+                        
+                        // Additional verification for LightweightCharts
+                        if (LightweightCharts.createChart && 
+                            typeof LightweightCharts.createChart === 'function') {
+                            console.log('✅ All required libraries loaded and verified');
+                            console.log('📊 LightweightCharts version info:', {
+                                hasCreateChart: typeof LightweightCharts.createChart === 'function',
+                                hasCrosshairMode: !!LightweightCharts.CrosshairMode,
+                                methods: Object.keys(LightweightCharts)
+                            });
+                            resolve();
+                        } else {
+                            console.error('❌ LightweightCharts loaded but missing createChart method');
+                            if (attempts >= maxAttempts) {
+                                reject(new Error('LightweightCharts API incomplete'));
+                            } else {
+                                setTimeout(checkLibraries, 100);
+                            }
+                        }
                     } else {
                         console.log('⏳ Waiting for libraries...', {
                             LightweightCharts: typeof LightweightCharts !== 'undefined',
-                            io: typeof io !== 'undefined'
+                            io: typeof io !== 'undefined',
+                            attempt: attempts
                         });
-                        setTimeout(checkLibraries, 100);
+                        
+                        if (attempts >= maxAttempts) {
+                            reject(new Error('Libraries failed to load within timeout'));
+                        } else {
+                            setTimeout(checkLibraries, 100);
+                        }
                     }
                 };
                 checkLibraries();
