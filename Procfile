@@ -1,2 +1,2 @@
-web: python app.py
+web: python /app/app.py
 release: echo "Starting GoldGPT Advanced Dashboard"

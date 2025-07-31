@@ -18,6 +18,9 @@ __pycache__/
 temp/
 cache/
 logs/
+
+# Minimal app (replaced by main app.py)
+app_minimal.py
 *.log
 
 # Database files (use Railway PostgreSQL)
