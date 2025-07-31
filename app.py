@@ -343,7 +343,7 @@ def generate_chart_data(timeframe='1H', count=100):
 def dashboard():
     """Main advanced dashboard"""
     try:
-        return render_template('dashboard.html')
+        return render_template('dashboard_advanced.html')
     except Exception as e:
         logger.error(f"Error loading dashboard template: {e}")
         # Fallback with advanced features preview
@@ -533,7 +533,7 @@ def simple_dashboard():
 def advanced_dashboard():
     """Advanced dashboard (direct access for testing)"""
     try:
-        return render_template('dashboard.html')
+        return render_template('dashboard_advanced.html')
     except Exception as e:
         logger.error(f"Error loading advanced dashboard template: {e}")
         return "Advanced dashboard template not found", 404
