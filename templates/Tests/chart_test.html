@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unified Chart System Test</title>
+    <link rel="stylesheet" href="../static/css/unified-chart.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #0a0a0a;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+        
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .test-section {
+            margin-bottom: 40px;
+            padding: 20px;
+            background: #141414;
+            border-radius: 8px;
+            border: 1px solid #2a2a2a;
+        }
+        
+        .test-title {
+            color: #00d4aa;
+            margin-bottom: 20px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .chart-test {
+            height: 400px;
+            background: #1a1a1a;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .test-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .test-btn {
+            padding: 8px 16px;
+            background: #00d4aa;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .test-btn:hover {
+            background: #4285f4;
+        }
+        
+        .test-btn.secondary {
+            background: #2a2a2a;
+            color: #b0b0b0;
+        }
+        
+        .test-log {
+            background: #0a0a0a;
+            border: 1px solid #2a2a2a;
+            border-radius: 4px;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 12px;
+            height: 150px;
+            overflow-y: auto;
+            color: #b0b0b0;
+        }
+        
+        .log-entry {
+            margin-bottom: 4px;
+        }
+        
+        .log-success { color: #00d084; }
+        .log-warning { color: #ffa502; }
+        .log-error { color: #ff4757; }
+        .log-info { color: #4285f4; }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1 style="text-align: center; color: #ffd700; margin-bottom: 40px;">
+            <i class="fas fa-chart-line"></i> Unified Chart System Test Suite
+        </h1>
+        
+        <!-- Test 1: Basic Chart Initialization -->
+        <div class="test-section">
+            <div class="test-title">Test 1: Basic Chart Initialization</div>
+            <div class="test-controls">
+                <button class="test-btn" onclick="runBasicTest()">Initialize Chart</button>
+                <button class="test-btn secondary" onclick="clearTest('test1')">Clear</button>
+            </div>
+            <div id="test1-chart" class="chart-test chart-container">
+                <div class="chart-loading">Waiting for test...</div>
+            </div>
+            <div id="test1-log" class="test-log"></div>
+        </div>
+        
+        <!-- Test 2: Symbol Switching -->
+        <div class="test-section">
+            <div class="test-title">Test 2: Symbol Switching</div>
+            <div class="test-controls">
+                <button class="test-btn" onclick="runSymbolTest('XAUUSD')">XAUUSD</button>
+                <button class="test-btn" onclick="runSymbolTest('XAGUSD')">XAGUSD</button>
+                <button class="test-btn" onclick="runSymbolTest('INVALID')">Invalid Symbol</button>
+                <button class="test-btn secondary" onclick="clearTest('test2')">Clear</button>
+            </div>
+            <div id="test2-chart" class="chart-test chart-container">
+                <div class="chart-loading">Waiting for test...</div>
+            </div>
+            <div id="test2-log" class="test-log"></div>
+        </div>
+        
+        <!-- Test 3: Real-time Data -->
+        <div class="test-section">
+            <div class="test-title">Test 3: Real-time Data Updates</div>
+            <div class="test-controls">
+                <button class="test-btn" onclick="runRealtimeTest()">Start Real-time</button>
+                <button class="test-btn secondary" onclick="stopRealtimeTest()">Stop Real-time</button>
+                <button class="test-btn secondary" onclick="clearTest('test3')">Clear</button>
+            </div>
+            <div id="test3-chart" class="chart-test chart-container">
+                <div class="chart-loading">Waiting for test...</div>
+            </div>
+            <div id="test3-log" class="test-log"></div>
+        </div>
+        
+        <!-- Test 4: Fallback Mode -->
+        <div class="test-section">
+            <div class="test-title">Test 4: Fallback Mode Simulation</div>
+            <div class="test-controls">
+                <button class="test-btn" onclick="runFallbackTest()">Force Fallback</button>
+                <button class="test-btn secondary" onclick="clearTest('test4')">Clear</button>
+            </div>
+            <div id="test4-chart" class="chart-test chart-container">
+                <div class="chart-loading">Waiting for test...</div>
+            </div>
+            <div id="test4-log" class="test-log"></div>
+        </div>
+    </div>
+
+    <!-- Include External Libraries -->
+    <script src="https://s3.tradingview.com/tv.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.min.js"></script>
+    <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+    <script src="../static/js/unified-chart-manager.js"></script>
+
+    <script>
+        // Test utilities
+        function log(testId, message, type = 'info') {
+            const logElement = document.getElementById(`${testId}-log`);
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry log-${type}`;
+            logEntry.textContent = `[${timestamp}] ${message}`;
+            logElement.appendChild(logEntry);
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+
+        function clearTest(testId) {
+            const chartElement = document.getElementById(`${testId}-chart`);
+            const logElement = document.getElementById(`${testId}-log`);
+            
+            chartElement.innerHTML = '<div class="chart-loading">Waiting for test...</div>';
+            logElement.innerHTML = '';
+            
+            log(testId, 'Test cleared', 'info');
+        }
+
+        // Test implementations
+        let chartManagers = {};
+        let realtimeInterval = null;
+
+        async function runBasicTest() {
+            const testId = 'test1';
+            const chartElement = document.getElementById(`${testId}-chart`);
+            
+            log(testId, 'Starting basic chart initialization test...', 'info');
+            
+            try {
+                chartElement.innerHTML = '<div class="chart-content" id="test1-content"></div>';
+                
+                const chartManager = new UnifiedChartManager('test1-content');
+                chartManagers[testId] = chartManager;
+                
+                log(testId, 'UnifiedChartManager created', 'success');
+                
+                await chartManager.initialize({
+                    symbol: 'XAUUSD',
+                    interval: '1D',
+                    theme: 'dark'
+                });
+                
+                log(testId, `Chart initialized with ${chartManager.getCurrentImplementation()}`, 'success');
+                
+            } catch (error) {
+                log(testId, `Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function runSymbolTest(symbol) {
+            const testId = 'test2';
+            const chartElement = document.getElementById(`${testId}-chart`);
+            
+            log(testId, `Testing symbol switching to ${symbol}...`, 'info');
+            
+            try {
+                if (!chartManagers[testId]) {
+                    chartElement.innerHTML = '<div class="chart-content" id="test2-content"></div>';
+                    chartManagers[testId] = new UnifiedChartManager('test2-content');
+                    await chartManagers[testId].initialize();
+                }
+                
+                await chartManagers[testId].updateSymbol(symbol);
+                log(testId, `Successfully switched to ${symbol}`, 'success');
+                
+            } catch (error) {
+                log(testId, `Error switching to ${symbol}: ${error.message}`, 'error');
+            }
+        }
+
+        async function runRealtimeTest() {
+            const testId = 'test3';
+            const chartElement = document.getElementById(`${testId}-chart`);
+            
+            log(testId, 'Starting real-time data test...', 'info');
+            
+            try {
+                if (!chartManagers[testId]) {
+                    chartElement.innerHTML = '<div class="chart-content" id="test3-content"></div>';
+                    chartManagers[testId] = new UnifiedChartManager('test3-content');
+                    await chartManagers[testId].initialize({ symbol: 'XAUUSD' });
+                }
+                
+                log(testId, 'Starting real-time updates...', 'info');
+                
+                // Simulate real-time data
+                let updateCount = 0;
+                realtimeInterval = setInterval(() => {
+                    updateCount++;
+                    const mockPrice = 2000 + Math.random() * 100;
+                    const mockData = {
+                        time: Date.now() / 1000,
+                        open: mockPrice,
+                        high: mockPrice + Math.random() * 5,
+                        low: mockPrice - Math.random() * 5,
+                        close: mockPrice + (Math.random() - 0.5) * 2,
+                        volume: Math.floor(Math.random() * 1000000)
+                    };
+                    
+                    chartManagers[testId].updateRealTimeData(mockData);
+                    
+                    if (updateCount % 5 === 0) {
+                        log(testId, `Real-time update #${updateCount}: $${mockData.close.toFixed(2)}`, 'info');
+                    }
+                }, 1000);
+                
+                log(testId, 'Real-time updates started', 'success');
+                
+            } catch (error) {
+                log(testId, `Error: ${error.message}`, 'error');
+            }
+        }
+
+        function stopRealtimeTest() {
+            if (realtimeInterval) {
+                clearInterval(realtimeInterval);
+                realtimeInterval = null;
+                log('test3', 'Real-time updates stopped', 'warning');
+            }
+        }
+
+        async function runFallbackTest() {
+            const testId = 'test4';
+            const chartElement = document.getElementById(`${testId}-chart`);
+            
+            log(testId, 'Testing fallback mode...', 'info');
+            
+            try {
+                chartElement.innerHTML = '<div class="chart-content" id="test4-content"></div>';
+                
+                // Create chart manager with forced fallback
+                const chartManager = new UnifiedChartManager('test4-content', {
+                    forceFallback: true
+                });
+                chartManagers[testId] = chartManager;
+                
+                await chartManager.initialize({
+                    symbol: 'XAUUSD',
+                    interval: '1D'
+                });
+                
+                log(testId, `Fallback mode activated: ${chartManager.getCurrentImplementation()}`, 'warning');
+                
+                // Test price updates in fallback mode
+                setTimeout(() => {
+                    chartManager.updatePrice({
+                        symbol: 'XAUUSD',
+                        price: 2034.56,
+                        change: 12.34,
+                        changePercent: 0.61
+                    });
+                    log(testId, 'Price updated in fallback mode', 'success');
+                }, 1000);
+                
+            } catch (error) {
+                log(testId, `Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Initialize on page load
+        window.addEventListener('load', () => {
+            console.log('Unified Chart Test Suite loaded');
+            
+            // Log available implementations
+            setTimeout(() => {
+                const implementations = [];
+                if (typeof TradingView !== 'undefined') implementations.push('TradingView');
+                if (typeof LightweightCharts !== 'undefined') implementations.push('LightweightCharts');
+                if (typeof Chart !== 'undefined') implementations.push('Chart.js');
+                
+                console.log('Available chart implementations:', implementations);
+                
+                // Add to first test log
+                log('test1', `Available implementations: ${implementations.join(', ')}`, 'info');
+            }, 500);
+        });
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            stopRealtimeTest();
+            Object.values(chartManagers).forEach(manager => {
+                if (manager.destroy) {
+                    manager.destroy();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

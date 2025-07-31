@@ -1,0 +1,59 @@
+{
+  "timestamp": "2025-07-23T11:37:35.453720",
+  "tests": {
+    "advanced_backtester": {
+      "backtester_functional": false,
+      "error": "PerformanceMetrics.__init__() missing 20 required positional arguments: 'total_return', 'annualized_return', 'volatility', 'sharpe_ratio', 'sortino_ratio', 'calmar_ratio', 'max_drawdown', 'max_drawdown_duration', 'win_rate', 'profit_factor', 'information_ratio', 'tracking_error', 'var_95', 'cvar_95', 'recovery_factor', 'average_win', 'average_loss', 'trades_count', 'winning_trades', and 'losing_trades'"
+    },
+    "risk_management": {
+      "risk_management_functional": true,
+      "var_95": -0.028897366916214483,
+      "max_drawdown": 0.255068381939994,
+      "sharpe_ratio": 0.6950893495404793,
+      "sortino_ratio": 1.2720854726108344,
+      "portfolio_volatility": 0.3064714477175796
+    },
+    "database_structure": {
+      "database_functional": true,
+      "databases_found": 2,
+      "database_files": [
+        "goldgpt_advanced_backtest.db",
+        "data_cache.db"
+      ],
+      "tables_count": 4,
+      "sample_records": 5
+    },
+    "performance_calculations": {
+      "performance_calculations_functional": true,
+      "total_return": 0.17467169428636276,
+      "annualized_return": 0.17467169428636264,
+      "volatility": 0.22985358578818474,
+      "sharpe_ratio": 0.672913993297003,
+      "max_drawdown": 0.1952685111940779,
+      "calmar_ratio": 0.8945205410654049,
+      "simulated_trades": 50,
+      "simulated_win_rate": 0.55,
+      "profit_factor": 1.8
+    },
+    "data_generation": {
+      "data_generation_functional": true,
+      "data_points": 100,
+      "date_range_days": 100,
+      "missing_data_points": "58",
+      "negative_prices": "0",
+      "invalid_ohlc": "0",
+      "price_range": [
+        2763.88495852697,
+        3710.2532521372063
+      ],
+      "avg_volume": 57539.77,
+      "data_quality_score": 0.884
+    }
+  },
+  "summary": {
+    "total_tests": 5,
+    "successful_tests": 4,
+    "system_health_percentage": 80.0,
+    "overall_status": "HEALTHY"
+  }
+}

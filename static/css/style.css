@@ -1,0 +1,481 @@
+/* Enhanced Trading 212 Inspired Styles for GoldGPT */
+
+/* Additional component styles */
+.price-flash {
+    animation: priceFlash 0.5s ease-in-out;
+}
+
+@keyframes priceFlash {
+    0% { background-color: transparent; }
+    50% { background-color: rgba(255, 215, 0, 0.2); }
+    100% { background-color: transparent; }
+}
+
+/* Analysis grid */
+.analysis-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.analysis-section {
+    background: #1a1a1a;
+    border-radius: 8px;
+    padding: 15px;
+    border: 1px solid #333;
+}
+
+.analysis-section h4 {
+    color: #FFD700;
+    margin-bottom: 10px;
+    font-size: 16px;
+}
+
+.highlight {
+    color: #FFD700;
+    font-weight: 600;
+}
+
+.recommendation {
+    font-size: 18px;
+    font-weight: bold;
+    padding: 5px 10px;
+    border-radius: 5px;
+    text-align: center;
+}
+
+.recommendation.buy {
+    background: rgba(34, 197, 94, 0.2);
+    color: #22c55e;
+    border: 1px solid #22c55e;
+}
+
+.recommendation.sell {
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+    border: 1px solid #ef4444;
+}
+
+.recommendation.hold {
+    background: rgba(234, 179, 8, 0.2);
+    color: #eab308;
+    border: 1px solid #eab308;
+}
+
+/* Trading interface */
+.trading-panel {
+    background: #111111;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    border: 1px solid #333;
+}
+
+.order-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.form-group label {
+    font-size: 14px;
+    color: #aaa;
+}
+
+.form-input {
+    background: #1a1a1a;
+    border: 1px solid #333;
+    border-radius: 6px;
+    padding: 10px;
+    color: #fff;
+    font-size: 14px;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: #FFD700;
+}
+
+.order-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-large {
+    padding: 15px 30px;
+    font-size: 16px;
+    font-weight: 600;
+    flex: 1;
+}
+
+/* Advanced chart container */
+.chart-controls {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 15px;
+    padding: 10px;
+    background: #1a1a1a;
+    border-radius: 8px;
+}
+
+.timeframe-buttons {
+    display: flex;
+    gap: 5px;
+}
+
+.timeframe-btn {
+    padding: 5px 10px;
+    background: transparent;
+    border: 1px solid #333;
+    color: #aaa;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.timeframe-btn.active {
+    background: #FFD700;
+    color: #000;
+    border-color: #FFD700;
+}
+
+/* Market depth */
+.market-depth {
+    background: #111111;
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px solid #333;
+}
+
+.depth-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.depth-table th,
+.depth-table td {
+    padding: 8px 12px;
+    text-align: right;
+    font-size: 12px;
+}
+
+.depth-table th {
+    color: #aaa;
+    border-bottom: 1px solid #333;
+}
+
+.depth-bid {
+    color: #22c55e;
+}
+
+.depth-ask {
+    color: #ef4444;
+}
+
+/* News feed */
+.news-feed {
+    background: #111111;
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px solid #333;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.news-item {
+    border-bottom: 1px solid #333;
+    padding: 15px 0;
+}
+
+.news-item:last-child {
+    border-bottom: none;
+}
+
+.news-title {
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.news-meta {
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 8px;
+}
+
+.news-summary {
+    font-size: 14px;
+    color: #ccc;
+    line-height: 1.4;
+}
+
+/* News section headers */
+.news-section-header {
+    padding: 12px 0 8px 0;
+    border-bottom: 2px solid #333;
+    margin-bottom: 15px;
+}
+
+.news-section-header h4 {
+    color: #00ff88;
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.news-section-header.upcoming-events {
+    border-bottom-color: #ff8800;
+}
+
+.news-section-header.upcoming-events h4 {
+    color: #ff8800;
+}
+
+/* Upcoming events styling */
+.upcoming-event {
+    border-left: 4px solid #ff8800 !important;
+    background: linear-gradient(135deg, rgba(255, 136, 0, 0.05), rgba(255, 136, 0, 0.02));
+    position: relative;
+}
+
+.upcoming-event::before {
+    content: "📅";
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 18px;
+    opacity: 0.7;
+}
+
+.upcoming-event .news-time {
+    color: #ff8800 !important;
+    font-weight: 600;
+}
+
+/* Performance metrics */
+.performance-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.metric-card {
+    background: #1a1a1a;
+    border-radius: 8px;
+    padding: 15px;
+    text-align: center;
+    border: 1px solid #333;
+}
+
+.metric-value {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.metric-label {
+    font-size: 12px;
+    color: #aaa;
+}
+
+.metric-positive {
+    color: #22c55e;
+}
+
+.metric-negative {
+    color: #ef4444;
+}
+
+/* Market sentiment summary improvements */
+.market-sentiment-summary {
+    background: linear-gradient(135deg, rgba(0, 255, 136, 0.05), rgba(255, 215, 0, 0.05));
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 20px;
+}
+
+.sentiment-overview h4 {
+    color: #FFD700;
+    margin-bottom: 12px;
+    font-size: 16px;
+}
+
+.sentiment-stats {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.sentiment-stats span {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.bullish-count { color: #00ff88; }
+.neutral-count { color: #888; }
+.bearish-count { color: #ff4444; }
+
+.overall-sentiment {
+    font-size: 16px;
+    font-weight: 600;
+    text-align: center;
+    padding: 8px;
+    border-radius: 6px;
+    margin-top: 10px;
+}
+
+.overall-sentiment.bullish {
+    background: rgba(0, 255, 136, 0.1);
+    color: #00ff88;
+    border: 1px solid #00ff88;
+}
+
+.overall-sentiment.bearish {
+    background: rgba(255, 68, 68, 0.1);
+    color: #ff4444;
+    border: 1px solid #ff4444;
+}
+
+.overall-sentiment.neutral {
+    background: rgba(136, 136, 136, 0.1);
+    color: #888;
+    border: 1px solid #888;
+}
+
+/* Notifications */
+.notification {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    padding: 15px 20px;
+    border-radius: 8px;
+    color: #fff;
+    font-weight: 500;
+    z-index: 10000;
+    min-width: 300px;
+    animation: slideIn 0.3s ease-out;
+}
+
+.notification-success {
+    background: #22c55e;
+}
+
+.notification-error {
+    background: #ef4444;
+}
+
+.notification-info {
+    background: #3b82f6;
+}
+
+.notification-warning {
+    background: #eab308;
+    color: #000;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Mobile responsive enhancements */
+@media (max-width: 768px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .analysis-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .order-form {
+        grid-template-columns: 1fr;
+    }
+    
+    .performance-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+    
+    .chart-controls {
+        flex-direction: column;
+        gap: 10px;
+    }
+}
+
+/* Dark mode enhancements */
+.scrollbar-dark::-webkit-scrollbar {
+    width: 8px;
+}
+
+.scrollbar-dark::-webkit-scrollbar-track {
+    background: #1a1a1a;
+}
+
+.scrollbar-dark::-webkit-scrollbar-thumb {
+    background: #333;
+    border-radius: 4px;
+}
+
+.scrollbar-dark::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* Loading states */
+.skeleton {
+    background: linear-gradient(90deg, #1a1a1a 25%, #333 50%, #1a1a1a 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+/* Advanced tooltips */
+.tooltip {
+    position: relative;
+    cursor: help;
+}
+
+.tooltip::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #333;
+    color: #fff;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+    z-index: 1000;
+}
+
+.tooltip:hover::after {
+    opacity: 1;
+}

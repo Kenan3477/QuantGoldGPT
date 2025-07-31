@@ -1,0 +1,128 @@
+{
+  "name": "GoldGPT Professional Trading Dashboard",
+  "short_name": "GoldGPT Pro",
+  "description": "AI-powered professional trading dashboard for gold market analysis",
+  "start_url": "/dashboard",
+  "display": "standalone",
+  "background_color": "#0a0a0b",
+  "theme_color": "#1a1a1b",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/static/icons/icon-72x72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/static/icons/icon-96x96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/static/icons/icon-128x128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/static/icons/icon-144x144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/static/icons/icon-152x152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/static/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/static/icons/icon-384x384.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/static/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable any"
+    }
+  ],
+  "categories": ["finance", "business", "productivity"],
+  "screenshots": [
+    {
+      "src": "/static/screenshots/desktop-dashboard.png",
+      "sizes": "1920x1080",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Desktop Dashboard View"
+    },
+    {
+      "src": "/static/screenshots/mobile-charts.png",
+      "sizes": "428x926",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Mobile Charts View"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Multi-Timeframe Charts",
+      "short_name": "Charts",
+      "description": "View multi-timeframe trading charts",
+      "url": "/dashboard#charts",
+      "icons": [
+        {
+          "src": "/static/icons/shortcut-charts.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "AI Predictions",
+      "short_name": "Predictions",
+      "description": "View AI trading predictions",
+      "url": "/dashboard#predictions",
+      "icons": [
+        {
+          "src": "/static/icons/shortcut-predictions.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Generate Signal",
+      "short_name": "Signal",
+      "description": "Generate new trading signal",
+      "url": "/dashboard?action=generate-signal",
+      "icons": [
+        {
+          "src": "/static/icons/shortcut-signal.png",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false,
+  "lang": "en",
+  "dir": "ltr",
+  "edge_side_panel": {
+    "preferred_width": 400
+  },
+  "protocol_handlers": [
+    {
+      "protocol": "web+goldgpt",
+      "url": "/dashboard?action=%s"
+    }
+  ]
+}

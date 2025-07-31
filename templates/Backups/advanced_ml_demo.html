@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🤖 GoldGPT Advanced ML Prediction System Demo</title>
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="/static/css/advanced-ml-dashboard.css">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Roboto', 'Segoe UI', sans-serif;
+            background: #0f0f0f;
+            color: #ffffff;
+            line-height: 1.6;
+        }
+        
+        .demo-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+        
+        .demo-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .demo-title {
+            font-size: 36px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #1976d2, #42a5f5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 16px;
+        }
+        
+        .demo-subtitle {
+            font-size: 18px;
+            color: #b0b0b0;
+            margin-bottom: 32px;
+        }
+        
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+        
+        .control-group {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .control-group h3 {
+            margin-bottom: 16px;
+            color: #00d4aa;
+            font-size: 18px;
+        }
+        
+        .btn {
+            background: linear-gradient(90deg, #00d4aa, #00c4aa);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin: 4px;
+            font-size: 14px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(0, 212, 170, 0.3);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(90deg, #8b5cf6, #a855f7);
+        }
+        
+        .btn-secondary:hover {
+            box-shadow: 0 8px 16px rgba(139, 92, 246, 0.3);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(90deg, #ff6b6b, #ff5252);
+        }
+        
+        .btn-danger:hover {
+            box-shadow: 0 8px 16px rgba(255, 107, 107, 0.3);
+        }
+        
+        .status-display {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 30px;
+        }
+        
+        .status-display h3 {
+            margin-bottom: 12px;
+            color: #8b5cf6;
+        }
+        
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .status-item:last-child {
+            border-bottom: none;
+        }
+        
+        .status-label {
+            color: #b0b0b0;
+            font-weight: 500;
+        }
+        
+        .status-value {
+            font-weight: 600;
+        }
+        
+        .status-success {
+            color: #00d4aa;
+        }
+        
+        .status-error {
+            color: #ff6b6b;
+        }
+        
+        .status-warning {
+            color: #ffa726;
+        }
+        
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+        
+        @media (max-width: 768px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .controls {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .log-container {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 16px;
+            height: 300px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            margin-top: 16px;
+        }
+        
+        .log-entry {
+            margin-bottom: 8px;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+        
+        .log-info {
+            color: #00d4aa;
+            background: rgba(0, 212, 170, 0.1);
+        }
+        
+        .log-error {
+            color: #ff6b6b;
+            background: rgba(255, 107, 107, 0.1);
+        }
+        
+        .log-warning {
+            color: #ffa726;
+            background: rgba(255, 167, 38, 0.1);
+        }
+        
+        .log-debug {
+            color: #8b5cf6;
+            background: rgba(139, 92, 246, 0.1);
+        }
+    </style>
+    
+    <!-- Include Advanced ML CSS -->
+    <link rel="stylesheet" href="/static/css/advanced-ml.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🚀 GoldGPT Advanced ML Integration</h1>
+            <p>Real-time Multi-Strategy ML Prediction Engine Demo</p>
+        </div>
+        
+        <!-- System Status -->
+        <div class="status-display">
+            <h3>🔍 System Status</h3>
+            <div id="system-status">
+                <div class="status-item">
+                    <span class="status-label">WebSocket Connection:</span>
+                    <span id="ws-status" class="status-value status-warning">Connecting...</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">Advanced ML Engine:</span>
+                    <span id="ml-engine-status" class="status-value status-warning">Checking...</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">Active Strategies:</span>
+                    <span id="strategy-count" class="status-value">0</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">Last Prediction:</span>
+                    <span id="last-prediction-time" class="status-value">Never</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Controls -->
+        <div class="controls">
+            <div class="control-group">
+                <h3>📊 Predictions</h3>
+                <button class="btn" onclick="requestQuickPrediction()">Quick Prediction</button>
+                <button class="btn" onclick="requestDetailedPrediction()">Detailed Analysis</button>
+                <button class="btn" onclick="requestMultiTimeframe()">Multi-Timeframe</button>
+            </div>
+            
+            <div class="control-group">
+                <h3>📈 Performance</h3>
+                <button class="btn btn-secondary" onclick="requestStrategyPerformance()">Strategy Performance</button>
+                <button class="btn btn-secondary" onclick="requestConfidenceAnalysis()">Confidence Analysis</button>
+                <button class="btn btn-secondary" onclick="checkSystemHealth()">System Health</button>
+            </div>
+            
+            <div class="control-group">
+                <h3>🔄 Real-time</h3>
+                <button class="btn" onclick="toggleRealTimeUpdates()" id="realtime-btn">Enable Real-time</button>
+                <button class="btn btn-secondary" onclick="requestStrategyUpdates()">Strategy Updates</button>
+                <button class="btn btn-danger" onclick="clearAllDisplays()">Clear Displays</button>
+            </div>
+        </div>
+        
+        <!-- Content Grid -->
+        <div class="content-grid">
+            <!-- Predictions Display -->
+            <div>
+                <h3 style="margin-bottom: 16px; color: #00d4aa;">📊 ML Predictions</h3>
+                <div id="prediction-display"></div>
+            </div>
+            
+            <!-- Strategy Performance Display -->
+            <div>
+                <h3 style="margin-bottom: 16px; color: #8b5cf6;">📈 Strategy Performance</h3>
+                <div id="performance-display"></div>
+            </div>
+        </div>
+        
+        <!-- Debug Log -->
+        <div class="control-group">
+            <h3>🔧 Debug Log</h3>
+            <button class="btn btn-secondary" onclick="clearLog()">Clear Log</button>
+            <div id="debug-log" class="log-container"></div>
+        </div>
+    </div>
+    
+    <!-- Scripts -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/static/js/advanced-ml-client.js"></script>
+    
+    <script>
+        // Global state
+        let realtimeEnabled = false;
+        let realtimeInterval = null;
+        
+        // Log function
+        function log(message, type = 'info') {
+            const logContainer = document.getElementById('debug-log');
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry log-${type}`;
+            logEntry.textContent = `[${timestamp}] ${message}`;
+            logContainer.appendChild(logEntry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        }
+        
+        // Update system status
+        function updateSystemStatus() {
+            if (window.advancedMLClient) {
+                // WebSocket status
+                const wsStatus = document.getElementById('ws-status');
+                if (advancedMLClient.isConnected) {
+                    wsStatus.textContent = 'Connected';
+                    wsStatus.className = 'status-value status-success';
+                } else {
+                    wsStatus.textContent = 'Disconnected';
+                    wsStatus.className = 'status-value status-error';
+                }
+                
+                // Last prediction time
+                if (advancedMLClient.lastPrediction) {
+                    document.getElementById('last-prediction-time').textContent = 
+                        new Date(advancedMLClient.lastPrediction.timestamp).toLocaleTimeString();
+                }
+                
+                // Strategy performance
+                if (advancedMLClient.strategyPerformance && advancedMLClient.strategyPerformance.performance) {
+                    const strategies = advancedMLClient.strategyPerformance.performance.strategies || {};
+                    document.getElementById('strategy-count').textContent = Object.keys(strategies).length;
+                }
+            }
+        }
+        
+        // Control functions
+        async function requestQuickPrediction() {
+            log('Requesting quick prediction...', 'info');
+            try {
+                if (window.advancedMLClient) {
+                    const result = await advancedMLClient.getQuickPrediction();
+                    advancedMLClient.updatePredictionDisplay('prediction-display', result);
+                    log('Quick prediction received successfully', 'info');
+                } else {
+                    throw new Error('Advanced ML client not initialized');
+                }
+            } catch (error) {
+                log(`Failed to get quick prediction: ${error.message}`, 'error');
+            }
+        }
+        
+        async function requestDetailedPrediction() {
+            log('Requesting detailed prediction...', 'info');
+            try {
+                if (window.advancedMLClient) {
+                    const result = await advancedMLClient.getPredictions(['1H']);
+                    if (result.status === 'success' && result.predictions && result.predictions.length > 0) {
+                        const predictionData = {
+                            success: true,
+                            prediction: result.predictions[0],
+                            timeframe: '1H',
+                            engine: 'Advanced ML',
+                            timestamp: new Date().toISOString(),
+                            execution_time: result.execution_time
+                        };
+                        advancedMLClient.updatePredictionDisplay('prediction-display', predictionData);
+                        log('Detailed prediction received successfully', 'info');
+                    } else {
+                        throw new Error('No predictions received');
+                    }
+                } else {
+                    throw new Error('Advanced ML client not initialized');
+                }
+            } catch (error) {
+                log(`Failed to get detailed prediction: ${error.message}`, 'error');
+            }
+        }
+        
+        async function requestMultiTimeframe() {
+            log('Requesting multi-timeframe analysis...', 'info');
+            try {
+                if (window.advancedMLClient) {
+                    const result = await advancedMLClient.getPredictions(['1H', '4H', '1D']);
+                    if (result.status === 'success' && result.predictions && result.predictions.length > 0) {
+                        // Display the first (1H) prediction
+                        const predictionData = {
+                            success: true,
+                            prediction: result.predictions[0],
+                            timeframe: '1H (Multi-TF)',
+                            engine: 'Advanced ML',
+                            timestamp: new Date().toISOString(),
+                            execution_time: result.execution_time
+                        };
+                        advancedMLClient.updatePredictionDisplay('prediction-display', predictionData);
+                        log(`Multi-timeframe analysis complete: ${result.predictions.length} predictions`, 'info');
+                    } else {
+                        throw new Error('No predictions received');
+                    }
+                } else {
+                    throw new Error('Advanced ML client not initialized');
+                }
+            } catch (error) {
+                log(`Failed to get multi-timeframe analysis: ${error.message}`, 'error');
+            }
+        }
+        
+        async function requestStrategyPerformance() {
+            log('Requesting strategy performance...', 'info');
+            try {
+                if (window.advancedMLClient) {
+                    const result = await advancedMLClient.getStrategyPerformance();
+                    advancedMLClient.updateStrategyPerformanceDisplay('performance-display', result);
+                    log('Strategy performance received successfully', 'info');
+                } else {
+                    throw new Error('Advanced ML client not initialized');
+                }
+            } catch (error) {
+                log(`Failed to get strategy performance: ${error.message}`, 'error');
+            }
+        }
+        
+        async function requestConfidenceAnalysis() {
+            log('Requesting confidence analysis...', 'info');
+            try {
+                if (window.advancedMLClient) {
+                    const result = await advancedMLClient.getConfidenceAnalysis();
+                    log(`Confidence analysis: ${JSON.stringify(result, null, 2)}`, 'debug');
+                } else {
+                    throw new Error('Advanced ML client not initialized');
+                }
+            } catch (error) {
+                log(`Failed to get confidence analysis: ${error.message}`, 'error');
+            }
+        }
+        
+        async function checkSystemHealth() {
+            log('Checking system health...', 'info');
+            try {
+                if (window.advancedMLClient) {
+                    const result = await advancedMLClient.checkSystemAvailability();
+                    const engineStatus = document.getElementById('ml-engine-status');
+                    
+                    if (result.advanced_ml_available) {
+                        engineStatus.textContent = 'Available';
+                        engineStatus.className = 'status-value status-success';
+                        log(`System health OK: ${result.strategy_count} strategies active`, 'info');
+                    } else {
+                        engineStatus.textContent = 'Unavailable';
+                        engineStatus.className = 'status-value status-error';
+                        log('Advanced ML system not available', 'warning');
+                    }
+                } else {
+                    throw new Error('Advanced ML client not initialized');
+                }
+            } catch (error) {
+                log(`Failed to check system health: ${error.message}`, 'error');
+            }
+        }
+        
+        function toggleRealTimeUpdates() {
+            const btn = document.getElementById('realtime-btn');
+            
+            if (realtimeEnabled) {
+                // Disable real-time
+                realtimeEnabled = false;
+                if (realtimeInterval) {
+                    clearInterval(realtimeInterval);
+                    realtimeInterval = null;
+                }
+                btn.textContent = 'Enable Real-time';
+                btn.className = 'btn';
+                log('Real-time updates disabled', 'info');
+            } else {
+                // Enable real-time
+                realtimeEnabled = true;
+                realtimeInterval = setInterval(() => {
+                    if (window.advancedMLClient && advancedMLClient.isConnected) {
+                        advancedMLClient.requestRealtimePrediction('1H');
+                    }
+                }, 15000); // 15 seconds
+                
+                btn.textContent = 'Disable Real-time';
+                btn.className = 'btn btn-danger';
+                log('Real-time updates enabled (15s interval)', 'info');
+            }
+        }
+        
+        function requestStrategyUpdates() {
+            log('Requesting real-time strategy updates...', 'info');
+            if (window.advancedMLClient && advancedMLClient.isConnected) {
+                advancedMLClient.requestStrategyPerformance();
+            } else {
+                log('WebSocket not connected, using HTTP fallback', 'warning');
+                requestStrategyPerformance();
+            }
+        }
+        
+        function clearAllDisplays() {
+            document.getElementById('prediction-display').innerHTML = '';
+            document.getElementById('performance-display').innerHTML = '';
+            log('All displays cleared', 'info');
+        }
+        
+        function clearLog() {
+            document.getElementById('debug-log').innerHTML = '';
+        }
+        
+        // Initialize when DOM is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            log('Demo page initialized', 'info');
+            
+            // Wait for advanced ML client to be ready
+            const checkClient = setInterval(() => {
+                if (window.advancedMLClient) {
+                    clearInterval(checkClient);
+                    log('Advanced ML client ready', 'info');
+                    
+                    // Set up event handlers
+                    advancedMLClient.onPrediction((data) => {
+                        log('Real-time prediction received', 'info');
+                        updateSystemStatus();
+                    });
+                    
+                    advancedMLClient.onPerformance((data) => {
+                        log('Real-time performance update received', 'info');
+                        updateSystemStatus();
+                    });
+                    
+                    advancedMLClient.onError((error) => {
+                        log(`Advanced ML error: ${error.message || 'Unknown error'}`, 'error');
+                    });
+                    
+                    // Initial system check
+                    setTimeout(() => {
+                        checkSystemHealth();
+                        updateSystemStatus();
+                    }, 1000);
+                    
+                    // Update status every 5 seconds
+                    setInterval(updateSystemStatus, 5000);
+                }
+            }, 100);
+        });
+    </script>
+</body>
+</html>

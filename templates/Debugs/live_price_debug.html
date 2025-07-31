@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔍 Live Price Debug Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #0a0a0a;
+            color: white;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .price-display {
+            background: #1a1a1a;
+            border: 2px solid #00d084;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .current-price {
+            font-size: 48px;
+            font-weight: bold;
+            color: #00d084;
+            margin: 10px 0;
+        }
+        .status {
+            background: #2a2a2a;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        .btn {
+            background: #00d084;
+            color: black;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .btn:hover {
+            background: #00a86b;
+        }
+        .success { color: #00d084; }
+        .error { color: #ff4757; }
+        .warning { color: #ffa502; }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🔍 Live Price Debug Test</h1>
+        <p>Testing direct Gold-API integration</p>
+        
+        <div class="price-display">
+            <div>Gold Spot Price (XAU/USD)</div>
+            <div class="current-price" id="current-price">Loading...</div>
+            <div id="price-change">Calculating...</div>
+            <div id="price-source">🔄 Connecting...</div>
+        </div>
+        
+        <div class="status" id="status">
+            🔄 Initializing price fetcher...
+        </div>
+        
+        <button class="btn" onclick="manualRefresh()">🔄 Manual Refresh</button>
+        <button class="btn" onclick="testAPI()">🧪 Test API</button>
+        <button class="btn" onclick="showDebugInfo()">🔍 Debug Info</button>
+    </div>
+
+    <script>
+        class DebugGoldPriceFetcher {
+            constructor() {
+                this.lastPrice = null;
+                this.apiEndpoint = '/api/live-gold-price';
+                this.updateInterval = null;
+                this.updateFrequency = 2000; // 2 seconds
+                
+                console.log('🚀 Debug Gold Price Fetcher initialized');
+                this.updateStatus('✅ Debug fetcher initialized');
+                
+                // Start immediately
+                this.init();
+            }
+
+            updateStatus(message) {
+                console.log(message);
+                const statusEl = document.getElementById('status');
+                if (statusEl) {
+                    statusEl.innerHTML = `${new Date().toLocaleTimeString()}: ${message}`;
+                }
+            }
+
+            async init() {
+                this.updateStatus('🚀 Starting debug price integration...');
+                
+                // Fetch immediately
+                await this.fetchPrice();
+                
+                // Start regular updates
+                this.startUpdates();
+            }
+
+            async fetchPrice() {
+                try {
+                    this.updateStatus('📡 Fetching price from Gold-API...');
+                    console.log('📡 Making API request to:', this.apiEndpoint);
+                    
+                    const response = await fetch(this.apiEndpoint);
+                    console.log('📥 API Response status:', response.status);
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+                    
+                    const data = await response.json();
+                    console.log('✅ API Response data:', data);
+                    
+                    if (data.success && data.data && data.data.price) {
+                        const price = data.data.price;
+                        this.updateStatus(`✅ Price received: $${price}`);
+                        this.updatePriceDisplay(price);
+                    } else {
+                        throw new Error('Invalid API response format');
+                    }
+                    
+                } catch (error) {
+                    console.error('❌ API Error:', error);
+                    this.updateStatus(`❌ Error: ${error.message}`);
+                    this.handleError(error);
+                }
+            }
+
+            updatePriceDisplay(price) {
+                const isUp = this.lastPrice ? price > this.lastPrice : true;
+                const change = this.lastPrice ? price - this.lastPrice : 0;
+                const changePercent = this.lastPrice ? (change / this.lastPrice) * 100 : 0;
+                
+                const formattedPrice = `$${price.toFixed(2)}`;
+                const formattedChange = this.lastPrice ? 
+                    `${change >= 0 ? '+' : ''}$${change.toFixed(2)} (${changePercent >= 0 ? '+' : ''}${changePercent.toFixed(2)}%)` : 
+                    'Live Data';
+
+                console.log(`💰 Updating display: ${formattedPrice} | Change: ${formattedChange}`);
+
+                // Update current price
+                const priceEl = document.getElementById('current-price');
+                if (priceEl) {
+                    priceEl.textContent = formattedPrice;
+                    priceEl.style.color = isUp ? '#00d084' : '#ff4757';
+                }
+
+                // Update change
+                const changeEl = document.getElementById('price-change');
+                if (changeEl) {
+                    changeEl.innerHTML = `<span style="color: ${isUp ? '#00d084' : '#ff4757'}">${formattedChange}</span>`;
+                }
+
+                // Update source
+                const sourceEl = document.getElementById('price-source');
+                if (sourceEl) {
+                    sourceEl.innerHTML = '🟢 Live from Gold-API.com';
+                    sourceEl.style.color = '#00d084';
+                }
+
+                this.lastPrice = price;
+                this.updateStatus(`✅ Display updated: ${formattedPrice}`);
+            }
+
+            startUpdates() {
+                if (this.updateInterval) {
+                    clearInterval(this.updateInterval);
+                }
+
+                this.updateStatus(`🔄 Starting updates every ${this.updateFrequency}ms`);
+                this.updateInterval = setInterval(() => {
+                    this.fetchPrice();
+                }, this.updateFrequency);
+            }
+
+            handleError(error) {
+                const priceEl = document.getElementById('current-price');
+                const sourceEl = document.getElementById('price-source');
+                
+                if (priceEl) {
+                    priceEl.textContent = 'API Error';
+                    priceEl.style.color = '#ff4757';
+                }
+                
+                if (sourceEl) {
+                    sourceEl.innerHTML = '🔴 API Connection Failed';
+                    sourceEl.style.color = '#ff4757';
+                }
+            }
+        }
+
+        // Global functions for testing
+        let debugFetcher = null;
+
+        function manualRefresh() {
+            if (debugFetcher) {
+                debugFetcher.fetchPrice();
+            }
+        }
+
+        async function testAPI() {
+            try {
+                const response = await fetch('/api/live-gold-price');
+                const data = await response.json();
+                console.log('🧪 Direct API Test:', data);
+                alert(`API Test Result: ${JSON.stringify(data, null, 2)}`);
+            } catch (error) {
+                console.error('🧪 API Test Failed:', error);
+                alert(`API Test Failed: ${error.message}`);
+            }
+        }
+
+        function showDebugInfo() {
+            const info = {
+                'Last Price': debugFetcher?.lastPrice || 'None',
+                'Update Interval': debugFetcher?.updateInterval ? 'Running' : 'Stopped',
+                'API Endpoint': debugFetcher?.apiEndpoint || 'None',
+                'Current Time': new Date().toISOString()
+            };
+            console.log('🔍 Debug Info:', info);
+            alert(`Debug Info:\n${JSON.stringify(info, null, 2)}`);
+        }
+
+        // Initialize when DOM loads
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('🎯 DOM loaded, starting debug fetcher...');
+            debugFetcher = new DebugGoldPriceFetcher();
+        });
+    </script>
+</body>
+</html>

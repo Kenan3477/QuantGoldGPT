@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ML Predictions Debug - GoldGPT</title>
+    <style>
+        body { font-family: Arial; background: #1a1a1a; color: white; padding: 20px; }
+        .section { margin: 20px 0; padding: 15px; border: 1px solid #333; border-radius: 8px; }
+        .price { font-size: 20px; font-weight: bold; color: #4CAF50; }
+        .error { color: #f44336; }
+        .api-test { background: #2a2a2a; padding: 10px; border-radius: 5px; margin: 10px 0; }
+        .debug-log { background: #000; padding: 10px; max-height: 200px; overflow-y: auto; font-family: monospace; }
+        pre { white-space: pre-wrap; }
+    </style>
+</head>
+<body>
+    <h1>🤖 ML Predictions Debug Center</h1>
+    
+    <div class="section">
+        <h2>API Response Test</h2>
+        <button onclick="testMLAPI()">Test ML Predictions API</button>
+        <div id="api-response" class="api-test"></div>
+    </div>
+    
+    <div class="section">
+        <h2>Price Formatting Test</h2>
+        <div id="price-test"></div>
+        <button onclick="testPriceFormatting()">Test Price Display</button>
+    </div>
+    
+    <div class="section">
+        <h2>Locale Detection</h2>
+        <div id="locale-info"></div>
+    </div>
+    
+    <div class="section">
+        <h2>Console Debug Log</h2>
+        <div id="debug-log" class="debug-log"></div>
+    </div>
+
+    <script src="/static/js/ml-price-fix.js"></script>
+    <script>
+        // Capture console logs
+        const originalLog = console.log;
+        const originalError = console.error;
+        const debugLog = document.getElementById('debug-log');
+        
+        function addToLog(type, ...args) {
+            const timestamp = new Date().toLocaleTimeString();
+            const div = document.createElement('div');
+            div.style.color = type === 'error' ? '#f44336' : '#4CAF50';
+            div.textContent = `[${timestamp}] ${type.toUpperCase()}: ${args.join(' ')}`;
+            debugLog.appendChild(div);
+            debugLog.scrollTop = debugLog.scrollHeight;
+        }
+        
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            addToLog('info', ...args);
+        };
+        
+        console.error = function(...args) {
+            originalError.apply(console, args);
+            addToLog('error', ...args);
+        };
+        
+        // Show locale information
+        document.getElementById('locale-info').innerHTML = `
+            <p><strong>Browser Locale:</strong> ${navigator.language}</p>
+            <p><strong>Available Locales:</strong> ${navigator.languages.join(', ')}</p>
+            <p><strong>Time Zone:</strong> ${Intl.DateTimeFormat().resolvedOptions().timeZone}</p>
+            <p><strong>Currency:</strong> ${new Intl.NumberFormat().resolvedOptions().currency || 'None detected'}</p>
+        `;
+        
+        async function testMLAPI() {
+            const responseDiv = document.getElementById('api-response');
+            responseDiv.innerHTML = 'Loading...';
+            
+            try {
+                const response = await fetch('/api/ml-predictions');
+                const data = await response.json();
+                
+                responseDiv.innerHTML = `
+                    <h3>✅ API Response Success</h3>
+                    <p><strong>Status:</strong> ${response.status}</p>
+                    <p><strong>Current Price:</strong> $${data.current_price}</p>
+                    <p><strong>Predictions Count:</strong> ${data.predictions?.length || 0}</p>
+                    ${data.predictions ? data.predictions.map(p => `
+                        <div style="margin: 10px 0; padding: 10px; background: #333;">
+                            <p><strong>${p.timeframe}:</strong> $${p.predicted_price} (${p.direction})</p>
+                            <p>Change: ${p.change_percent.toFixed(2)}% | Confidence: ${(p.confidence * 100).toFixed(1)}%</p>
+                        </div>
+                    `).join('') : ''}
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+                
+                console.log('ML API Response:', data);
+                
+            } catch (error) {
+                responseDiv.innerHTML = `<div class="error">❌ API Error: ${error.message}</div>`;
+                console.error('ML API Error:', error);
+            }
+        }
+        
+        function testPriceFormatting() {
+            const testDiv = document.getElementById('price-test');
+            const testPrices = [3350.70, 3353.49, 0, null, undefined, '3350.70'];
+            
+            let html = '<h3>Price Formatting Tests:</h3>';
+            
+            testPrices.forEach((price, i) => {
+                try {
+                    // Test various formatting methods
+                    const toFixed = price ? `$${parseFloat(price).toFixed(2)}` : 'N/A';
+                    const toLocale = price ? parseFloat(price).toLocaleString('en-US', {style: 'decimal', minimumFractionDigits: 2}) : 'N/A';
+                    const safeFormat = window.formatPrice ? window.formatPrice(price) : 'formatPrice not available';
+                    
+                    html += `
+                        <div style="margin: 10px 0; padding: 10px; background: #333;">
+                            <p><strong>Input ${i+1}:</strong> ${price} (type: ${typeof price})</p>
+                            <p><strong>toFixed:</strong> ${toFixed}</p>
+                            <p><strong>toLocaleString:</strong> $${toLocale}</p>
+                            <p><strong>safeFormat:</strong> ${safeFormat}</p>
+                        </div>
+                    `;
+                } catch (error) {
+                    html += `<div class="error">Error formatting ${price}: ${error.message}</div>`;
+                }
+            });
+            
+            testDiv.innerHTML = html;
+        }
+        
+        // Auto-run tests on load
+        window.addEventListener('load', () => {
+            console.log('🔧 ML Predictions Debug page loaded');
+            testMLAPI();
+            testPriceFormatting();
+        });
+        
+        // Check for £ symbols every 2 seconds
+        setInterval(() => {
+            const bodyText = document.body.textContent;
+            if (bodyText.includes('£')) {
+                console.warn('🚨 Found £ symbol in page content!', bodyText.match(/£[0-9.]*/g));
+            }
+        }, 2000);
+    </script>
+</body>
+</html>

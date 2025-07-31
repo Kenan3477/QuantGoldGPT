@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Multi-Strategy ML Engine - GoldGPT</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .ml-strategy-card {
+            background: linear-gradient(135deg, #1e293b, #334155);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 10px;
+            border: 1px solid #475569;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .ml-prediction-display {
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+            border: 2px solid #22d3ee;
+            box-shadow: 0 0 20px rgba(34, 211, 238, 0.3);
+        }
+        
+        .strategy-performance {
+            display: flex;
+            justify-content: space-between;
+            margin: 15px 0;
+        }
+        
+        .performance-metric {
+            text-align: center;
+            flex: 1;
+        }
+        
+        .confidence-bar {
+            width: 100%;
+            height: 8px;
+            background: #374151;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 8px 0;
+        }
+        
+        .confidence-fill {
+            height: 100%;
+            transition: width 0.5s ease;
+        }
+        
+        .confidence-high { background: linear-gradient(90deg, #10b981, #059669); }
+        .confidence-medium { background: linear-gradient(90deg, #f59e0b, #d97706); }
+        .confidence-low { background: linear-gradient(90deg, #ef4444, #dc2626); }
+        
+        .ensemble-voting {
+            background: #1f2937;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        .vote-breakdown {
+            display: flex;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        
+        .vote-item {
+            flex: 1;
+            text-align: center;
+            padding: 8px;
+            border-radius: 6px;
+            font-weight: bold;
+        }
+        
+        .vote-buy { background: rgba(16, 185, 129, 0.2); color: #10b981; }
+        .vote-sell { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+        .vote-hold { background: rgba(107, 114, 128, 0.2); color: #9ca3af; }
+        
+        .real-time-status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #1f2937;
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #374151;
+            z-index: 1000;
+        }
+        
+        .status-active {
+            color: #10b981;
+        }
+        
+        .status-inactive {
+            color: #ef4444;
+        }
+        
+        .ml-controls {
+            display: flex;
+            gap: 15px;
+            margin: 20px 0;
+            justify-content: center;
+        }
+        
+        .ml-button {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .ml-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+        }
+        
+        .ml-button:disabled {
+            background: #374151;
+            cursor: not-allowed;
+            transform: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Header -->
+        <div class="dashboard-header">
+            <h1><i class="fas fa-robot"></i> Advanced Multi-Strategy ML Engine</h1>
+            <p>Real-time AI predictions using 5 advanced strategies with ensemble voting</p>
+        </div>
+
+        <!-- Real-time Status -->
+        <div class="real-time-status" id="mlStatus">
+            <div class="status-indicator">
+                <i class="fas fa-circle" id="statusIcon"></i>
+                <span id="statusText">Initializing...</span>
+            </div>
+            <div id="lastUpdate">Last update: Never</div>
+        </div>
+
+        <!-- ML Controls -->
+        <div class="ml-controls">
+            <button class="ml-button" id="generatePredictionBtn">
+                <i class="fas fa-brain"></i> Generate Prediction
+            </button>
+            <button class="ml-button" id="startMonitoringBtn">
+                <i class="fas fa-play"></i> Start Monitoring
+            </button>
+            <button class="ml-button" id="stopMonitoringBtn" disabled>
+                <i class="fas fa-stop"></i> Stop Monitoring
+            </button>
+            <button class="ml-button" id="refreshPerformanceBtn">
+                <i class="fas fa-chart-line"></i> Refresh Performance
+            </button>
+        </div>
+
+        <!-- Main Prediction Display -->
+        <div class="ml-prediction-display" id="mainPrediction">
+            <div class="prediction-header">
+                <h2>Current ML Prediction</h2>
+                <div class="prediction-symbol" id="predictionSymbol">XAUUSD</div>
+            </div>
+            
+            <div class="prediction-result" id="predictionResult">
+                <div class="prediction-direction" id="predictionDirection">HOLD</div>
+                <div class="prediction-confidence">
+                    <span>Confidence: <span id="predictionConfidence">0%</span></span>
+                    <div class="confidence-bar">
+                        <div class="confidence-fill confidence-medium" id="confidenceBar" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ensemble Voting -->
+            <div class="ensemble-voting">
+                <h3>Ensemble Voting Results</h3>
+                <div class="vote-breakdown" id="voteBreakdown">
+                    <div class="vote-item vote-buy">BUY: <span id="buyVotes">0</span></div>
+                    <div class="vote-item vote-hold">HOLD: <span id="holdVotes">0</span></div>
+                    <div class="vote-item vote-sell">SELL: <span id="sellVotes">0</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Strategy Breakdown -->
+        <div class="strategies-container">
+            <h2>Individual Strategy Analysis</h2>
+            
+            <div class="strategies-grid">
+                <!-- Technical Strategy -->
+                <div class="ml-strategy-card" id="technicalStrategy">
+                    <h3><i class="fas fa-chart-line"></i> Technical Analysis</h3>
+                    <div class="strategy-prediction" id="technicalPrediction">HOLD</div>
+                    <div class="strategy-confidence">
+                        <span>Confidence: <span id="technicalConfidence">0%</span></span>
+                        <div class="confidence-bar">
+                            <div class="confidence-fill confidence-medium" id="technicalBar"></div>
+                        </div>
+                    </div>
+                    <div class="strategy-performance" id="technicalPerformance">
+                        <div class="performance-metric">
+                            <div>Accuracy</div>
+                            <div id="technicalAccuracy">--%</div>
+                        </div>
+                        <div class="performance-metric">
+                            <div>Predictions</div>
+                            <div id="technicalTotal">--</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sentiment Strategy -->
+                <div class="ml-strategy-card" id="sentimentStrategy">
+                    <h3><i class="fas fa-newspaper"></i> Sentiment Analysis</h3>
+                    <div class="strategy-prediction" id="sentimentPrediction">NEUTRAL</div>
+                    <div class="strategy-confidence">
+                        <span>Confidence: <span id="sentimentConfidence">0%</span></span>
+                        <div class="confidence-bar">
+                            <div class="confidence-fill confidence-medium" id="sentimentBar"></div>
+                        </div>
+                    </div>
+                    <div class="strategy-performance" id="sentimentPerformance">
+                        <div class="performance-metric">
+                            <div>Accuracy</div>
+                            <div id="sentimentAccuracy">--%</div>
+                        </div>
+                        <div class="performance-metric">
+                            <div>Predictions</div>
+                            <div id="sentimentTotal">--</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Macro Strategy -->
+                <div class="ml-strategy-card" id="macroStrategy">
+                    <h3><i class="fas fa-globe"></i> Macro Economic</h3>
+                    <div class="strategy-prediction" id="macroPrediction">NEUTRAL</div>
+                    <div class="strategy-confidence">
+                        <span>Confidence: <span id="macroConfidence">0%</span></span>
+                        <div class="confidence-bar">
+                            <div class="confidence-fill confidence-medium" id="macroBar"></div>
+                        </div>
+                    </div>
+                    <div class="strategy-performance" id="macroPerformance">
+                        <div class="performance-metric">
+                            <div>Accuracy</div>
+                            <div id="macroAccuracy">--%</div>
+                        </div>
+                        <div class="performance-metric">
+                            <div>Predictions</div>
+                            <div id="macroTotal">--</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pattern Strategy -->
+                <div class="ml-strategy-card" id="patternStrategy">
+                    <h3><i class="fas fa-search"></i> Pattern Recognition</h3>
+                    <div class="strategy-prediction" id="patternPrediction">NEUTRAL</div>
+                    <div class="strategy-confidence">
+                        <span>Confidence: <span id="patternConfidence">0%</span></span>
+                        <div class="confidence-bar">
+                            <div class="confidence-fill confidence-medium" id="patternBar"></div>
+                        </div>
+                    </div>
+                    <div class="strategy-performance" id="patternPerformance">
+                        <div class="performance-metric">
+                            <div>Accuracy</div>
+                            <div id="patternAccuracy">--%</div>
+                        </div>
+                        <div class="performance-metric">
+                            <div>Predictions</div>
+                            <div id="patternTotal">--</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Momentum Strategy -->
+                <div class="ml-strategy-card" id="momentumStrategy">
+                    <h3><i class="fas fa-trending-up"></i> Momentum Analysis</h3>
+                    <div class="strategy-prediction" id="momentumPrediction">NEUTRAL</div>
+                    <div class="strategy-confidence">
+                        <span>Confidence: <span id="momentumConfidence">0%</span></span>
+                        <div class="confidence-bar">
+                            <div class="confidence-fill confidence-medium" id="momentumBar"></div>
+                        </div>
+                    </div>
+                    <div class="strategy-performance" id="momentumPerformance">
+                        <div class="performance-metric">
+                            <div>Accuracy</div>
+                            <div id="momentumAccuracy">--%</div>
+                        </div>
+                        <div class="performance-metric">
+                            <div>Predictions</div>
+                            <div id="momentumTotal">--</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.0/socket.io.js"></script>
+    <script>
+        // Initialize Socket.IO
+        const socket = io();
+        
+        // State management
+        let isMonitoring = false;
+        let lastPredictionData = null;
+        
+        // DOM elements
+        const elements = {
+            statusIcon: document.getElementById('statusIcon'),
+            statusText: document.getElementById('statusText'),
+            lastUpdate: document.getElementById('lastUpdate'),
+            generateBtn: document.getElementById('generatePredictionBtn'),
+            startBtn: document.getElementById('startMonitoringBtn'),
+            stopBtn: document.getElementById('stopMonitoringBtn'),
+            refreshBtn: document.getElementById('refreshPerformanceBtn'),
+            
+            // Prediction display
+            predictionDirection: document.getElementById('predictionDirection'),
+            predictionConfidence: document.getElementById('predictionConfidence'),
+            confidenceBar: document.getElementById('confidenceBar'),
+            
+            // Voting
+            buyVotes: document.getElementById('buyVotes'),
+            holdVotes: document.getElementById('holdVotes'),
+            sellVotes: document.getElementById('sellVotes')
+        };
+        
+        // Event listeners
+        elements.generateBtn.addEventListener('click', generatePrediction);
+        elements.startBtn.addEventListener('click', startMonitoring);
+        elements.stopBtn.addEventListener('click', stopMonitoring);
+        elements.refreshBtn.addEventListener('click', refreshPerformance);
+        
+        // Socket event handlers
+        socket.on('connect', () => {
+            updateStatus('Connected', 'active');
+            console.log('Connected to ML Engine');
+        });
+        
+        socket.on('disconnect', () => {
+            updateStatus('Disconnected', 'inactive');
+        });
+        
+        socket.on('ml_prediction_update', (data) => {
+            updatePredictionDisplay(data);
+            updateLastUpdate();
+        });
+        
+        socket.on('background_ml_update', (data) => {
+            if (isMonitoring) {
+                updatePredictionDisplay(data);
+                updateLastUpdate();
+            }
+        });
+        
+        socket.on('ml_monitoring_started', () => {
+            isMonitoring = true;
+            elements.startBtn.disabled = true;
+            elements.stopBtn.disabled = false;
+            updateStatus('Monitoring Active', 'active');
+        });
+        
+        socket.on('ml_monitoring_stopped', () => {
+            isMonitoring = false;
+            elements.startBtn.disabled = false;
+            elements.stopBtn.disabled = true;
+            updateStatus('Monitoring Stopped', 'inactive');
+        });
+        
+        // Functions
+        function updateStatus(text, status) {
+            elements.statusText.textContent = text;
+            elements.statusIcon.className = `fas fa-circle status-${status}`;
+        }
+        
+        function updateLastUpdate() {
+            const now = new Date();
+            elements.lastUpdate.textContent = `Last update: ${now.toLocaleTimeString()}`;
+        }
+        
+        function generatePrediction() {
+            elements.generateBtn.disabled = true;
+            elements.generateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
+            
+            socket.emit('request_ml_update', {
+                symbol: 'XAUUSD',
+                timeframe: '1h'
+            });
+            
+            setTimeout(() => {
+                elements.generateBtn.disabled = false;
+                elements.generateBtn.innerHTML = '<i class="fas fa-brain"></i> Generate Prediction';
+            }, 3000);
+        }
+        
+        function startMonitoring() {
+            socket.emit('start_ml_monitoring');
+        }
+        
+        function stopMonitoring() {
+            socket.emit('stop_ml_monitoring');
+        }
+        
+        function refreshPerformance() {
+            elements.refreshBtn.disabled = true;
+            elements.refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Refreshing...';
+            
+            fetch('/api/ml/strategies/performance')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        updatePerformanceDisplay(data.performance);
+                    }
+                })
+                .finally(() => {
+                    elements.refreshBtn.disabled = false;
+                    elements.refreshBtn.innerHTML = '<i class="fas fa-chart-line"></i> Refresh Performance';
+                });
+        }
+        
+        function updatePredictionDisplay(data) {
+            const prediction = data.prediction;
+            
+            // Update main prediction
+            elements.predictionDirection.textContent = prediction.prediction || 'HOLD';
+            const confidence = Math.round((prediction.confidence || 0.5) * 100);
+            elements.predictionConfidence.textContent = `${confidence}%`;
+            elements.confidenceBar.style.width = `${confidence}%`;
+            
+            // Update confidence bar color
+            elements.confidenceBar.className = 'confidence-fill';
+            if (confidence >= 70) {
+                elements.confidenceBar.classList.add('confidence-high');
+            } else if (confidence >= 50) {
+                elements.confidenceBar.classList.add('confidence-medium');
+            } else {
+                elements.confidenceBar.classList.add('confidence-low');
+            }
+            
+            // Update voting breakdown
+            const voting = prediction.ensemble?.voting_details || {};
+            elements.buyVotes.textContent = voting.BUY || 0;
+            elements.holdVotes.textContent = voting.HOLD || 0;
+            elements.sellVotes.textContent = voting.SELL || 0;
+            
+            // Update individual strategies
+            const strategies = prediction.strategies || {};
+            updateStrategyDisplay('technical', strategies.technical);
+            updateStrategyDisplay('sentiment', strategies.sentiment);
+            updateStrategyDisplay('macro', strategies.macro);
+            updateStrategyDisplay('pattern', strategies.pattern);
+            updateStrategyDisplay('momentum', strategies.momentum);
+        }
+        
+        function updateStrategyDisplay(strategyName, strategyData) {
+            if (!strategyData) return;
+            
+            const predictionEl = document.getElementById(`${strategyName}Prediction`);
+            const confidenceEl = document.getElementById(`${strategyName}Confidence`);
+            const barEl = document.getElementById(`${strategyName}Bar`);
+            
+            if (predictionEl) predictionEl.textContent = strategyData.prediction || 'NEUTRAL';
+            if (confidenceEl) {
+                const confidence = Math.round((strategyData.confidence || 0.5) * 100);
+                confidenceEl.textContent = `${confidence}%`;
+            }
+            if (barEl) {
+                const confidence = (strategyData.confidence || 0.5) * 100;
+                barEl.style.width = `${confidence}%`;
+                
+                barEl.className = 'confidence-fill';
+                if (confidence >= 70) {
+                    barEl.classList.add('confidence-high');
+                } else if (confidence >= 50) {
+                    barEl.classList.add('confidence-medium');
+                } else {
+                    barEl.classList.add('confidence-low');
+                }
+            }
+        }
+        
+        function updatePerformanceDisplay(performance) {
+            for (const [strategyName, perf] of Object.entries(performance)) {
+                const accuracyEl = document.getElementById(`${strategyName}Accuracy`);
+                const totalEl = document.getElementById(`${strategyName}Total`);
+                
+                if (accuracyEl && perf.accuracy) {
+                    accuracyEl.textContent = `${Math.round(perf.accuracy * 100)}%`;
+                }
+                if (totalEl && perf.total_predictions) {
+                    totalEl.textContent = perf.total_predictions;
+                }
+            }
+        }
+        
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('Advanced ML Dashboard initialized');
+            
+            // Load initial performance data
+            refreshPerformance();
+            
+            // Generate initial prediction
+            setTimeout(generatePrediction, 1000);
+        });
+    </script>
+</body>
+</html>

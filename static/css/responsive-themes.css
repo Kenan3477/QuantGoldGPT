@@ -1,0 +1,725 @@
+/* 
+ * GoldGPT Responsive Theme System
+ * Advanced responsive design and theme customizations
+ */
+
+/* ========================================
+   RESPONSIVE BREAKPOINTS SYSTEM
+======================================== */
+
+:root {
+  /* Responsive Breakpoints */
+  --breakpoint-xs: 320px;
+  --breakpoint-sm: 576px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 992px;
+  --breakpoint-xl: 1200px;
+  --breakpoint-xxl: 1920px;
+  
+  /* Dynamic Spacing (scales with viewport) */
+  --spacing-responsive-xs: clamp(2px, 0.5vw, 4px);
+  --spacing-responsive-sm: clamp(4px, 1vw, 8px);
+  --spacing-responsive-md: clamp(8px, 2vw, 16px);
+  --spacing-responsive-lg: clamp(12px, 3vw, 24px);
+  --spacing-responsive-xl: clamp(16px, 4vw, 32px);
+  
+  /* Dynamic Typography */
+  --font-size-responsive-xs: clamp(10px, 2vw, 11px);
+  --font-size-responsive-sm: clamp(11px, 2.2vw, 12px);
+  --font-size-responsive-md: clamp(12px, 2.5vw, 14px);
+  --font-size-responsive-lg: clamp(14px, 3vw, 16px);
+  --font-size-responsive-xl: clamp(16px, 3.5vw, 18px);
+  --font-size-responsive-xxl: clamp(20px, 4vw, 24px);
+}
+
+/* ========================================
+   MOBILE-FIRST DASHBOARD LAYOUT
+======================================== */
+
+/* Extra Small Devices (Phones, <576px) */
+@media (max-width: 575.98px) {
+  .dashboard-container {
+    grid-template-areas: 
+      "header"
+      "charts"
+      "predictions"
+      "context"
+      "analysis"
+      "sidebar";
+    grid-template-columns: 1fr;
+    grid-template-rows: 
+      50px        /* header */
+      40vh        /* charts */
+      30vh        /* predictions */
+      25vh        /* context */
+      25vh        /* analysis */
+      auto;       /* sidebar */
+    gap: 4px;
+    padding: 4px;
+    height: auto;
+    min-height: 100vh;
+  }
+  
+  /* Compact header for mobile */
+  .dashboard-header {
+    padding: 0 8px;
+  }
+  
+  .header-brand {
+    flex: 1;
+  }
+  
+  .header-title {
+    font-size: var(--font-size-responsive-md);
+  }
+  
+  .header-subtitle {
+    display: none;
+  }
+  
+  .header-controls {
+    gap: 4px;
+  }
+  
+  .header-status {
+    padding: 2px 4px;
+  }
+  
+  /* Mobile chart optimizations */
+  .charts-header,
+  .predictions-header,
+  .context-header,
+  .analysis-header {
+    padding: 8px 12px;
+    min-height: 40px;
+  }
+  
+  .charts-title,
+  .predictions-title,
+  .context-title,
+  .analysis-title {
+    font-size: var(--font-size-responsive-md);
+  }
+  
+  /* Mobile content padding */
+  .charts-content,
+  .predictions-content,
+  .context-content,
+  .analysis-content,
+  .sidebar-content {
+    padding: 8px;
+  }
+  
+  /* Simplified timeframe selector */
+  .timeframe-selector {
+    flex-wrap: wrap;
+    gap: 2px;
+  }
+  
+  .timeframe-btn {
+    padding: 4px 6px;
+    min-width: 28px;
+    font-size: var(--font-size-responsive-xs);
+  }
+  
+  /* Stack chart controls */
+  .chart-controls {
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  
+  .chart-control-btn {
+    width: 28px;
+    height: 28px;
+  }
+  
+  /* Mobile prediction cards */
+  .prediction-card {
+    padding: 12px;
+    margin-bottom: 8px;
+  }
+  
+  .prediction-metrics {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  
+  .prediction-direction {
+    flex-direction: column;
+    text-align: center;
+    gap: 8px;
+  }
+  
+  /* Mobile correlation matrix */
+  .matrix-grid.grid-3x3,
+  .matrix-grid.grid-4x4 {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  
+  .matrix-cell {
+    padding: 8px;
+  }
+  
+  /* Mobile market context */
+  .context-quick-stats {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+  
+  .regime-indicator {
+    width: 50px;
+    height: 50px;
+    font-size: var(--font-size-responsive-lg);
+  }
+  
+  /* Simplified events list */
+  .event-item {
+    padding: 8px;
+  }
+  
+  .event-header {
+    flex-direction: column;
+    gap: 4px;
+  }
+}
+
+/* Small Devices (Landscape Phones, 576px and up) */
+@media (min-width: 576px) and (max-width: 767.98px) {
+  .dashboard-container {
+    grid-template-areas: 
+      "header header"
+      "charts predictions"
+      "context sidebar"
+      "analysis analysis";
+    grid-template-columns: 1fr 300px;
+    grid-template-rows: 
+      60px        /* header */
+      45vh        /* charts/predictions */
+      30vh        /* context/sidebar */
+      25vh;       /* analysis */
+    gap: 6px;
+    padding: 6px;
+  }
+  
+  .prediction-metrics {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .context-quick-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .matrix-grid.grid-4x4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Medium Devices (Tablets, 768px and up) */
+@media (min-width: 768px) and (max-width: 991.98px) {
+  .dashboard-container {
+    grid-template-areas: 
+      "header header header"
+      "charts predictions context"
+      "sidebar analysis analysis";
+    grid-template-columns: 1fr 320px 280px;
+    grid-template-rows: 60px 1fr 300px;
+    gap: 8px;
+    padding: 8px;
+  }
+  
+  .sidebar-content {
+    padding: 12px;
+  }
+  
+  .portfolio-metrics {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .overview-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Large Devices (Desktops, 992px and up) */
+@media (min-width: 992px) and (max-width: 1199.98px) {
+  .dashboard-container {
+    grid-template-areas: 
+      "header header header header"
+      "sidebar charts predictions context"
+      "sidebar analysis analysis context";
+    grid-template-columns: 240px 1fr 340px 280px;
+    grid-template-rows: 60px 1fr 280px;
+  }
+}
+
+/* ========================================
+   ADVANCED MOBILE INTERACTIONS
+======================================== */
+
+/* Touch-friendly interactions */
+@media (hover: none) and (pointer: coarse) {
+  .sidebar-nav-link,
+  .timeframe-btn,
+  .chart-control-btn,
+  .prediction-action,
+  .level-item,
+  .event-item {
+    min-height: 44px; /* Apple's recommended minimum touch target */
+    touch-action: manipulation;
+  }
+  
+  /* Larger touch targets */
+  .chart-tab {
+    min-height: 40px;
+    padding: 8px 12px;
+  }
+  
+  .indicator-btn {
+    min-height: 36px;
+    padding: 6px 12px;
+  }
+  
+  /* Remove hover effects on touch devices */
+  .prediction-card:hover,
+  .matrix-cell:hover,
+  .level-item:hover,
+  .event-item:hover {
+    transform: none;
+    border-color: var(--border-color);
+  }
+  
+  /* Enhanced focus states for accessibility */
+  .sidebar-nav-link:focus,
+  .timeframe-btn:focus,
+  .chart-control-btn:focus {
+    outline: 3px solid var(--accent-blue);
+    outline-offset: 2px;
+  }
+}
+
+/* ========================================
+   ORIENTATION-SPECIFIC STYLES
+======================================== */
+
+/* Portrait orientation optimizations */
+@media (orientation: portrait) and (max-width: 767.98px) {
+  .dashboard-container {
+    grid-template-rows: 
+      50px        /* header */
+      35vh        /* charts */
+      30vh        /* predictions */
+      20vh        /* context */
+      20vh        /* analysis */
+      auto;       /* sidebar */
+  }
+  
+  .chart-toolbar {
+    flex-direction: column;
+    gap: 4px;
+    padding: 6px 8px;
+  }
+  
+  .chart-toolbar-left,
+  .chart-toolbar-right {
+    justify-content: space-between;
+    width: 100%;
+  }
+  
+  .correlation-strength-indicator {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .trade-confidence .confidence-breakdown {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+}
+
+/* Landscape orientation optimizations */
+@media (orientation: landscape) and (max-height: 600px) {
+  .dashboard-container {
+    grid-template-areas: 
+      "header header header header"
+      "sidebar charts predictions context";
+    grid-template-columns: 200px 1fr 280px 240px;
+    grid-template-rows: 50px 1fr;
+    height: 100vh;
+  }
+  
+  .dashboard-analysis {
+    display: none; /* Hide analysis panel in landscape to save space */
+  }
+  
+  .regime-indicator {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .confidence-score {
+    width: 80px;
+    height: 80px;
+    font-size: var(--font-size-responsive-lg);
+  }
+}
+
+/* ========================================
+   HIGH-DPI DISPLAY OPTIMIZATIONS
+======================================== */
+
+@media (-webkit-min-device-pixel-ratio: 2), 
+       (min-resolution: 192dpi),
+       (min-resolution: 2dppx) {
+  
+  /* Sharper borders and lines */
+  .border,
+  .chart-panel,
+  .prediction-card,
+  .matrix-cell {
+    border-width: 0.5px;
+  }
+  
+  /* Enhanced shadows for retina displays */
+  .prediction-card,
+  .correlation-matrix,
+  .market-regime-section .regime-display {
+    box-shadow: 
+      0 1px 3px rgba(0, 0, 0, 0.1),
+      0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+  
+  /* Crisp icon rendering */
+  .sidebar-nav-icon,
+  .chart-tab-icon,
+  .timeframe-icon,
+  .levels-icon {
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+  }
+}
+
+/* ========================================
+   DARK MODE ENHANCEMENTS
+======================================== */
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Enhanced dark mode colors */
+    --primary-bg: #0a0a0b;
+    --secondary-bg: #1a1a1d;
+    --tertiary-bg: #2d2d30;
+    --accent-bg: #3a3a3d;
+    
+    /* Adjusted text contrast for better readability */
+    --text-primary: #ffffff;
+    --text-secondary: #b4b4b4;
+    --text-muted: #808080;
+    
+    /* Enhanced trading colors for dark mode */
+    --bull-color: #00d4aa;
+    --bear-color: #ff4757;
+    --neutral-color: #ffa502;
+    
+    /* Dark mode specific shadows */
+    --shadow-light: rgba(0, 0, 0, 0.3);
+    --shadow-medium: rgba(0, 0, 0, 0.5);
+    --shadow-heavy: rgba(0, 0, 0, 0.7);
+  }
+  
+  /* Enhanced focus visibility in dark mode */
+  button:focus,
+  .sidebar-nav-link:focus,
+  .timeframe-btn:focus {
+    outline-color: var(--accent-blue);
+    box-shadow: 0 0 0 3px rgba(55, 66, 250, 0.3);
+  }
+}
+
+/* ========================================
+   REDUCED MOTION PREFERENCES
+======================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  /* Remove all animations for users who prefer reduced motion */
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  
+  /* Remove hover transforms */
+  .prediction-card:hover,
+  .matrix-cell:hover,
+  .chart-control-btn:hover {
+    transform: none !important;
+  }
+  
+  /* Disable pulsing animations */
+  .status-indicator,
+  .regime-indicator::after,
+  .confidence-score::after {
+    animation: none !important;
+  }
+}
+
+/* ========================================
+   HIGH CONTRAST MODE
+======================================== */
+
+@media (prefers-contrast: high) {
+  :root {
+    /* High contrast color adjustments */
+    --primary-bg: #000000;
+    --secondary-bg: #1a1a1a;
+    --tertiary-bg: #333333;
+    
+    --text-primary: #ffffff;
+    --text-secondary: #ffffff;
+    --text-muted: #cccccc;
+    
+    --border-color: #ffffff;
+    --border-light: #ffffff;
+    
+    /* High contrast trading colors */
+    --bull-color: #00ff00;
+    --bear-color: #ff0000;
+    --neutral-color: #ffff00;
+  }
+  
+  /* Enhanced borders for better visibility */
+  .prediction-card,
+  .matrix-cell,
+  .level-item,
+  .event-item {
+    border-width: 2px;
+  }
+  
+  /* Remove subtle backgrounds that may reduce contrast */
+  .chart-overlay,
+  .ai-annotations,
+  .pattern-highlights {
+    display: none;
+  }
+}
+
+/* ========================================
+   PRINT STYLES
+======================================== */
+
+@media print {
+  /* Optimize for printing */
+  .dashboard-container {
+    grid-template-areas: 
+      "header header"
+      "charts predictions";
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto 1fr;
+    height: auto;
+    gap: 10mm;
+    padding: 10mm;
+  }
+  
+  /* Hide interactive elements */
+  .dashboard-sidebar,
+  .dashboard-context,
+  .dashboard-analysis,
+  .charts-controls,
+  .predictions-refresh,
+  .chart-controls,
+  .timeframe-selector,
+  .indicator-controls {
+    display: none !important;
+  }
+  
+  /* Ensure good contrast for printing */
+  .prediction-card,
+  .matrix-cell {
+    border: 1pt solid #000000 !important;
+    box-shadow: none !important;
+  }
+  
+  /* Print-friendly colors */
+  .bull-color { color: #000000 !important; }
+  .bear-color { color: #000000 !important; }
+  .neutral-color { color: #000000 !important; }
+  
+  /* Force text to be black for better print readability */
+  .text-primary,
+  .text-secondary,
+  .prediction-card,
+  .matrix-cell {
+    color: #000000 !important;
+  }
+  
+  /* Page break controls */
+  .prediction-card,
+  .correlation-matrix {
+    page-break-inside: avoid;
+  }
+  
+  .dashboard-charts,
+  .dashboard-predictions {
+    page-break-after: auto;
+  }
+}
+
+/* ========================================
+   CONTAINER QUERIES (Future-proof)
+======================================== */
+
+/* When container queries are supported, these will provide more precise responsive behavior */
+@supports (container-type: inline-size) {
+  .dashboard-charts {
+    container-type: inline-size;
+  }
+  
+  @container (max-width: 400px) {
+    .chart-toolbar {
+      flex-direction: column;
+    }
+    
+    .timeframe-selector {
+      justify-content: center;
+    }
+  }
+  
+  .dashboard-predictions {
+    container-type: inline-size;
+  }
+  
+  @container (max-width: 320px) {
+    .prediction-metrics {
+      grid-template-columns: 1fr;
+    }
+    
+    .prediction-direction {
+      flex-direction: column;
+    }
+  }
+}
+
+/* ========================================
+   ACCESSIBILITY ENHANCEMENTS
+======================================== */
+
+/* Enhanced focus management */
+.dashboard-container:focus-within {
+  --border-color: var(--accent-blue);
+}
+
+/* Skip navigation for keyboard users */
+.skip-nav {
+  position: absolute;
+  top: -40px;
+  left: 6px;
+  background: var(--accent-blue);
+  color: white;
+  padding: 8px;
+  text-decoration: none;
+  border-radius: 4px;
+  z-index: var(--z-modal);
+}
+
+.skip-nav:focus {
+  top: 6px;
+}
+
+/* Improved screen reader content */
+.sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+/* Focus trap for modals */
+.modal-content:focus-within {
+  outline: 3px solid var(--accent-blue);
+  outline-offset: -3px;
+}
+
+/* ========================================
+   PERFORMANCE OPTIMIZATIONS
+======================================== */
+
+/* GPU acceleration for smooth animations */
+.prediction-card,
+.matrix-cell,
+.chart-panel,
+.regime-indicator {
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+/* Optimize repaints */
+.chart-overlay,
+.ai-annotations,
+.pattern-highlights {
+  contain: layout style paint;
+}
+
+/* Reduce layout thrashing */
+.dashboard-container {
+  contain: layout;
+}
+
+/* ========================================
+   UTILITY CLASSES FOR RESPONSIVE DESIGN
+======================================== */
+
+/* Display utilities */
+.d-xs-none { display: none; }
+@media (min-width: 576px) { .d-xs-none { display: block; } }
+
+.d-sm-none { display: none; }
+@media (min-width: 768px) { .d-sm-none { display: block; } }
+
+.d-md-none { display: none; }
+@media (min-width: 992px) { .d-md-none { display: block; } }
+
+.d-lg-none { display: none; }
+@media (min-width: 1200px) { .d-lg-none { display: block; } }
+
+/* Responsive text sizes */
+.text-responsive { font-size: var(--font-size-responsive-md); }
+.text-responsive-sm { font-size: var(--font-size-responsive-sm); }
+.text-responsive-lg { font-size: var(--font-size-responsive-lg); }
+
+/* Responsive spacing */
+.p-responsive { padding: var(--spacing-responsive-md); }
+.m-responsive { margin: var(--spacing-responsive-md); }
+.gap-responsive { gap: var(--spacing-responsive-md); }
+
+/* Responsive grid columns */
+.grid-responsive-1 {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-responsive-md);
+}
+
+@media (min-width: 576px) {
+  .grid-responsive-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 768px) {
+  .grid-responsive-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 992px) {
+  .grid-responsive-4 {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}

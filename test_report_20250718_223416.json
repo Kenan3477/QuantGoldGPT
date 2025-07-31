@@ -1,0 +1,93 @@
+{
+  "timestamp": "2025-07-18T22:34:16.902562",
+  "summary": {
+    "total_tests": 18,
+    "passed_tests": 10,
+    "success_rate": 55.55555555555556
+  },
+  "detailed_results": {
+    "imports": {
+      "error": "cannot import name 'DataSourceManager' from 'robust_data_system' (C:\\Users\\kenne\\Downloads\\ml-model-training\\bot_modules\\GoldGPT\\robust_data_system.py)"
+    },
+    "data_source_manager": {
+      "error": "cannot import name 'DataSourceManager' from 'robust_data_system' (C:\\Users\\kenne\\Downloads\\ml-model-training\\bot_modules\\GoldGPT\\robust_data_system.py)"
+    },
+    "api_services": {
+      "price": {
+        "success": true,
+        "symbol": "XAUUSD",
+        "price": 1994.4232629820056,
+        "source": "simulated",
+        "has_bid_ask": true
+      },
+      "sentiment": {
+        "success": true,
+        "sentiment_score": 0.15958435819481698,
+        "sentiment_label": "neutral",
+        "confidence": 0.3,
+        "sources_count": 0
+      },
+      "technical": {
+        "success": true,
+        "indicators": [
+          "RSI",
+          "MACD",
+          "BOLLINGER"
+        ],
+        "timeframe": "1H",
+        "source": "simulated"
+      }
+    },
+    "web_scraping": {
+      "error": "cannot import name 'PriceDataService' from 'robust_data_system' (C:\\Users\\kenne\\Downloads\\ml-model-training\\bot_modules\\GoldGPT\\robust_data_system.py)"
+    },
+    "fallback_mechanisms": {
+      "XAUUSD": {
+        "success": true,
+        "has_price": true,
+        "has_sentiment": true,
+        "has_technical": true,
+        "fallback_used": true
+      },
+      "INVALID_SYMBOL": {
+        "success": true,
+        "has_price": true,
+        "has_sentiment": true,
+        "has_technical": true,
+        "fallback_used": true
+      }
+    },
+    "cache_management": {
+      "first_call_time": 0.0,
+      "second_call_time": 0.0009875297546386719,
+      "cache_effective": false,
+      "data_consistent": "True"
+    },
+    "flask_integration": {
+      "price_sync": {
+        "success": false,
+        "has_price": false,
+        "source": "unknown"
+      },
+      "sentiment_sync": {
+        "success": false,
+        "has_sentiment": false
+      },
+      "technical_sync": {
+        "success": false,
+        "has_indicators": false
+      }
+    },
+    "frontend_integration": {
+      "static/js/robust-data-integration.js": {
+        "exists": true
+      },
+      "static/js/real-time-data-manager.js": {
+        "exists": true
+      },
+      "enhanced_routes": {
+        "available": true
+      }
+    }
+  }
+}

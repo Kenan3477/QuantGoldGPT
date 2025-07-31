@@ -1,0 +1,339 @@
+/* Component Loader Styles - Trading 212 Inspired */
+
+#component-loader-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 99999;
+    transition: opacity 0.3s ease;
+}
+
+.loader-container {
+    background: var(--bg-secondary, #1e1e1e);
+    border-radius: 16px;
+    padding: 40px;
+    max-width: 500px;
+    width: 90%;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    border: 1px solid var(--border-color, #333);
+    text-align: center;
+    animation: slideIn 0.5s ease-out;
+}
+
+.loader-container.error {
+    border-color: var(--danger, #ff4757);
+    background: linear-gradient(135deg, #2d1b1b 0%, #1e1e1e 100%);
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.loader-header {
+    margin-bottom: 30px;
+}
+
+.loader-logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.loader-logo i {
+    font-size: 32px;
+    color: var(--accent-primary, #00d4aa);
+    animation: pulse 2s infinite;
+}
+
+.loader-logo span {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text-primary, #ffffff);
+    letter-spacing: 1px;
+}
+
+.loader-subtitle {
+    color: var(--text-secondary, #b0b0b0);
+    font-size: 14px;
+    font-weight: 400;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.1);
+        opacity: 0.8;
+    }
+}
+
+.loader-progress {
+    margin: 30px 0;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 6px;
+    background: var(--bg-tertiary, #333);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 12px;
+    position: relative;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent-primary, #00d4aa) 0%, var(--accent-secondary, #00b894) 100%);
+    border-radius: 3px;
+    transition: width 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.progress-fill::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.2) 50%, transparent 100%);
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    0% {
+        transform: translateX(-100%);
+    }
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+.progress-text {
+    color: var(--text-primary, #ffffff);
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.loader-status {
+    margin: 20px 0;
+}
+
+.status-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px;
+    background: var(--bg-tertiary, #2a2a2a);
+    border-radius: 8px;
+    color: var(--text-secondary, #b0b0b0);
+    font-size: 14px;
+}
+
+.status-item i {
+    color: var(--accent-primary, #00d4aa);
+}
+
+.loader-details {
+    margin-top: 24px;
+    max-height: 200px;
+    overflow-y: auto;
+    border-top: 1px solid var(--border-color, #333);
+    padding-top: 20px;
+}
+
+.detail-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.component-status-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    background: var(--bg-tertiary, #2a2a2a);
+    border-radius: 6px;
+    font-size: 13px;
+    transition: background 0.2s ease;
+}
+
+.component-status-item:hover {
+    background: var(--bg-hover, #3a3a3a);
+}
+
+.component-status-item i {
+    width: 16px;
+    flex-shrink: 0;
+}
+
+.component-status-item span {
+    flex: 1;
+    text-align: left;
+    margin-left: 8px;
+    color: var(--text-primary, #ffffff);
+}
+
+.component-status-item small {
+    font-size: 11px;
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.status-loaded {
+    color: var(--success, #2ed573);
+}
+
+.status-loading {
+    color: var(--accent-primary, #00d4aa);
+}
+
+.status-failed {
+    color: var(--danger, #ff4757);
+}
+
+.status-pending {
+    color: var(--text-secondary, #b0b0b0);
+}
+
+/* Error State Styles */
+.error-icon {
+    font-size: 48px;
+    color: var(--danger, #ff4757);
+    margin-bottom: 20px;
+}
+
+.loader-container.error h2 {
+    color: var(--text-primary, #ffffff);
+    margin-bottom: 16px;
+    font-size: 24px;
+}
+
+.loader-container.error p {
+    color: var(--text-secondary, #b0b0b0);
+    margin-bottom: 16px;
+    line-height: 1.5;
+}
+
+.loader-container.error code {
+    background: var(--bg-tertiary, #2a2a2a);
+    color: var(--danger, #ff4757);
+    padding: 12px;
+    border-radius: 6px;
+    display: block;
+    margin: 16px 0;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    word-break: break-word;
+}
+
+.retry-btn {
+    background: var(--accent-primary, #00d4aa);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 20px;
+}
+
+.retry-btn:hover {
+    background: var(--accent-secondary, #00b894);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 212, 170, 0.3);
+}
+
+.retry-btn:active {
+    transform: translateY(0);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .loader-container {
+        padding: 30px 20px;
+        margin: 20px;
+        max-width: none;
+    }
+    
+    .loader-logo span {
+        font-size: 24px;
+    }
+    
+    .loader-logo i {
+        font-size: 28px;
+    }
+    
+    .loader-details {
+        max-height: 150px;
+    }
+}
+
+/* Custom Scrollbar for Details */
+.loader-details::-webkit-scrollbar {
+    width: 4px;
+}
+
+.loader-details::-webkit-scrollbar-track {
+    background: var(--bg-tertiary, #2a2a2a);
+    border-radius: 2px;
+}
+
+.loader-details::-webkit-scrollbar-thumb {
+    background: var(--accent-primary, #00d4aa);
+    border-radius: 2px;
+}
+
+.loader-details::-webkit-scrollbar-thumb:hover {
+    background: var(--accent-secondary, #00b894);
+}
+
+/* Loading Animation Variants */
+.loader-container .fa-spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Success State (briefly shown) */
+.loader-container.success {
+    border-color: var(--success, #2ed573);
+    background: linear-gradient(135deg, #1b2d1b 0%, #1e1e1e 100%);
+}
+
+.loader-container.success .loader-logo i {
+    color: var(--success, #2ed573);
+}

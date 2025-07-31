@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📡 Real-Time ML Predictions</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .status {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .predictions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .prediction-card {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .prediction-card.bullish {
+            border-left: 5px solid #28a745;
+            box-shadow: 0 0 20px rgba(40, 167, 69, 0.3);
+        }
+        .prediction-card.bearish {
+            border-left: 5px solid #dc3545;
+            box-shadow: 0 0 20px rgba(220, 53, 69, 0.3);
+        }
+        .prediction-card.neutral {
+            border-left: 5px solid #ffc107;
+            box-shadow: 0 0 20px rgba(255, 193, 7, 0.3);
+        }
+        .timeframe {
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+        .direction {
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            padding: 5px 15px;
+            border-radius: 20px;
+            display: inline-block;
+        }
+        .direction.bullish { background: #28a745; }
+        .direction.bearish { background: #dc3545; }
+        .direction.neutral { background: #ffc107; color: #000; }
+        .price-info {
+            margin: 15px 0;
+        }
+        .current-price {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #fff;
+        }
+        .target-price {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #ffd700;
+        }
+        .confidence {
+            font-size: 1.1rem;
+            margin: 10px 0;
+            color: #87CEEB;
+        }
+        .reasoning {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            margin: 10px 0;
+            line-height: 1.4;
+        }
+        .refresh-btn {
+            background: linear-gradient(45deg, #28a745, #20c997);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 30px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 10px;
+            transition: transform 0.3s ease;
+        }
+        .refresh-btn:hover {
+            transform: scale(1.05);
+        }
+        .error {
+            background: rgba(220, 53, 69, 0.2);
+            border: 1px solid #dc3545;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+        }
+        .debug-info {
+            background: rgba(0,0,0,0.3);
+            padding: 10px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            margin: 10px 0;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 Real-Time ML Predictions</h1>
+            <p>Direct API Feed - No Caching</p>
+        </div>
+
+        <div class="status" id="status">
+            <span id="statusText">⏳ Loading...</span>
+            <button class="refresh-btn" onclick="loadPredictions(true)">🔄 Refresh Now</button>
+            <button class="refresh-btn" onclick="toggleDebug()">🔍 Toggle Debug</button>
+        </div>
+
+        <div id="errorMessage" class="error" style="display: none;"></div>
+        <div id="debugInfo" class="debug-info" style="display: none;"></div>
+        
+        <div class="predictions-grid" id="predictionsGrid">
+            <!-- Predictions will be loaded here -->
+        </div>
+    </div>
+
+    <script>
+        let showDebug = false;
+        let lastUpdate = null;
+
+        function toggleDebug() {
+            showDebug = !showDebug;
+            const debugDiv = document.getElementById('debugInfo');
+            debugDiv.style.display = showDebug ? 'block' : 'none';
+        }
+
+        function updateStatus(text, isError = false) {
+            const statusText = document.getElementById('statusText');
+            statusText.textContent = text;
+            if (isError) {
+                statusText.style.color = '#ff6b6b';
+            } else {
+                statusText.style.color = '#4ecdc4';
+            }
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+
+        function hideError() {
+            document.getElementById('errorMessage').style.display = 'none';
+        }
+
+        function logDebug(message, data = null) {
+            if (showDebug) {
+                const debugDiv = document.getElementById('debugInfo');
+                const timestamp = new Date().toLocaleTimeString();
+                debugDiv.innerHTML += `<div>[${timestamp}] ${message}</div>`;
+                if (data) {
+                    debugDiv.innerHTML += `<div style="margin-left: 20px; color: #87CEEB;">${JSON.stringify(data, null, 2)}</div>`;
+                }
+                debugDiv.scrollTop = debugDiv.scrollHeight;
+            }
+            console.log(message, data);
+        }
+
+        async function loadPredictions(forceRefresh = false) {
+            hideError();
+            updateStatus('📡 Loading fresh predictions...');
+            
+            try {
+                // Add cache busting parameter
+                const url = `/api/advanced-ml/predictions?_t=${Date.now()}`;
+                logDebug('🔍 Fetching from:', { url });
+                
+                const response = await fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'Cache-Control': 'no-cache',
+                        'Pragma': 'no-cache'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                logDebug('📊 Raw API Response:', data);
+
+                if (data.success && data.predictions) {
+                    displayPredictions(data.predictions);
+                    
+                    lastUpdate = new Date();
+                    updateStatus(`✅ Live Data Updated - ${lastUpdate.toLocaleTimeString()}`);
+                    
+                    // Show market summary if available
+                    if (data.market_summary) {
+                        logDebug('💰 Market Summary:', data.market_summary);
+                    }
+                    
+                } else {
+                    throw new Error(data.error || 'Invalid response format');
+                }
+
+            } catch (error) {
+                logDebug('❌ Error loading predictions:', error);
+                updateStatus(`❌ Error: ${error.message}`, true);
+                showError(`Failed to load predictions: ${error.message}`);
+            }
+        }
+
+        function displayPredictions(predictions) {
+            const grid = document.getElementById('predictionsGrid');
+            
+            if (!predictions || Object.keys(predictions).length === 0) {
+                grid.innerHTML = '<div class="error">No predictions available</div>';
+                return;
+            }
+
+            let html = '';
+            
+            // Sort timeframes by duration
+            const timeframeOrder = ['15min', '30min', '1h', '4h', '24h', '7d'];
+            const sortedTimeframes = timeframeOrder.filter(tf => predictions[tf]);
+
+            sortedTimeframes.forEach(timeframe => {
+                if (predictions[timeframe] && predictions[timeframe].length > 0) {
+                    const pred = predictions[timeframe][0];
+                    const directionClass = pred.direction ? pred.direction.toLowerCase() : 'neutral';
+                    
+                    logDebug(`📈 ${timeframe} prediction:`, pred);
+                    
+                    html += `
+                        <div class="prediction-card ${directionClass}">
+                            <div class="timeframe">${timeframe}</div>
+                            <div class="direction ${directionClass}">${pred.direction || 'N/A'}</div>
+                            
+                            <div class="price-info">
+                                <div class="current-price">Current: $${(pred.current_price || 0).toFixed(2)}</div>
+                                <div class="target-price">Target: $${(pred.target_price || 0).toFixed(2)}</div>
+                            </div>
+                            
+                            <div class="confidence">
+                                Confidence: ${((pred.confidence || 0) * 100).toFixed(1)}%
+                            </div>
+                            
+                            ${pred.reasoning ? `<div class="reasoning">${pred.reasoning}</div>` : ''}
+                            
+                            <div style="font-size: 0.8rem; opacity: 0.7; margin-top: 10px;">
+                                ${pred.created_at ? `Created: ${new Date(pred.created_at).toLocaleString()}` : ''}
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+
+            if (html === '') {
+                html = '<div class="error">No valid predictions found in response</div>';
+            }
+
+            grid.innerHTML = html;
+            logDebug(`✅ Displayed ${sortedTimeframes.length} predictions`);
+        }
+
+        // Auto-load on page load
+        window.addEventListener('load', () => {
+            logDebug('🚀 Page loaded, fetching initial predictions...');
+            loadPredictions();
+        });
+
+        // Auto-refresh every 2 minutes
+        setInterval(() => {
+            logDebug('⏰ Auto-refresh triggered');
+            loadPredictions();
+        }, 120000);
+    </script>
+</body>
+</html>

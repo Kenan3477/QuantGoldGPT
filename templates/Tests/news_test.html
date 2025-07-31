@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced News Test</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/enhanced-news-display.css') }}">
+    <style>
+        body {
+            background: #0a0a0a;
+            color: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .test-container {
+            max-width: 400px;
+            margin: 0 auto;
+            background: #1a1a1a;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        
+        .test-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .test-header h1 {
+            color: #00ff88;
+            margin: 0;
+        }
+        
+        .status-indicator {
+            padding: 8px 16px;
+            border-radius: 4px;
+            margin: 10px 0;
+            font-size: 14px;
+        }
+        
+        .status-loading {
+            background: #333;
+            color: #fff;
+        }
+        
+        .status-success {
+            background: #00ff88;
+            color: #000;
+        }
+        
+        .status-error {
+            background: #ff4444;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <div class="test-header">
+            <h1><i class="fas fa-newspaper"></i> Enhanced News Test</h1>
+            <div class="status-indicator status-loading" id="status">
+                <i class="fas fa-spinner fa-spin"></i> Loading enhanced news analysis...
+            </div>
+        </div>
+        
+        <div id="enhanced-news-container" class="enhanced-news-container">
+            <div class="news-loading">
+                <i class="fas fa-spinner fa-spin"></i>
+                <span>Testing sentiment data display...</span>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/enhanced-news-manager.js') }}"></script>
+    <script>
+        // Test the enhanced news system
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🧪 Starting Enhanced News Test...');
+            
+            const statusEl = document.getElementById('status');
+            
+            // Test API connection
+            fetch('/api/news/enhanced?limit=10')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.articles) {
+                        statusEl.className = 'status-indicator status-success';
+                        statusEl.innerHTML = `<i class="fas fa-check"></i> Successfully loaded ${data.articles.length} articles with sentiment analysis`;
+                        
+                        console.log('✅ Enhanced news API working:', data);
+                        console.log('📊 Sample article:', data.articles[0]);
+                        
+                        // Check if sentiment analysis is working
+                        const sentimentCount = data.articles.filter(a => a.sentiment_label && a.sentiment_label !== 'neutral').length;
+                        if (sentimentCount > 0) {
+                            console.log(`✅ Sentiment analysis active: ${sentimentCount}/${data.articles.length} articles have sentiment labels`);
+                        } else {
+                            console.log('⚠️ All articles are neutral - sentiment analysis may need tuning');
+                        }
+                        
+                    } else {
+                        statusEl.className = 'status-indicator status-error';
+                        statusEl.innerHTML = '<i class="fas fa-exclamation-triangle"></i> API error: ' + (data.error || 'Unknown error');
+                    }
+                })
+                .catch(error => {
+                    console.error('❌ Enhanced news test failed:', error);
+                    statusEl.className = 'status-indicator status-error';
+                    statusEl.innerHTML = '<i class="fas fa-times"></i> Connection failed: ' + error.message;
+                });
+        });
+    </script>
+</body>
+</html>

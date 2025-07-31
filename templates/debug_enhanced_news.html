@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced News Debug</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/enhanced-news-display.css') }}">
+    <style>
+        body {
+            background: #0a0a0a;
+            color: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .debug-container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: #1a1a1a;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        
+        .debug-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .debug-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            justify-content: center;
+        }
+        
+        .debug-btn {
+            background: #0066cc;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 8px 16px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        
+        .debug-btn:hover {
+            background: #0088ff;
+        }
+        
+        .debug-log {
+            background: #222;
+            border: 1px solid #444;
+            border-radius: 4px;
+            padding: 12px;
+            margin-bottom: 20px;
+            height: 200px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+        }
+    </style>
+</head>
+<body>
+    <div class="debug-container">
+        <div class="debug-header">
+            <h1><i class="fas fa-bug"></i> Enhanced News Debug</h1>
+        </div>
+        
+        <div class="debug-controls">
+            <button class="debug-btn" onclick="testAPI()">Test API</button>
+            <button class="debug-btn" onclick="testSentiment()">Test Sentiment</button>
+            <button class="debug-btn" onclick="forceRefresh()">Force Refresh</button>
+            <button class="debug-btn" onclick="clearLog()">Clear Log</button>
+        </div>
+        
+        <div class="debug-log" id="debug-log">
+            <div>🐛 Enhanced News Debug Console</div>
+            <div>Ready for testing...</div>
+        </div>
+        
+        <div id="enhanced-news-container" class="enhanced-news-container">
+            <div class="news-loading">
+                <i class="fas fa-spinner fa-spin"></i>
+                <span>Initializing debug mode...</span>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/enhanced-news-manager.js') }}"></script>
+    <script>
+        const debugLog = document.getElementById('debug-log');
+        
+        function log(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            debugLog.innerHTML += `<div>[${timestamp}] ${message}</div>`;
+            debugLog.scrollTop = debugLog.scrollHeight;
+            console.log(message);
+        }
+        
+        function clearLog() {
+            debugLog.innerHTML = '<div>🐛 Enhanced News Debug Console</div><div>Log cleared...</div>';
+        }
+        
+        async function testAPI() {
+            log('🧪 Testing Enhanced News API...');
+            try {
+                const response = await fetch('/api/news/enhanced?limit=5');
+                const data = await response.json();
+                log(`✅ API Response: ${data.success ? 'SUCCESS' : 'FAILED'}`);
+                log(`📊 Articles: ${data.articles?.length || 0}`);
+                if (data.articles && data.articles.length > 0) {
+                    log(`📰 Sample: ${data.articles[0].title?.substring(0, 60)}...`);
+                    log(`📈 Sentiment: ${data.articles[0].sentiment_label} (${data.articles[0].sentiment_score})`);
+                }
+            } catch (error) {
+                log(`❌ API Error: ${error.message}`);
+            }
+        }
+        
+        async function testSentiment() {
+            log('🧪 Testing Sentiment Summary API...');
+            try {
+                const response = await fetch('/api/news/sentiment-summary');
+                const data = await response.json();
+                log(`✅ Sentiment API: ${data.success ? 'SUCCESS' : 'FAILED'}`);
+                log(`📊 Market Outlook: ${data.market_outlook}`);
+                log(`📈 Overall Score: ${data.overall_sentiment_score?.toFixed(3)}`);
+                log(`📰 Total Articles: ${data.total_articles_analyzed}`);
+            } catch (error) {
+                log(`❌ Sentiment Error: ${error.message}`);
+            }
+        }
+        
+        function forceRefresh() {
+            log('🔄 Force refreshing enhanced news...');
+            if (window.enhancedNewsManager) {
+                enhancedNewsManager.loadEnhancedNews();
+                log('✅ Refresh triggered');
+            } else {
+                log('❌ Enhanced news manager not found');
+            }
+        }
+        
+        // Override console.log to capture logs
+        const originalLog = console.log;
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            if (args[0] && typeof args[0] === 'string' && args[0].includes('Enhanced News')) {
+                log(args.join(' '));
+            }
+        };
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            log('🚀 Debug page loaded');
+            setTimeout(() => {
+                if (window.enhancedNewsManager) {
+                    log('✅ Enhanced News Manager detected');
+                } else {
+                    log('❌ Enhanced News Manager not detected');
+                }
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

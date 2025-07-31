@@ -1,0 +1,58 @@
+{
+  "current_price": 3350.7,
+  "data_quality": "high",
+  "generated_at": "2025-07-19T13:55:12.960351",
+  "pattern_analysis": {
+    "pattern": "consolidation",
+    "signal": "neutral"
+  },
+  "predictions": [
+    {
+      "change_amount": -2.79,
+      "change_percent": -0.083,
+      "confidence": 0.685,
+      "direction": "bearish",
+      "predicted_price": 3347.91,
+      "timeframe": "1H"
+    },
+    {
+      "change_amount": 0.18,
+      "change_percent": 0.005,
+      "confidence": 0.793,
+      "direction": "bullish",
+      "predicted_price": 3350.88,
+      "timeframe": "4H"
+    },
+    {
+      "change_amount": 2.7,
+      "change_percent": 0.081,
+      "confidence": 0.762,
+      "direction": "bullish",
+      "predicted_price": 3353.4,
+      "timeframe": "1D"
+    }
+  ],
+  "sentiment_analysis": {
+    "confidence": 0.8095735675115905,
+    "fear_greed_index": 42,
+    "news_sentiment": -0.022021219253957725,
+    "sentiment": "neutral",
+    "sentiment_score": 0.45022904644238765
+  },
+  "source": "intelligent_ml_api",
+  "success": true,
+  "symbol": "XAUUSD",
+  "technical_analysis": {
+    "bb_lower": 3130.132267955619,
+    "bb_middle": 3217.706479880892,
+    "bb_upper": 3305.2806918061647,
+    "ema_12": 3249.794634148787,
+    "ema_26": 3227.2416838530057,
+    "macd": 22.552950295781102,
+    "resistance": 3350.699951,
+    "rsi": 83.15520851425777,
+    "signal": 22.552950295781102,
+    "sma_20": 3217.706479880892,
+    "support": 3160.7277326168305
+  }
+}

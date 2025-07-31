@@ -1,0 +1,97 @@
+{
+  "timestamp": "2025-07-18T22:38:17.589992",
+  "summary": {
+    "total_tests": 22,
+    "passed_tests": 17,
+    "success_rate": 77.27272727272727
+  },
+  "detailed_results": {
+    "imports": {
+      "robust_data_system": true,
+      "unified_provider": true,
+      "flask_integration": true
+    },
+    "data_source_manager": {
+      "initialization": true,
+      "cache_manager": true,
+      "rate_limiter": true
+    },
+    "api_services": {
+      "price": {
+        "success": true,
+        "symbol": "XAUUSD",
+        "price": 1996.2244167636024,
+        "source": "simulated",
+        "has_bid_ask": true
+      },
+      "sentiment": {
+        "success": true,
+        "sentiment_score": 0.15958435819481698,
+        "sentiment_label": "neutral",
+        "confidence": 0.3,
+        "sources_count": 0
+      },
+      "technical": {
+        "success": true,
+        "indicators": [
+          "RSI",
+          "MACD",
+          "BOLLINGER"
+        ],
+        "timeframe": "1H",
+        "source": "simulated"
+      }
+    },
+    "web_scraping": {
+      "error": "PriceDataService.__init__() missing 1 required positional argument: 'data_manager'"
+    },
+    "fallback_mechanisms": {
+      "XAUUSD": {
+        "success": true,
+        "has_price": true,
+        "has_sentiment": true,
+        "has_technical": true,
+        "fallback_used": true
+      },
+      "INVALID_SYMBOL": {
+        "success": true,
+        "has_price": true,
+        "has_sentiment": true,
+        "has_technical": true,
+        "fallback_used": true
+      }
+    },
+    "cache_management": {
+      "first_call_time": 0.0009944438934326172,
+      "second_call_time": 0.0,
+      "cache_effective": true,
+      "data_consistent": "True"
+    },
+    "flask_integration": {
+      "price_sync": {
+        "success": false,
+        "has_price": false,
+        "source": "unknown"
+      },
+      "sentiment_sync": {
+        "success": false,
+        "has_sentiment": false
+      },
+      "technical_sync": {
+        "success": false,
+        "has_indicators": false
+      }
+    },
+    "frontend_integration": {
+      "static/js/robust-data-integration.js": {
+        "exists": true
+      },
+      "static/js/real-time-data-manager.js": {
+        "exists": true
+      },
+      "enhanced_routes": {
+        "available": true
+      }
+    }
+  }
+}

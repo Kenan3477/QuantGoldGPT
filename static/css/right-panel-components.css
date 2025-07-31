@@ -1,0 +1,439 @@
+/* Right Panel Components - Live Order Book, Fear/Greed, ML Overview */
+
+/* Order Book Styles */
+.order-book {
+    background: var(--bg-tertiary);
+    border-radius: 8px;
+    border: 1px solid var(--border-primary);
+    overflow: hidden;
+}
+
+.order-book-header {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+    padding: 12px 16px;
+    background: var(--bg-quaternary);
+    border-bottom: 1px solid var(--border-primary);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+}
+
+.order-book-content {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.order-book-section {
+    padding: 8px 0;
+}
+
+.order-book-section-title {
+    padding: 8px 16px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border-secondary);
+}
+
+.order-book-asks {
+    background: linear-gradient(to bottom, rgba(255, 71, 87, 0.05), transparent);
+}
+
+.order-book-bids {
+    background: linear-gradient(to top, rgba(0, 208, 132, 0.05), transparent);
+}
+
+.order-book-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+    padding: 6px 16px;
+    font-size: 12px;
+    transition: background-color 0.2s ease;
+    position: relative;
+}
+
+.order-book-row:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.order-book-price {
+    font-weight: 600;
+}
+
+.order-book-asks .order-book-price {
+    color: var(--danger);
+}
+
+.order-book-bids .order-book-price {
+    color: var(--success);
+}
+
+.order-book-size {
+    color: var(--text-secondary);
+}
+
+.order-book-total {
+    color: var(--text-muted);
+    font-size: 11px;
+}
+
+.order-book-depth-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    opacity: 0.1;
+    transition: width 0.3s ease;
+    z-index: 0;
+}
+
+.order-book-asks .order-book-depth-bar {
+    background: var(--danger);
+}
+
+.order-book-bids .order-book-depth-bar {
+    background: var(--success);
+}
+
+.order-book-current-price {
+    padding: 12px 16px;
+    text-align: center;
+    background: var(--bg-quaternary);
+    border-top: 1px solid var(--border-primary);
+    border-bottom: 1px solid var(--border-primary);
+    font-weight: 700;
+    color: var(--gold);
+}
+
+.order-book-spread {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 4px;
+}
+
+/* Fear & Greed Index Styles */
+.fear-greed-container {
+    background: var(--bg-tertiary);
+    border-radius: 8px;
+    border: 1px solid var(--border-primary);
+    padding: 20px;
+    text-align: center;
+}
+
+.fear-greed-gauge {
+    position: relative;
+    width: 160px;
+    height: 80px;
+    margin: 0 auto 16px;
+}
+
+.fear-greed-semicircle {
+    width: 160px;
+    height: 80px;
+    border-radius: 160px 160px 0 0;
+    border: 8px solid;
+    border-bottom: none;
+    position: relative;
+    background: conic-gradient(
+        from 180deg,
+        #5352ed 0deg,
+        #70a1ff 72deg,
+        #ffa502 108deg,
+        #ff6b7a 144deg,
+        #ff4757 180deg
+    );
+    border-color: #333;
+}
+
+.fear-greed-needle {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform-origin: bottom center;
+    width: 2px;
+    height: 60px;
+    background: white;
+    border-radius: 1px;
+    transform: translateX(-50%) rotate(0deg);
+    transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 10;
+}
+
+.fear-greed-needle::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 8px;
+    height: 8px;
+    background: white;
+    border-radius: 50%;
+}
+
+.fear-greed-value {
+    font-size: 32px;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.fear-greed-level {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+}
+
+.fear-greed-description {
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.4;
+}
+
+.fear-greed-components {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border-secondary);
+}
+
+.fear-greed-component {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 0;
+    font-size: 11px;
+}
+
+.fear-greed-component-name {
+    color: var(--text-secondary);
+}
+
+.fear-greed-component-value {
+    font-weight: 600;
+}
+
+.fear-greed-last-updated {
+    margin-top: 12px;
+    font-size: 10px;
+    color: var(--text-muted);
+}
+
+/* ML AI Overview Styles */
+.ml-overview-container {
+    background: var(--bg-tertiary);
+    border-radius: 8px;
+    border: 1px solid var(--border-primary);
+    padding: 16px;
+}
+
+.ml-overview-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+}
+
+.ml-assessment {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: var(--bg-quaternary);
+    border-radius: 6px;
+    margin-bottom: 16px;
+}
+
+.ml-assessment-icon {
+    font-size: 24px;
+}
+
+.ml-assessment-bullish {
+    color: var(--success);
+    background: rgba(0, 208, 132, 0.1);
+    border: 1px solid rgba(0, 208, 132, 0.2);
+}
+
+.ml-assessment-bearish {
+    color: var(--danger);
+    background: rgba(255, 71, 87, 0.1);
+    border: 1px solid rgba(255, 71, 87, 0.2);
+}
+
+.ml-assessment-neutral {
+    color: var(--warning);
+    background: rgba(255, 165, 2, 0.1);
+    border: 1px solid rgba(255, 165, 2, 0.2);
+}
+
+.ml-assessment-details h4 {
+    margin: 0 0 4px 0;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.ml-assessment-confidence {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.ml-signals-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.ml-signal {
+    padding: 8px;
+    background: var(--bg-quaternary);
+    border-radius: 4px;
+    border: 1px solid var(--border-secondary);
+}
+
+.ml-signal-name {
+    font-size: 10px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    margin-bottom: 4px;
+}
+
+.ml-signal-value {
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.ml-signal-confidence {
+    font-size: 10px;
+    color: var(--text-secondary);
+    margin-top: 2px;
+}
+
+.ml-key-levels {
+    margin-bottom: 16px;
+}
+
+.ml-key-levels h5 {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+}
+
+.ml-levels-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+}
+
+.ml-level {
+    display: flex;
+    justify-content: space-between;
+    padding: 4px 8px;
+    background: var(--bg-secondary);
+    border-radius: 4px;
+    font-size: 11px;
+}
+
+.ml-level-name {
+    color: var(--text-secondary);
+}
+
+.ml-level-value {
+    font-weight: 600;
+}
+
+.ml-insights {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border-secondary);
+}
+
+.ml-insights h5 {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+}
+
+.ml-insight {
+    padding: 6px 8px;
+    margin-bottom: 4px;
+    background: var(--bg-secondary);
+    border-left: 3px solid var(--accent-primary);
+    border-radius: 0 4px 4px 0;
+    font-size: 11px;
+    line-height: 1.3;
+    color: var(--text-secondary);
+}
+
+.ml-last-updated {
+    margin-top: 12px;
+    font-size: 10px;
+    color: var(--text-muted);
+    text-align: center;
+}
+
+/* Loading States */
+.component-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    color: var(--text-secondary);
+}
+
+.component-loading i {
+    font-size: 24px;
+    margin-bottom: 12px;
+    color: var(--accent-primary);
+    animation: spin 2s linear infinite;
+}
+
+.component-loading-text {
+    font-size: 14px;
+    margin-bottom: 8px;
+}
+
+.component-loading-subtext {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+    .ml-signals-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .ml-levels-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .fear-greed-gauge {
+        width: 140px;
+        height: 70px;
+    }
+    
+    .fear-greed-semicircle {
+        width: 140px;
+        height: 70px;
+        border-radius: 140px 140px 0 0;
+    }
+    
+    .fear-greed-needle {
+        height: 50px;
+    }
+}

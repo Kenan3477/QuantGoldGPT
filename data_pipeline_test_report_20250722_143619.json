@@ -1,0 +1,90 @@
+{
+  "timestamp": "2025-07-22T14:36:19.585721",
+  "overall_score": 0.6666666666666666,
+  "total_tests": 30,
+  "passed_tests": 20,
+  "failed_tests": 10,
+  "detailed_results": {
+    "pipeline_core": {
+      "data_source_management": true,
+      "unified_data_fetching": false,
+      "caching_system": true,
+      "source_reliability": true,
+      "health_check": true
+    },
+    "price_service": {
+      "real_time_price": false,
+      "historical_ohlcv": true,
+      "market_summary": true,
+      "price_alerts": true,
+      "support_resistance": false
+    },
+    "sentiment_service": {
+      "sentiment_signal": true,
+      "news_analysis": false,
+      "correlation_tracking": false,
+      "news_deduplication": false,
+      "sentiment_history": false
+    },
+    "technical_service": {
+      "all_indicators": {
+        "sma_10": "TechnicalIndicatorValue(indicator_name='sma_10', value=3465.2549999999997, signal='sell', strength=0.050082894332450466, timeframe='', timestamp=datetime.datetime(2025, 7, 22, 14, 36, 18, 936142), metadata={'period': 10, 'current_price': 3447.9})",
+        "sma_20": "TechnicalIndicatorValue(indicator_name='sma_20', value=3454.6230000000005, signal='sell', strength=0.01946087894395542, timeframe='', timestamp=datetime.datetime(2025, 7, 22, 14, 36, 18, 936694), metadata={'period': 20, 'current_price': 3447.9})",
+        "sma_50": "TechnicalIndicatorValue(indicator_name='sma_50', value=3455.8322000000003, signal='sell', strength=0.022953082039111138, timeframe='', timestamp=datetime.datetime(2025, 7, 22, 14, 36, 18, 936694), metadata={'period': 50, 'current_price': 3447.9})",
+        "ema_12": "TechnicalIndicatorValue(indicator_name='ema_12', value=3459.699102146495, signal='sell', strength=0.03410441717077214, timeframe='', timestamp=datetime.datetime(2025, 7, 22, 14, 36, 18, 936694), metadata={'period': 12, 'current_price': 3447.9})",
+        "ema_26": "TechnicalIndicatorValue(indicator_name='ema_26', value=3456.543973171307, signal='sell', strength=0.025007560263658482, timeframe='', timestamp=datetime.datetime(2025, 7, 22, 14, 36, 18, 937237), metadata={'period': 26, 'current_price': 3447.9})",
+        "ema_50": "TechnicalIndicatorValue(indicator_name='ema_50', value=3452.343304730194, signal='sell', strength=0.012870402326750458, timeframe='', timestamp=datetime.datetime(2025, 7, 22, 14, 36, 18, 937237), metadata={'period': 50, 'current_price': 3447.9})",
+        "macd": "TechnicalIndicatorValue(indicator_name='macd', value=3.1551289751882905, signal='sell', strength=0.23477500355922773, timeframe='', timestamp=datetime.datetime(2025, 7, 22, 14, 36, 18, 937237), metadata={'macd_line': 3.1551289751882905, 'signal_line': 3.895874391567944, 'histogram': -0.7407454163796534})",
+        "adx": "TechnicalIndicatorValue(indicator_name='adx', value=32.58618889040949, signal='sell', strength=0.6517237778081898, timeframe='', timestamp=datetime.datetime(2025, 7, 22, 14, 36, 18, 941111), metadata={'plus_di': 32.09339533023333, 'minus_di': 33.34833258337078, 'trend_strength': 'strong'})",
+        "aroon": "TechnicalIndicatorValue(indicator_name='aroon', value=-75.00000000000001, signal='sell', strength=0.8333333333333335, timeframe='', timestamp=datetime.datetime(2025, 7, 22, 14, 36, 18, 951112), metadata={'aroon_up': 8.333333333333332, 'aroon_down': 83.33333333333334})",
+        "parabolic_sar": "TechnicalIndicatorValue(indicator_name='parabolic_sar', value=3490.66, signal='sell', strength=0.12401751790945144, timeframe='', timestamp=datetime.datetime(2025, 7, 22, 14, 36, 18, 951653), metadata={'current_price': 3447.9, 'trend': 'down'})",
+        "rsi": "TechnicalIndicatorValue(indicator_name='rsi', value=53.89939438882709, signal='neutral', strength=0.5, timeframe='', timestamp=datetime.datetime(2025, 7, 22, 14, 36, 18, 954606), metadata={'period': 14, 'interpretation': 'neutral'})",
+        "stochastic": "TechnicalIndicatorValue(indicator_name='stochastic', value=11.3231024471175, signal='neutral', strength=0.4, timeframe='', timestamp=datetime.datetime(2025, 7, 22, 14, 36, 18, 955767), metadata={'k_percent': 11.3231024471175, 'd_percent': 36.798706808889825})",
+        "williams_r": "TechnicalIndicatorValue(indicator_name='williams_r', value=-88.6768975528825, signal='buy', strength=0.5661551223558753, timeframe='', timestamp=datetime.datetime(2025, 7, 22, 14, 36, 18, 956337), metadata={'period': 14})",
+        "cci": "TechnicalIndicatorValue(indicator_name='cci', value=-28.445354215145187, signal='neutral', strength=0.4, timeframe='', timestamp=datetime.datetime(2025, 7, 22, 14, 36, 18, 980838), metadata={'period': 20})",
+        "momentum": "TechnicalIndicatorValue(indicator_name='momentum', value=99.48840470563793, signal='neutral', strength=0.3, timeframe='', timestamp=datetime.datetime(2025, 7, 22, 14, 36, 18, 981384), metadata={'period': 10})",
+        "roc": "TechnicalIndicatorValue(indicator_name='roc', value=-0.2834253983862026, signal='neutral', strength=0.3, timeframe='', timestamp=datetime.datetime(2025, 7, 22, 14, 36, 18, 981930), metadata={'period': 12})",
+        "trix": "TechnicalIndicatorValue(indicator_name='trix', value=1.7469521439095304, signal='buy', strength=0.03493904287819061, timeframe='', timestamp=datetime.datetime(2025, 7, 22, 14, 36, 18, 982737), metadata={'period': 14})",
+        "ultimate_oscillator": "TechnicalIndicatorValue(indicator_name='ultimate_oscillator', value=22.95627072472815, signal='buy', strength=0.23479097584239503, timeframe='', timestamp=datetime.datetime(2025, 7, 22, 14, 36, 18, 987781), metadata={'short': 7, 'medium': 14, 'long': 28})",
+        "bollinger_bands": "TechnicalIndicatorValue(indicator_name='bollinger_bands', value=0.3890979386714195, signal='neutral', strength=0.5, timeframe='', timestamp=datetime.datetime(2025, 7, 22, 14, 36, 18, 988334), metadata={'upper_band': 3484.933527682987, 'middle_band': 3454.6230000000005, 'lower_band': 3424.312472317014, 'current_price': 3447.9, 'position': 0.3890979386714195})",
+        "atr": "TechnicalIndicatorValue(indicator_name='atr', value=14.286428571428555, signal='neutral', strength=0.3, timeframe='', timestamp=datetime.datetime(2025, 7, 22, 14, 36, 18, 990626), metadata={'atr_percentage': 0.4143515928950537, 'volatility_level': 'low'})",
+        "mass_index": "TechnicalIndicatorValue(indicator_name='mass_index', value=25.102868761374733, signal='neutral', strength=0.3, timeframe='', timestamp=datetime.datetime(2025, 7, 22, 14, 36, 18, 991173), metadata={'period': 25, 'interpretation': 'normal'})",
+        "chaikin_money_flow": "TechnicalIndicatorValue(indicator_name='chaikin_money_flow', value=-0.006145147174745251, signal='neutral', strength=0.3, timeframe='', timestamp=datetime.datetime(2025, 7, 22, 14, 36, 18, 992407), metadata={'period': 20})",
+        "volume_oscillator": "TechnicalIndicatorValue(indicator_name='volume_oscillator', value=20.5656385703151, signal='buy', strength=1.0, timeframe='', timestamp=datetime.datetime(2025, 7, 22, 14, 36, 18, 992963), metadata={'short': 5, 'long': 10})",
+        "detrended_price_oscillator": "TechnicalIndicatorValue(indicator_name='detrended_price_oscillator', value=2.7150000000001455, signal='neutral', strength=0.3, timeframe='', timestamp=datetime.datetime(2025, 7, 22, 14, 36, 18, 993528), metadata={'period': 20, 'percentage': 0.07874358305055673})",
+        "vortex_indicator": "TechnicalIndicatorValue(indicator_name='vortex_indicator', value=0.08084595770211767, signal='neutral', strength=0.4, timeframe='', timestamp=datetime.datetime(2025, 7, 22, 14, 36, 18, 996410), metadata={'vi_plus': 0.9870506474676282, 'vi_minus': 0.9062046897655105})"
+      },
+      "multi_timeframe": true,
+      "trend_analysis": true,
+      "signal_generation": true,
+      "indicator_validation": true
+    },
+    "macro_service": {
+      "macro_analysis": true,
+      "inflation_tracking": true,
+      "interest_rates": true,
+      "economic_events": false,
+      "macro_summary": false
+    },
+    "integration": {
+      "unified_dashboard": true,
+      "data_consistency": true,
+      "cross_service_validation": true,
+      "performance_benchmarks": true,
+      "error_handling": true
+    },
+    "performance": {
+      "response_times": {
+        "price_service": 0.0068318843841552734,
+        "sentiment_service": 0.001233816146850586,
+        "technical_service": 0.04618692398071289,
+        "macro_service": 0.025106191635131836
+      },
+      "throughput": {},
+      "memory_usage": {},
+      "cache_efficiency": {
+        "improvement": -0.6785449931267844
+      }
+    }
+  }
+}

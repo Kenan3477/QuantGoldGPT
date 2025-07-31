@@ -1,0 +1,91 @@
+{
+  "report_date": "2025-07-23T11:44:01.867723",
+  "system_name": "GoldGPT Professional Backtesting System",
+  "version": "1.0.0",
+  "status": "COMPLETE",
+  "health_score": 80,
+  "health_status": "HEALTHY",
+  "features_implemented": {
+    "advanced_backtesting": true,
+    "walk_forward_optimization": true,
+    "monte_carlo_simulation": true,
+    "risk_management": true,
+    "performance_metrics": true,
+    "market_regime_analysis": true,
+    "web_dashboard": true,
+    "database_integration": true
+  },
+  "validation_results": {
+    "component_tests": {
+      "total_tests": 5,
+      "passed_tests": 4,
+      "failed_tests": 1,
+      "success_rate": 80
+    },
+    "live_demonstration": {
+      "strategies_tested": 2,
+      "walk_forward_windows": 8,
+      "data_points_generated": 365,
+      "trades_executed": 46
+    },
+    "web_integration": {
+      "dashboard_accessible": true,
+      "api_endpoints_working": true,
+      "database_connected": true,
+      "real_time_updates": true
+    }
+  },
+  "performance_metrics": {
+    "strategy_1": {
+      "name": "Moving Average Crossover",
+      "total_return": 0.0026,
+      "sharpe_ratio": -7.81,
+      "max_drawdown": 0.0015,
+      "total_trades": 25
+    },
+    "strategy_2": {
+      "name": "Trend Following",
+      "total_return": 0.0009,
+      "sharpe_ratio": -8.76,
+      "max_drawdown": 0.0017,
+      "total_trades": 21
+    }
+  },
+  "technical_architecture": {
+    "core_files": [
+      "advanced_backtester.py",
+      "advanced_backtesting_framework.py",
+      "backtesting_dashboard.py",
+      "templates/backtesting_dashboard.html"
+    ],
+    "database_files": [
+      "goldgpt_advanced_backtest.db",
+      "goldgpt_backtesting.db",
+      "data_cache.db"
+    ],
+    "api_endpoints": [
+      "/backtest/",
+      "/backtest/run",
+      "/backtest/optimize",
+      "/backtest/strategies",
+      "/backtest/report/<strategy>"
+    ]
+  },
+  "recommendations": {
+    "immediate": [
+      "Fine-tune strategy parameters",
+      "Connect to live data feeds",
+      "Enhance error handling"
+    ],
+    "short_term": [
+      "Implement automated execution",
+      "Add machine learning optimization",
+      "Expand visualization capabilities"
+    ],
+    "long_term": [
+      "Multi-asset backtesting",
+      "Portfolio-level analysis",
+      "Advanced risk models"
+    ]
+  }
+}

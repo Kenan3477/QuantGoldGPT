@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TradingView Widget Test</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #0a0a0a;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+        
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .status {
+            background: #1a1a1a;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #00d084;
+        }
+        
+        #tradingview_widget {
+            width: 100%;
+            height: 600px;
+            border: 2px solid #00d084;
+            border-radius: 8px;
+        }
+        
+        .controls {
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .btn {
+            background: #00d084;
+            color: black;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        .btn:hover {
+            background: #00b070;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🔥 TradingView Widget Direct Test</h1>
+        
+        <div class="status" id="status">
+            ⏳ Loading TradingView Widget...
+        </div>
+        
+        <div class="controls">
+            <button class="btn" onclick="createWidget()">🚀 Create Widget</button>
+            <button class="btn" onclick="testLibrary()">📚 Test Library</button>
+            <button class="btn" onclick="clearWidget()">🗑️ Clear Widget</button>
+        </div>
+        
+        <div id="tradingview_widget"></div>
+    </div>
+
+    <!-- TradingView Widget Script -->
+    <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+    
+    <script>
+        const statusDiv = document.getElementById('status');
+        let tvWidget = null;
+        
+        function updateStatus(message, type = 'info') {
+            const colors = {
+                'info': '#00d084',
+                'error': '#ff4757',
+                'warning': '#ffa502',
+                'success': '#00d084'
+            };
+            
+            statusDiv.innerHTML = message;
+            statusDiv.style.borderLeftColor = colors[type] || colors.info;
+            console.log(message);
+        }
+        
+        function testLibrary() {
+            updateStatus('🔍 Testing TradingView library...');
+            
+            if (typeof TradingView === 'undefined') {
+                updateStatus('❌ TradingView library not loaded!', 'error');
+                return;
+            }
+            
+            updateStatus('✅ TradingView library is loaded successfully!', 'success');
+            console.log('TradingView object:', TradingView);
+            console.log('TradingView.widget:', TradingView.widget);
+        }
+        
+        function createWidget() {
+            updateStatus('🚀 Creating TradingView widget...');
+            
+            if (typeof TradingView === 'undefined') {
+                updateStatus('❌ TradingView library not available', 'error');
+                return;
+            }
+            
+            try {
+                // Clear existing widget
+                document.getElementById('tradingview_widget').innerHTML = '';
+                
+                tvWidget = new TradingView.widget({
+                    "width": "100%",
+                    "height": "600",
+                    "symbol": "OANDA:XAUUSD",
+                    "interval": "1H",
+                    "timezone": "Etc/UTC",
+                    "theme": "dark",
+                    "style": "1",
+                    "locale": "en",
+                    "toolbar_bg": "#0a0a0a",
+                    "enable_publishing": false,
+                    "hide_top_toolbar": false,
+                    "hide_legend": false,
+                    "save_image": false,
+                    "container_id": "tradingview_widget",
+                    "studies": [
+                        "Volume@tv-basicstudies",
+                        "RSI@tv-basicstudies",
+                        "MACD@tv-basicstudies",
+                        "BB@tv-basicstudies"
+                    ],
+                    "show_popup_button": false,
+                    "popup_width": "1000",
+                    "popup_height": "650",
+                    "allow_symbol_change": true,
+                    "details": true,
+                    "hotlist": true,
+                    "calendar": true,
+                    "studies_overrides": {
+                        "volume.volume.color.1": "#00d084",
+                        "volume.volume.color.0": "#ff6b6b"
+                    },
+                    "overrides": {
+                        "symbolWatermarkProperties.transparency": 90,
+                        "scalesProperties.textColor": "#ffffff",
+                        "paneProperties.background": "#0a0a0a",
+                        "paneProperties.vertGridProperties.color": "#1a1a1a",
+                        "paneProperties.horzGridProperties.color": "#1a1a1a"
+                    },
+                    "loading_screen": {
+                        "backgroundColor": "#0a0a0a",
+                        "foregroundColor": "#00d084"
+                    }
+                });
+                
+                updateStatus('✅ TradingView widget created successfully!', 'success');
+                
+                // Add widget ready callback
+                tvWidget.onChartReady(() => {
+                    updateStatus('🎉 TradingView widget is fully loaded and ready!', 'success');
+                });
+                
+            } catch (error) {
+                updateStatus(`❌ Error creating widget: ${error.message}`, 'error');
+                console.error('Widget creation error:', error);
+            }
+        }
+        
+        function clearWidget() {
+            updateStatus('🗑️ Clearing widget...');
+            document.getElementById('tradingview_widget').innerHTML = '<div style="text-align: center; padding: 50px; color: #666;">Widget cleared</div>';
+            tvWidget = null;
+        }
+        
+        // Auto-test when page loads
+        window.addEventListener('load', function() {
+            updateStatus('🔄 Page loaded, testing library in 2 seconds...');
+            
+            setTimeout(() => {
+                testLibrary();
+                
+                setTimeout(() => {
+                    if (typeof TradingView !== 'undefined') {
+                        createWidget();
+                    } else {
+                        updateStatus('❌ TradingView library failed to load after timeout', 'error');
+                    }
+                }, 1000);
+            }, 2000);
+        });
+        
+        // Test periodically
+        setInterval(() => {
+            if (typeof TradingView === 'undefined') {
+                updateStatus('⚠️ TradingView library not available', 'warning');
+            }
+        }, 5000);
+    </script>
+</body>
+</html>

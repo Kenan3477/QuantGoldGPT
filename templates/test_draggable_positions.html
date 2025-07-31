@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎯 Draggable Open Positions Test - GoldGPT</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            color: white;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .test-info {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .instructions {
+            background: rgba(76, 175, 80, 0.2);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #4CAF50;
+        }
+        
+        .shortcuts {
+            background: rgba(255, 193, 7, 0.2);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #FFC107;
+        }
+        
+        /* Copy the exact styles from dashboard_advanced.html */
+        :root {
+            --primary-color: #4a90e2;
+            --bg-tertiary: rgba(30, 40, 60, 0.95);
+            --border-secondary: rgba(255, 255, 255, 0.1);
+            --text-tertiary: rgba(255, 255, 255, 0.6);
+            --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.3);
+            --transition: all 0.3s ease;
+        }
+        
+        .chart-positions-overlay {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 320px;
+            max-height: 400px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-secondary);
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            z-index: 100;
+            box-shadow: var(--shadow-lg);
+            opacity: 0.95;
+            transition: var(--transition);
+        }
+        
+        .positions-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-secondary);
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px 12px 0 0;
+        }
+        
+        .positions-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            color: white;
+        }
+        
+        .positions-count {
+            background: var(--primary-color);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: bold;
+            min-width: 18px;
+            text-align: center;
+        }
+        
+        .positions-toggle {
+            background: none;
+            border: none;
+            color: var(--text-tertiary);
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            transition: var(--transition);
+        }
+        
+        .positions-toggle:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        
+        .positions-body {
+            padding: 16px;
+            max-height: 350px;
+            overflow-y: auto;
+        }
+        
+        .no-positions {
+            text-align: center;
+            color: var(--text-tertiary);
+            padding: 20px 0;
+        }
+        
+        .no-positions i {
+            font-size: 24px;
+            margin-bottom: 8px;
+            opacity: 0.5;
+        }
+        
+        .demo-position {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 8px;
+            font-size: 12px;
+        }
+        
+        .position-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+        
+        .position-symbol {
+            font-weight: bold;
+            color: #4CAF50;
+        }
+        
+        .position-pnl {
+            font-weight: bold;
+        }
+        
+        .position-pnl.positive { color: #4CAF50; }
+        .position-pnl.negative { color: #f44336; }
+        
+        .position-details {
+            display: flex;
+            justify-content: space-between;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 Draggable Open Positions Test</h1>
+            <p>Testing the moveable Open Positions dropdown functionality</p>
+        </div>
+        
+        <div class="test-info">
+            <h3>📋 Test Features</h3>
+            <p>The Open Positions panel on the right can now be dragged anywhere on the screen!</p>
+            
+            <div class="instructions">
+                <h4>🖱️ How to Use:</h4>
+                <ul>
+                    <li><strong>Drag:</strong> Click and drag the header to move the panel</li>
+                    <li><strong>Position Memory:</strong> The panel remembers its position when you reload</li>
+                    <li><strong>Visual Feedback:</strong> Hover to see drag indicators</li>
+                    <li><strong>Constraints:</strong> Panel stays within screen boundaries</li>
+                </ul>
+            </div>
+            
+            <div class="shortcuts">
+                <h4>⌨️ Keyboard Shortcuts:</h4>
+                <ul>
+                    <li><strong>Ctrl+Shift+R:</strong> Reset to original position</li>
+                    <li><strong>Ctrl+Shift+C:</strong> Center the panel</li>
+                    <li><strong>Ctrl+Shift+1:</strong> Snap to top-left corner</li>
+                    <li><strong>Ctrl+Shift+2:</strong> Snap to top-right corner</li>
+                    <li><strong>Ctrl+Shift+3:</strong> Snap to bottom-left corner</li>
+                    <li><strong>Ctrl+Shift+4:</strong> Snap to bottom-right corner</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Open Positions Overlay - Draggable Version -->
+    <div class="chart-positions-overlay" id="positions-overlay">
+        <div class="positions-header">
+            <div class="positions-title">
+                <i class="fas fa-chart-bar"></i>
+                Open Positions
+                <span class="positions-count" id="positions-count">3</span>
+            </div>
+            <button class="positions-toggle" id="positions-toggle" title="Toggle positions panel">
+                <i class="fas fa-chevron-up"></i>
+            </button>
+        </div>
+        <div class="positions-body" id="positions-body">
+            <!-- Demo positions for testing -->
+            <div class="demo-position">
+                <div class="position-header">
+                    <span class="position-symbol">XAUUSD</span>
+                    <span class="position-pnl positive">+$127.50</span>
+                </div>
+                <div class="position-details">
+                    <span>Buy 0.1 lots</span>
+                    <span>Entry: $3,345.20</span>
+                </div>
+            </div>
+            
+            <div class="demo-position">
+                <div class="position-header">
+                    <span class="position-symbol">XAUUSD</span>
+                    <span class="position-pnl negative">-$45.30</span>
+                </div>
+                <div class="position-details">
+                    <span>Sell 0.05 lots</span>
+                    <span>Entry: $3,356.80</span>
+                </div>
+            </div>
+            
+            <div class="demo-position">
+                <div class="position-header">
+                    <span class="position-symbol">XAUUSD</span>
+                    <span class="position-pnl positive">+$89.20</span>
+                </div>
+                <div class="position-details">
+                    <span>Buy 0.08 lots</span>
+                    <span>Entry: $3,340.15</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Load the draggable functionality -->
+    <script src="/static/js/draggable-positions-overlay.js"></script>
+    
+    <script>
+        // Add some interactive feedback
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('🎯 Draggable Open Positions Test Page Loaded');
+            
+            // Add click handler for toggle button
+            document.getElementById('positions-toggle').addEventListener('click', () => {
+                const body = document.getElementById('positions-body');
+                const icon = document.querySelector('#positions-toggle i');
+                
+                if (body.style.display === 'none') {
+                    body.style.display = 'block';
+                    icon.className = 'fas fa-chevron-up';
+                } else {
+                    body.style.display = 'none';
+                    icon.className = 'fas fa-chevron-down';
+                }
+            });
+            
+            // Show success message after 2 seconds
+            setTimeout(() => {
+                if (window.draggablePositions) {
+                    console.log('✅ Draggable functionality successfully loaded!');
+                    
+                    // Add a temporary success indicator
+                    const indicator = document.createElement('div');
+                    indicator.innerHTML = '✅ Draggable Ready!';
+                    indicator.style.cssText = `
+                        position: fixed;
+                        top: 20px;
+                        left: 20px;
+                        background: #4CAF50;
+                        color: white;
+                        padding: 10px 15px;
+                        border-radius: 8px;
+                        z-index: 10000;
+                        font-weight: bold;
+                        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+                        animation: slideIn 0.5s ease;
+                    `;
+                    
+                    document.body.appendChild(indicator);
+                    
+                    // Remove after 3 seconds
+                    setTimeout(() => {
+                        indicator.style.animation = 'slideOut 0.5s ease';
+                        setTimeout(() => indicator.remove(), 500);
+                    }, 3000);
+                } else {
+                    console.log('❌ Draggable functionality not loaded');
+                }
+            }, 2000);
+        });
+        
+        // Add CSS animations
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from { transform: translateX(-100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            
+            @keyframes slideOut {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(-100%); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>

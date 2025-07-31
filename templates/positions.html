@@ -1,0 +1,1043 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Positions & AI Signals - GoldGPT Pro</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #141414;
+            --bg-tertiary: #1a1a1a;
+            --bg-quaternary: #2a2a2a;
+            --text-primary: #ffffff;
+            --text-secondary: #b8b8b8;
+            --text-muted: #6c6c6c;
+            --border-primary: #333333;
+            --border-secondary: #4a4a4a;
+            --accent-primary: #007bff;
+            --accent-secondary: #0056b3;
+            --success: #28a745;
+            --danger: #dc3545;
+            --warning: #ffc107;
+            --info: #17a2b8;
+            --gold: #ffd700;
+            --profit: #00ff88;
+            --loss: #ff4757;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --shadow: 0 4px 16px rgba(0,0,0,0.15);
+            --shadow-lg: 0 8px 32px rgba(0,0,0,0.25);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        /* Header */
+        .header {
+            background: var(--bg-secondary);
+            padding: 16px 32px;
+            border-bottom: 1px solid var(--border-primary);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .header-title h1 {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--gold);
+        }
+
+        .back-btn {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-primary);
+            color: var(--text-secondary);
+            padding: 8px 16px;
+            border-radius: 8px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
+        }
+
+        .back-btn:hover {
+            background: var(--bg-quaternary);
+            color: var(--text-primary);
+            border-color: var(--border-secondary);
+        }
+
+        /* Main Layout */
+        .main-container {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 24px;
+            padding: 24px;
+            min-height: calc(100vh - 80px);
+        }
+
+        .left-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .right-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        /* Panel Styles */
+        .panel {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            border: 1px solid var(--border-primary);
+            overflow: hidden;
+        }
+
+        .panel-header {
+            padding: 20px 24px 16px;
+            border-bottom: 1px solid var(--border-primary);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .panel-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .panel-title i {
+            color: var(--accent-primary);
+            font-size: 20px;
+        }
+
+        .panel-content {
+            padding: 24px;
+        }
+
+        /* Positions Overview */
+        .positions-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            padding: 16px;
+            text-align: center;
+            border: 1px solid var(--border-primary);
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .stat-value.profit {
+            color: var(--profit);
+        }
+
+        .stat-value.loss {
+            color: var(--loss);
+        }
+
+        .stat-value.neutral {
+            color: var(--text-primary);
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        /* Position Tables */
+        .positions-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 16px;
+        }
+
+        .positions-table th,
+        .positions-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-primary);
+        }
+
+        .positions-table th {
+            background: var(--bg-tertiary);
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+
+        .positions-table td {
+            font-size: 14px;
+        }
+
+        .position-symbol {
+            font-weight: 600;
+            color: var(--gold);
+        }
+
+        .position-type {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .position-type.buy {
+            background: rgba(40, 167, 69, 0.2);
+            color: var(--success);
+        }
+
+        .position-type.sell {
+            background: rgba(220, 53, 69, 0.2);
+            color: var(--danger);
+        }
+
+        .position-pnl.profit {
+            color: var(--profit);
+            font-weight: 600;
+        }
+
+        .position-pnl.loss {
+            color: var(--loss);
+            font-weight: 600;
+        }
+
+        /* AI Signal Generator */
+        .signal-generator {
+            position: sticky;
+            top: 24px;
+        }
+
+        .generate-btn {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            border: none;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .generate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .generate-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .signals-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .signal-card {
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            border: 1px solid var(--border-primary);
+            padding: 16px;
+            transition: var(--transition);
+        }
+
+        .signal-card:hover {
+            border-color: var(--border-secondary);
+            box-shadow: var(--shadow);
+        }
+
+        .signal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .signal-type {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .signal-type.buy {
+            background: var(--success);
+            color: white;
+        }
+
+        .signal-type.sell {
+            background: var(--danger);
+            color: white;
+        }
+
+        .signal-type.hold {
+            background: var(--warning);
+            color: var(--bg-primary);
+        }
+
+        .signal-strength {
+            font-size: 12px;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+
+        .signal-confidence {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--accent-primary);
+        }
+
+        .signal-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .signal-detail {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .signal-detail strong {
+            color: var(--text-primary);
+        }
+
+        .signal-reasoning {
+            background: var(--bg-quaternary);
+            border-radius: 6px;
+            padding: 12px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            border-left: 3px solid var(--accent-primary);
+        }
+
+        .signal-roi {
+            text-align: center;
+            margin-top: 12px;
+            padding: 8px;
+            background: rgba(0, 123, 255, 0.1);
+            border-radius: 6px;
+        }
+
+        .signal-roi .roi-value {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--accent-primary);
+        }
+
+        .signal-roi .roi-label {
+            font-size: 11px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+        }
+
+        /* Loading States */
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            color: var(--text-secondary);
+        }
+
+        .spinner {
+            width: 24px;
+            height: 24px;
+            border: 2px solid var(--border-primary);
+            border-top: 2px solid var(--accent-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 12px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Empty States */
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-secondary);
+        }
+
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 16px;
+            color: var(--border-secondary);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .main-container {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .right-panel {
+                order: -1;
+            }
+
+            .signal-generator {
+                position: relative;
+                top: 0;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                padding: 16px;
+                gap: 16px;
+            }
+
+            .header {
+                padding: 12px 16px;
+            }
+
+            .header-title h1 {
+                font-size: 20px;
+            }
+
+            .positions-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .panel-content {
+                padding: 16px;
+            }
+
+            .positions-table {
+                font-size: 12px;
+            }
+
+            .positions-table th,
+            .positions-table td {
+                padding: 8px 6px;
+            }
+        }
+
+        /* Animation for new signals */
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .signal-card.new {
+            animation: slideInUp 0.5s ease-out;
+        }
+
+        /* Status indicators */
+        .status-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .status-indicator.active {
+            background: var(--success);
+            box-shadow: 0 0 8px var(--success);
+        }
+
+        .status-indicator.closed {
+            background: var(--text-muted);
+        }
+
+        .status-indicator.pending {
+            background: var(--warning);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-title">
+            <a href="/" class="back-btn">
+                <i class="fas fa-arrow-left"></i>
+                <span>Back to Dashboard</span>
+            </a>
+            <h1><i class="fas fa-chart-line"></i> Positions & AI Signals</h1>
+        </div>
+        <div class="header-actions">
+            <button class="generate-btn" onclick="generateNewSignals()">
+                <i class="fas fa-magic"></i> Generate New Signals
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Left Panel - Positions -->
+        <div class="left-panel">
+            <!-- Positions Overview -->
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>Portfolio Overview</span>
+                    </div>
+                    <button onclick="refreshPositions()" class="back-btn">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                </div>
+                <div class="panel-content">
+                    <div class="positions-stats">
+                        <div class="stat-card">
+                            <div class="stat-value profit" id="total-pnl">+$0.00</div>
+                            <div class="stat-label">Total P&L</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value neutral" id="open-positions">0</div>
+                            <div class="stat-label">Open Positions</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value neutral" id="win-rate">0%</div>
+                            <div class="stat-label">Win Rate</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value neutral" id="total-volume">$0.00</div>
+                            <div class="stat-label">Total Volume</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Open Positions -->
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <i class="fas fa-coins"></i>
+                        <span>Open Positions</span>
+                    </div>
+                    <span class="signal-confidence" id="open-count">0 positions</span>
+                </div>
+                <div class="panel-content">
+                    <div id="open-positions-content">
+                        <div class="empty-state">
+                            <i class="fas fa-chart-line"></i>
+                            <h3>No Open Positions</h3>
+                            <p>Your open positions will appear here when you have active trades.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Closed Positions -->
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <i class="fas fa-history"></i>
+                        <span>Recent Closed Positions</span>
+                    </div>
+                    <span class="signal-confidence" id="closed-count">0 trades</span>
+                </div>
+                <div class="panel-content">
+                    <div id="closed-positions-content">
+                        <div class="loading">
+                            <div class="spinner"></div>
+                            <span>Loading trading history...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Panel - AI Signal Generator -->
+        <div class="right-panel">
+            <div class="panel signal-generator">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <i class="fas fa-robot"></i>
+                        <span>AI Signal Generator</span>
+                    </div>
+                    <div class="status-indicator active"></div>
+                </div>
+                <div class="panel-content">
+                    <p style="color: var(--text-secondary); margin-bottom: 20px; font-size: 14px;">
+                        Advanced AI analysis combining trend, technical indicators, candlestick patterns, 
+                        news sentiment, fear/greed index, and economic factors.
+                    </p>
+                    
+                    <button class="generate-btn" id="generate-signals-btn" onclick="generateAISignals()">
+                        <i class="fas fa-magic"></i> Generate AI Signals
+                    </button>
+
+                    <div id="signals-container">
+                        <div class="empty-state">
+                            <i class="fas fa-lightbulb"></i>
+                            <h3>Generate Your First Signal</h3>
+                            <p>Click the button above to generate AI-powered trading signals with high ROI potential.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let currentSignals = [];
+        let openPositions = [];
+        let closedPositions = [];
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Initializing Positions & AI Signals page...');
+            loadPositions();
+            loadClosedTrades();
+            updateStats();
+        });
+
+        // Load open positions
+        async function loadPositions() {
+            try {
+                console.log('📊 Loading open positions...');
+                
+                // Simulate API call - replace with actual API
+                const response = await fetch('/api/positions/open');
+                if (response.ok) {
+                    openPositions = await response.json();
+                } else {
+                    // Mock data for demonstration
+                    openPositions = generateMockOpenPositions();
+                }
+                
+                displayOpenPositions();
+                updateStats();
+                
+            } catch (error) {
+                console.error('❌ Error loading positions:', error);
+                // Show mock data on error
+                openPositions = generateMockOpenPositions();
+                displayOpenPositions();
+            }
+        }
+
+        // Load closed trades
+        async function loadClosedTrades() {
+            try {
+                console.log('📊 Loading closed trades...');
+                
+                // Simulate API call - replace with actual API
+                const response = await fetch('/api/positions/closed?limit=20');
+                if (response.ok) {
+                    closedPositions = await response.json();
+                } else {
+                    // Mock data for demonstration
+                    closedPositions = generateMockClosedPositions();
+                }
+                
+                displayClosedPositions();
+                
+            } catch (error) {
+                console.error('❌ Error loading closed trades:', error);
+                // Show mock data on error
+                closedPositions = generateMockClosedPositions();
+                displayClosedPositions();
+            }
+        }
+
+        // Generate AI signals
+        async function generateAISignals() {
+            const button = document.getElementById('generate-signals-btn');
+            const container = document.getElementById('signals-container');
+            
+            try {
+                // Show loading state
+                button.disabled = true;
+                button.innerHTML = '<div class="spinner" style="margin-right: 8px;"></div> Analyzing...';
+                
+                container.innerHTML = `
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <span>AI is analyzing market conditions...</span>
+                    </div>
+                `;
+
+                console.log('🤖 Generating AI signals...');
+
+                // Call the AI signal generator API
+                const response = await fetch('/api/ai-signals/generate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    currentSignals = await response.json();
+                } else {
+                    // Mock data for demonstration
+                    currentSignals = generateMockSignals();
+                }
+
+                displaySignals();
+                
+            } catch (error) {
+                console.error('❌ Error generating signals:', error);
+                // Show mock signals on error
+                currentSignals = generateMockSignals();
+                displaySignals();
+            } finally {
+                // Reset button
+                button.disabled = false;
+                button.innerHTML = '<i class="fas fa-magic"></i> Generate New Signals';
+            }
+        }
+
+        // Display open positions
+        function displayOpenPositions() {
+            const container = document.getElementById('open-positions-content');
+            const countElement = document.getElementById('open-count');
+            
+            countElement.textContent = `${openPositions.length} positions`;
+            
+            if (openPositions.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-chart-line"></i>
+                        <h3>No Open Positions</h3>
+                        <p>Your open positions will appear here when you have active trades.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const tableHTML = `
+                <table class="positions-table">
+                    <thead>
+                        <tr>
+                            <th>Symbol</th>
+                            <th>Type</th>
+                            <th>Size</th>
+                            <th>Entry Price</th>
+                            <th>Current Price</th>
+                            <th>P&L</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${openPositions.map(position => `
+                            <tr>
+                                <td class="position-symbol">${position.symbol}</td>
+                                <td><span class="position-type ${position.type.toLowerCase()}">${position.type}</span></td>
+                                <td>${position.size}</td>
+                                <td>$${position.entryPrice.toFixed(2)}</td>
+                                <td>$${position.currentPrice.toFixed(2)}</td>
+                                <td class="position-pnl ${position.pnl >= 0 ? 'profit' : 'loss'}">
+                                    ${position.pnl >= 0 ? '+' : ''}$${position.pnl.toFixed(2)}
+                                </td>
+                                <td><span class="status-indicator active"></span>Active</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+            
+            container.innerHTML = tableHTML;
+        }
+
+        // Display closed positions
+        function displayClosedPositions() {
+            const container = document.getElementById('closed-positions-content');
+            const countElement = document.getElementById('closed-count');
+            
+            countElement.textContent = `${closedPositions.length} trades`;
+            
+            if (closedPositions.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-history"></i>
+                        <h3>No Trading History</h3>
+                        <p>Your closed positions will appear here after you complete trades.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const tableHTML = `
+                <table class="positions-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Symbol</th>
+                            <th>Type</th>
+                            <th>Size</th>
+                            <th>Entry</th>
+                            <th>Exit</th>
+                            <th>P&L</th>
+                            <th>ROI</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${closedPositions.slice(0, 10).map(position => `
+                            <tr>
+                                <td>${new Date(position.closeTime).toLocaleDateString()}</td>
+                                <td class="position-symbol">${position.symbol}</td>
+                                <td><span class="position-type ${position.type.toLowerCase()}">${position.type}</span></td>
+                                <td>${position.size}</td>
+                                <td>$${position.entryPrice.toFixed(2)}</td>
+                                <td>$${position.exitPrice.toFixed(2)}</td>
+                                <td class="position-pnl ${position.pnl >= 0 ? 'profit' : 'loss'}">
+                                    ${position.pnl >= 0 ? '+' : ''}$${position.pnl.toFixed(2)}
+                                </td>
+                                <td class="position-pnl ${position.roi >= 0 ? 'profit' : 'loss'}">
+                                    ${position.roi >= 0 ? '+' : ''}${position.roi.toFixed(2)}%
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+            
+            container.innerHTML = tableHTML;
+        }
+
+        // Display AI signals
+        function displaySignals() {
+            const container = document.getElementById('signals-container');
+            
+            if (currentSignals.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <h3>No Signals Generated</h3>
+                        <p>Try generating signals again or check market conditions.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const signalsHTML = currentSignals.map(signal => `
+                <div class="signal-card new">
+                    <div class="signal-header">
+                        <div>
+                            <span class="signal-type ${signal.signal_type.toLowerCase()}">${signal.signal_type}</span>
+                            <span class="signal-strength">${signal.strength}</span>
+                        </div>
+                        <div class="signal-confidence">${signal.confidence.toFixed(1)}%</div>
+                    </div>
+                    
+                    <div class="signal-details">
+                        <div class="signal-detail">
+                            <strong>Entry:</strong> $${signal.entry_price.toFixed(2)}
+                        </div>
+                        <div class="signal-detail">
+                            <strong>Timeframe:</strong> ${signal.timeframe}
+                        </div>
+                        <div class="signal-detail">
+                            <strong>Stop Loss:</strong> $${signal.stop_loss.toFixed(2)}
+                        </div>
+                        <div class="signal-detail">
+                            <strong>Take Profit:</strong> $${signal.take_profit.toFixed(2)}
+                        </div>
+                        <div class="signal-detail">
+                            <strong>R/R Ratio:</strong> ${signal.risk_reward_ratio.toFixed(2)}
+                        </div>
+                        <div class="signal-detail">
+                            <strong>Risk Level:</strong> ${signal.risk_level}
+                        </div>
+                    </div>
+                    
+                    <div class="signal-reasoning">
+                        <strong>Analysis:</strong> ${signal.reasoning}
+                    </div>
+                    
+                    <div class="signal-roi">
+                        <div class="roi-value">${signal.expected_roi.toFixed(2)}%</div>
+                        <div class="roi-label">Expected ROI</div>
+                    </div>
+                </div>
+            `).join('');
+
+            container.innerHTML = `<div class="signals-list">${signalsHTML}</div>`;
+        }
+
+        // Update statistics
+        function updateStats() {
+            const totalPnL = openPositions.reduce((sum, pos) => sum + pos.pnl, 0) + 
+                           closedPositions.reduce((sum, pos) => sum + pos.pnl, 0);
+            
+            const totalVolume = openPositions.reduce((sum, pos) => sum + (pos.size * pos.entryPrice), 0) + 
+                              closedPositions.reduce((sum, pos) => sum + (pos.size * pos.entryPrice), 0);
+            
+            const winningTrades = closedPositions.filter(pos => pos.pnl > 0).length;
+            const winRate = closedPositions.length > 0 ? (winningTrades / closedPositions.length * 100) : 0;
+
+            // Update DOM elements
+            const totalPnLElement = document.getElementById('total-pnl');
+            totalPnLElement.textContent = `${totalPnL >= 0 ? '+' : ''}$${totalPnL.toFixed(2)}`;
+            totalPnLElement.className = `stat-value ${totalPnL >= 0 ? 'profit' : 'loss'}`;
+
+            document.getElementById('open-positions').textContent = openPositions.length;
+            document.getElementById('win-rate').textContent = `${winRate.toFixed(1)}%`;
+            document.getElementById('total-volume').textContent = `$${totalVolume.toLocaleString()}`;
+        }
+
+        // Refresh positions
+        async function refreshPositions() {
+            console.log('🔄 Refreshing positions...');
+            await loadPositions();
+            await loadClosedTrades();
+        }
+
+        // Generate mock data for demonstration
+        function generateMockOpenPositions() {
+            return [
+                {
+                    symbol: 'XAUUSD',
+                    type: 'BUY',
+                    size: 0.1,
+                    entryPrice: 3345.50,
+                    currentPrice: 3352.75,
+                    pnl: 72.50
+                },
+                {
+                    symbol: 'XAUUSD',
+                    type: 'SELL',
+                    size: 0.05,
+                    entryPrice: 3358.20,
+                    currentPrice: 3352.75,
+                    pnl: 27.25
+                }
+            ];
+        }
+
+        function generateMockClosedPositions() {
+            const positions = [];
+            const now = Date.now();
+            
+            for (let i = 0; i < 15; i++) {
+                const entryPrice = 3300 + Math.random() * 100;
+                const exitPrice = entryPrice + (Math.random() - 0.5) * 50;
+                const size = Math.random() * 0.2 + 0.05;
+                const pnl = (exitPrice - entryPrice) * size * 100;
+                const roi = (pnl / (entryPrice * size)) * 100;
+                
+                positions.push({
+                    symbol: 'XAUUSD',
+                    type: Math.random() > 0.5 ? 'BUY' : 'SELL',
+                    size: parseFloat(size.toFixed(2)),
+                    entryPrice: parseFloat(entryPrice.toFixed(2)),
+                    exitPrice: parseFloat(exitPrice.toFixed(2)),
+                    pnl: parseFloat(pnl.toFixed(2)),
+                    roi: parseFloat(roi.toFixed(2)),
+                    closeTime: new Date(now - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString()
+                });
+            }
+            
+            return positions.sort((a, b) => new Date(b.closeTime) - new Date(a.closeTime));
+        }
+
+        function generateMockSignals() {
+            const signalTypes = ['BUY', 'SELL'];
+            const strengths = ['MODERATE', 'STRONG', 'VERY_STRONG'];
+            const timeframes = ['1H', '4H', '1D'];
+            const reasonings = [
+                'Strong bullish trend with RSI oversold conditions',
+                'Technical indicators show bearish divergence',
+                'Hammer candlestick pattern detected at support',
+                'Economic factors favor gold investment',
+                'Extreme fear in market creates contrarian opportunity',
+                'News sentiment strongly positive for precious metals'
+            ];
+            
+            const signals = [];
+            const currentPrice = 3350.75;
+            
+            for (let i = 0; i < 3; i++) {
+                const signalType = signalTypes[Math.floor(Math.random() * signalTypes.length)];
+                const strength = strengths[Math.floor(Math.random() * strengths.length)];
+                const timeframe = timeframes[i];
+                const confidence = 60 + Math.random() * 35;
+                
+                const entryPrice = currentPrice + (Math.random() - 0.5) * 10;
+                const stopLoss = signalType === 'BUY' ? entryPrice * 0.985 : entryPrice * 1.015;
+                const takeProfit = signalType === 'BUY' ? entryPrice * 1.025 : entryPrice * 0.975;
+                const riskRewardRatio = Math.abs(takeProfit - entryPrice) / Math.abs(entryPrice - stopLoss);
+                const expectedROI = (confidence / 100) * (Math.abs(takeProfit - entryPrice) / entryPrice * 100);
+                
+                signals.push({
+                    signal_type: signalType,
+                    strength: strength,
+                    confidence: confidence,
+                    entry_price: entryPrice,
+                    stop_loss: stopLoss,
+                    take_profit: takeProfit,
+                    risk_reward_ratio: riskRewardRatio,
+                    timeframe: timeframe,
+                    expected_roi: expectedROI,
+                    risk_level: confidence > 80 ? 'LOW' : confidence > 60 ? 'MEDIUM' : 'HIGH',
+                    reasoning: reasonings[Math.floor(Math.random() * reasonings.length)],
+                    timestamp: new Date().toISOString()
+                });
+            }
+            
+            return signals;
+        }
+
+        // Quick action functions
+        function generateNewSignals() {
+            generateAISignals();
+        }
+    </script>
+</body>
+</html>

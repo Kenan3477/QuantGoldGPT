@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎨 Theme Toggle Test</title>
+    <style>
+        :root {
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #2a2a2a;
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0b0;
+            --accent-primary: #00d084;
+        }
+
+        [data-theme="light"] {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f5f5f5;
+            --text-primary: #1a1a1a;
+            --text-secondary: #666666;
+            --accent-primary: #007c4a;
+        }
+
+        body {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: 'Segoe UI', Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .theme-toggle {
+            background: transparent;
+            border: 2px solid var(--accent-primary);
+            color: var(--text-primary);
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 16px;
+        }
+
+        .theme-toggle:hover {
+            background: var(--accent-primary);
+            transform: scale(1.1);
+        }
+
+        .test-section {
+            background: var(--bg-secondary);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+
+        .console-output {
+            background: #000;
+            color: #00ff00;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            white-space: pre-line;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body data-theme="dark">
+    <div class="header">
+        <h1>🎨 Theme Toggle Test</h1>
+        <button class="theme-toggle" id="theme-toggle" title="Toggle Theme">
+            <i class="fas fa-sun" id="theme-icon"></i> Toggle Theme
+        </button>
+    </div>
+
+    <div class="test-section">
+        <h2>Theme Status</h2>
+        <p>Current Theme: <span id="current-theme">dark</span></p>
+        <p>LocalStorage Theme: <span id="storage-theme">none</span></p>
+        <p>Body Data-Theme: <span id="body-theme">none</span></p>
+    </div>
+
+    <div class="test-section">
+        <h2>Console Output</h2>
+        <div class="console-output" id="console-output">Test starting...\n</div>
+    </div>
+
+    <div class="test-section">
+        <h2>Manual Test</h2>
+        <button onclick="manualTest()">🧪 Manual Theme Toggle Test</button>
+        <button onclick="clearConsole()">🧹 Clear Console</button>
+    </div>
+
+    <script>
+        let consoleOutput = document.getElementById('console-output');
+        let currentThemeSpan = document.getElementById('current-theme');
+        let storageThemeSpan = document.getElementById('storage-theme');
+        let bodyThemeSpan = document.getElementById('body-theme');
+
+        function log(message) {
+            console.log(message);
+            consoleOutput.textContent += message + '\n';
+            consoleOutput.scrollTop = consoleOutput.scrollHeight;
+            updateStatus();
+        }
+
+        function updateStatus() {
+            const bodyTheme = document.body.getAttribute('data-theme') || 'none';
+            const storageTheme = localStorage.getItem('goldgpt-theme') || 'none';
+            
+            currentThemeSpan.textContent = bodyTheme;
+            storageThemeSpan.textContent = storageTheme;
+            bodyThemeSpan.textContent = bodyTheme;
+        }
+
+        function clearConsole() {
+            consoleOutput.textContent = '';
+            log('Console cleared.');
+        }
+
+        function manualTest() {
+            log('🧪 Manual test triggered!');
+            const currentTheme = document.body.getAttribute('data-theme') || 'dark';
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            
+            log(`Switching from ${currentTheme} to ${newTheme}`);
+            document.body.setAttribute('data-theme', newTheme);
+            localStorage.setItem('goldgpt-theme', newTheme);
+            
+            updateThemeIcon(newTheme);
+            log('✅ Manual test completed!');
+        }
+
+        function updateThemeIcon(theme) {
+            const themeIcon = document.getElementById('theme-icon');
+            if (theme === 'dark') {
+                themeIcon.className = 'fas fa-sun';
+                themeIcon.style.color = '#fbbf24';
+            } else {
+                themeIcon.className = 'fas fa-moon';
+                themeIcon.style.color = '#6366f1';
+            }
+        }
+
+        // Initialize theme toggle (same code as main dashboard)
+        document.addEventListener('DOMContentLoaded', function() {
+            log('🎨 Starting theme system initialization...');
+            
+            try {
+                const themeToggle = document.getElementById('theme-toggle');
+                const themeIcon = document.getElementById('theme-icon');
+                const body = document.body;
+                
+                log(`Elements found: toggle=${!!themeToggle}, icon=${!!themeIcon}, body=${!!body}`);
+                
+                if (!themeToggle || !themeIcon) {
+                    log('❌ Theme toggle elements not found!');
+                    return;
+                }
+                
+                // Load saved theme
+                const savedTheme = localStorage.getItem('goldgpt-theme') || 'dark';
+                log(`Loading saved theme: ${savedTheme}`);
+                
+                body.setAttribute('data-theme', savedTheme);
+                updateThemeIcon(savedTheme);
+                
+                // Event listener
+                const handleThemeToggle = function(event) {
+                    log('🎨 THEME TOGGLE CLICKED!');
+                    event.preventDefault();
+                    event.stopPropagation();
+                    
+                    const currentTheme = body.getAttribute('data-theme') || 'dark';
+                    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                    
+                    log(`Switching from ${currentTheme} to ${newTheme}`);
+                    
+                    body.setAttribute('data-theme', newTheme);
+                    localStorage.setItem('goldgpt-theme', newTheme);
+                    updateThemeIcon(newTheme);
+                    
+                    log('✅ Theme switch completed!');
+                };
+                
+                themeToggle.addEventListener('click', handleThemeToggle);
+                themeToggle.onclick = handleThemeToggle;
+                
+                log('✅ Theme system initialized successfully!');
+                updateStatus();
+                
+            } catch (error) {
+                log('❌ ERROR: ' + error.message);
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,42 @@
+{
+  "timestamp": "2025-07-18T22:31:53.355192",
+  "summary": {
+    "total_tests": 10,
+    "passed_tests": 3,
+    "success_rate": 30.0
+  },
+  "detailed_results": {
+    "imports": {
+      "error": "No module named 'aiohttp'"
+    },
+    "data_source_manager": {
+      "error": "No module named 'aiohttp'"
+    },
+    "api_services": {
+      "error": "No module named 'aiohttp'"
+    },
+    "web_scraping": {
+      "error": "No module named 'aiohttp'"
+    },
+    "fallback_mechanisms": {
+      "error": "No module named 'aiohttp'"
+    },
+    "cache_management": {
+      "error": "No module named 'aiohttp'"
+    },
+    "flask_integration": {
+      "error": "Robust data system not available"
+    },
+    "frontend_integration": {
+      "static/js/robust-data-integration.js": {
+        "exists": true
+      },
+      "static/js/real-time-data-manager.js": {
+        "exists": true
+      },
+      "enhanced_routes": {
+        "available": true
+      }
+    }
+  }
+}

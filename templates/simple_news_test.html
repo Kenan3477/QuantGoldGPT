@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SIMPLE NEWS TEST</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { background: #0a0a0a; color: white; font-family: Arial, sans-serif; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .news-container { background: #1a1a1a; border: 1px solid #333; border-radius: 8px; min-height: 400px; }
+        .test-btn { background: #0066cc; color: white; border: none; padding: 10px 20px; border-radius: 4px; margin: 10px; cursor: pointer; }
+        .test-btn:hover { background: #0088ff; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 SIMPLE NEWS TEST</h1>
+        
+        <button class="test-btn" onclick="loadNews()">LOAD NEWS NOW</button>
+        <button class="test-btn" onclick="clearNews()">CLEAR</button>
+        
+        <div id="enhanced-news-container" class="news-container">
+            <div style="text-align: center; padding: 40px; color: #888;">
+                Click "LOAD NEWS NOW" to test
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function loadNews() {
+            console.log('🔄 Loading news...');
+            const container = document.getElementById('enhanced-news-container');
+            
+            // Show loading
+            container.innerHTML = `
+                <div style="text-align: center; padding: 40px; color: #fff;">
+                    <i class="fas fa-spinner fa-spin" style="font-size: 24px; color: #0088ff; margin-bottom: 12px; display: block;"></i>
+                    <span>Loading news...</span>
+                </div>
+            `;
+            
+            // Fetch news
+            fetch('/api/news/enhanced?limit=5')
+                .then(response => response.json())
+                .then(data => {
+                    console.log('📊 News data:', data);
+                    if (data.success && data.articles) {
+                        displayNews(data.articles);
+                    } else {
+                        container.innerHTML = '<div style="padding: 40px; color: #ff4444; text-align: center;">No news data</div>';
+                    }
+                })
+                .catch(error => {
+                    console.error('❌ Error:', error);
+                    container.innerHTML = '<div style="padding: 40px; color: #ff4444; text-align: center;">Error loading news</div>';
+                });
+        }
+        
+        function displayNews(articles) {
+            const container = document.getElementById('enhanced-news-container');
+            const html = `
+                <div style="padding: 20px;">
+                    <h3 style="color: #fff; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 10px;">
+                        📰 Market News (${articles.length} articles)
+                    </h3>
+                    ${articles.map(article => `
+                        <div style="background: #222; border-radius: 6px; padding: 15px; margin-bottom: 15px; border-left: 3px solid ${getSentimentColor(article.sentiment_label)};">
+                            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                                <span style="background: ${getSentimentColor(article.sentiment_label)}; color: white; padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: bold;">
+                                    ${(article.sentiment_label || 'neutral').toUpperCase()}
+                                </span>
+                                <span style="color: #888; font-size: 12px;">${article.source || 'Unknown'}</span>
+                                <span style="color: #666; font-size: 11px;">${article.time_ago || 'Recent'}</span>
+                            </div>
+                            <div style="color: #fff; font-size: 14px; font-weight: 500; margin-bottom: 8px;">
+                                ${article.title || 'No title'}
+                            </div>
+                            <div style="color: #aaa; font-size: 12px; line-height: 1.4;">
+                                ${(article.content || '').substring(0, 150)}${(article.content || '').length > 150 ? '...' : ''}
+                            </div>
+                            <div style="margin-top: 8px; display: flex; align-items: center; gap: 8px;">
+                                <span style="color: #888; font-size: 10px;">Confidence:</span>
+                                <div style="width: 60px; height: 4px; background: #333; border-radius: 2px; overflow: hidden;">
+                                    <div style="height: 100%; width: ${Math.round((article.confidence_score || 0.5) * 100)}%; background: ${(article.confidence_score || 0) >= 0.7 ? '#00ff88' : (article.confidence_score || 0) >= 0.4 ? '#ffaa00' : '#ff4444'}; border-radius: 2px;"></div>
+                                </div>
+                                <span style="color: #ccc; font-size: 10px;">${Math.round((article.confidence_score || 0.5) * 100)}%</span>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            container.innerHTML = html;
+        }
+        
+        function getSentimentColor(sentiment) {
+            switch((sentiment || '').toLowerCase()) {
+                case 'bullish': return '#00ff88';
+                case 'bearish': return '#ff4444';
+                case 'neutral': return '#ffaa00';
+                default: return '#666';
+            }
+        }
+        
+        function clearNews() {
+            document.getElementById('enhanced-news-container').innerHTML = `
+                <div style="text-align: center; padding: 40px; color: #888;">
+                    Cleared. Click "LOAD NEWS NOW" to test again.
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>

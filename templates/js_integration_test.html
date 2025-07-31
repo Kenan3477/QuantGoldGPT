@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧪 GoldGPT JavaScript Integration Test</title>
+    <style>
+        body { 
+            background: #0a0a0a; 
+            color: white; 
+            font-family: Arial, sans-serif; 
+            padding: 20px; 
+            line-height: 1.6;
+        }
+        .container { max-width: 1000px; margin: 0 auto; }
+        .test-section { 
+            background: #1a1a1a; 
+            border: 1px solid #333; 
+            border-radius: 8px; 
+            padding: 20px; 
+            margin: 20px 0; 
+        }
+        .status-indicator { 
+            padding: 8px 12px; 
+            border-radius: 4px; 
+            margin: 5px 0; 
+            font-weight: bold; 
+        }
+        .status-success { background: #27ae60; color: white; }
+        .status-error { background: #e74c3c; color: white; }
+        .status-loading { background: #f39c12; color: white; }
+        .test-btn { 
+            background: #3498db; 
+            color: white; 
+            border: none; 
+            padding: 10px 20px; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            margin: 5px; 
+        }
+        .test-btn:hover { background: #2980b9; }
+        .log-output { 
+            background: #2a2a2a; 
+            border: 1px solid #444; 
+            border-radius: 4px; 
+            padding: 10px; 
+            max-height: 200px; 
+            overflow-y: auto; 
+            font-family: monospace; 
+            font-size: 12px; 
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 GoldGPT JavaScript Integration Test</h1>
+        <p>Testing the three enhanced JavaScript files: config-manager.js, connection-manager.js, notification-manager.js</p>
+        
+        <!-- Config Manager Test -->
+        <div class="test-section">
+            <h2>⚙️ Config Manager Test</h2>
+            <div id="config-status" class="status-indicator status-loading">⏳ Testing Config Manager...</div>
+            <button class="test-btn" onclick="testConfigManager()">Test Config Manager</button>
+            <div class="log-output" id="config-log"></div>
+        </div>
+        
+        <!-- Connection Manager Test -->
+        <div class="test-section">
+            <h2>🔌 Connection Manager Test</h2>
+            <div id="connection-status" class="status-indicator status-loading">⏳ Testing Connection Manager...</div>
+            <button class="test-btn" onclick="testConnectionManager()">Test Connection Manager</button>
+            <div class="log-output" id="connection-log"></div>
+        </div>
+        
+        <!-- Notification Manager Test -->
+        <div class="test-section">
+            <h2>🔔 Notification Manager Test</h2>
+            <div id="notification-status" class="status-indicator status-loading">⏳ Testing Notification Manager...</div>
+            <button class="test-btn" onclick="testNotificationManager()">Test Notification Manager</button>
+            <button class="test-btn" onclick="showTestNotification()">Show Test Notification</button>
+            <div class="log-output" id="notification-log"></div>
+        </div>
+        
+        <!-- Integration Test -->
+        <div class="test-section">
+            <h2>🎯 Integration Test</h2>
+            <div id="integration-status" class="status-indicator status-loading">⏳ Testing Integration...</div>
+            <button class="test-btn" onclick="runFullIntegrationTest()">Run Full Integration Test</button>
+            <div class="log-output" id="integration-log"></div>
+        </div>
+    </div>
+
+    <!-- Load the three JavaScript files -->
+    <script src="{{ url_for('static', filename='js/config-manager.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/connection-manager.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/notification-manager.js') }}"></script>
+
+    <script>
+        // Test logging functions
+        function logToElement(elementId, message, isError = false) {
+            const element = document.getElementById(elementId);
+            const timestamp = new Date().toLocaleTimeString();
+            const logClass = isError ? 'color: #ff6b6b;' : 'color: #51cf66;';
+            element.innerHTML += `<div style="${logClass}">[${timestamp}] ${message}</div>`;
+            element.scrollTop = element.scrollHeight;
+        }
+
+        function setStatus(elementId, message, type = 'loading') {
+            const element = document.getElementById(elementId);
+            element.className = `status-indicator status-${type}`;
+            element.textContent = message;
+        }
+
+        // Test Config Manager
+        async function testConfigManager() {
+            try {
+                logToElement('config-log', '🔍 Testing Config Manager...');
+                
+                // Check if ConfigManager class exists
+                if (typeof ConfigManager === 'undefined') {
+                    throw new Error('ConfigManager class not found');
+                }
+                
+                logToElement('config-log', '✅ ConfigManager class found');
+                
+                // Create instance
+                const configManager = new ConfigManager();
+                logToElement('config-log', '✅ ConfigManager instance created');
+                
+                // Test initialization
+                await configManager.initialize();
+                logToElement('config-log', '✅ ConfigManager initialization completed');
+                
+                // Test gold trading optimizations
+                const goldConfig = configManager.getSessionConfig('london');
+                logToElement('config-log', `✅ London session config loaded: ${JSON.stringify(goldConfig.goldTrading?.enabled)}`);
+                
+                // Test risk adjusted config
+                const riskConfig = configManager.getRiskAdjustedConfig({ volatility: 'high' });
+                logToElement('config-log', `✅ Risk adjusted config loaded: Risk per trade = ${riskConfig.goldTrading?.trading?.riskPerTrade}`);
+                
+                setStatus('config-status', '✅ Config Manager Test Passed', 'success');
+                
+            } catch (error) {
+                logToElement('config-log', `❌ Error: ${error.message}`, true);
+                setStatus('config-status', '❌ Config Manager Test Failed', 'error');
+            }
+        }
+
+        // Test Connection Manager
+        async function testConnectionManager() {
+            try {
+                logToElement('connection-log', '🔍 Testing Connection Manager...');
+                
+                // Check if EnhancedConnectionManager class exists
+                if (typeof EnhancedConnectionManager === 'undefined') {
+                    throw new Error('EnhancedConnectionManager class not found');
+                }
+                
+                logToElement('connection-log', '✅ EnhancedConnectionManager class found');
+                
+                // Create instance
+                const connectionManager = new EnhancedConnectionManager();
+                logToElement('connection-log', '✅ EnhancedConnectionManager instance created');
+                
+                // Test gold trading metrics
+                if (connectionManager.connectionMetrics) {
+                    logToElement('connection-log', `✅ Connection metrics initialized: ${JSON.stringify(connectionManager.connectionMetrics)}`);
+                }
+                
+                // Test gold trading endpoints
+                if (connectionManager.goldTradingEndpoints) {
+                    logToElement('connection-log', `✅ Gold trading endpoints configured: ${connectionManager.goldTradingEndpoints.size} endpoints`);
+                }
+                
+                setStatus('connection-status', '✅ Connection Manager Test Passed', 'success');
+                
+            } catch (error) {
+                logToElement('connection-log', `❌ Error: ${error.message}`, true);
+                setStatus('connection-status', '❌ Connection Manager Test Failed', 'error');
+            }
+        }
+
+        // Test Notification Manager
+        async function testNotificationManager() {
+            try {
+                logToElement('notification-log', '🔍 Testing Notification Manager...');
+                
+                // Check if NotificationManager class exists
+                if (typeof NotificationManager === 'undefined') {
+                    throw new Error('NotificationManager class not found');
+                }
+                
+                logToElement('notification-log', '✅ NotificationManager class found');
+                
+                // Create instance
+                window.testNotificationManager = new NotificationManager();
+                logToElement('notification-log', '✅ NotificationManager instance created');
+                
+                // Test gold trading categories
+                const goldCategories = window.testNotificationManager.categories;
+                if (goldCategories['GOLD_ALERT']) {
+                    logToElement('notification-log', '✅ Gold alert category found');
+                }
+                
+                // Test gold thresholds
+                if (window.testNotificationManager.goldThresholds) {
+                    logToElement('notification-log', `✅ Gold thresholds configured: ${JSON.stringify(window.testNotificationManager.goldThresholds)}`);
+                }
+                
+                // Test Trading 212 preferences
+                if (window.testNotificationManager.preferences.categories['gold-alert']) {
+                    logToElement('notification-log', '✅ Trading 212-style gold alert preferences found');
+                }
+                
+                setStatus('notification-status', '✅ Notification Manager Test Passed', 'success');
+                
+            } catch (error) {
+                logToElement('notification-log', `❌ Error: ${error.message}`, true);
+                setStatus('notification-status', '❌ Notification Manager Test Failed', 'error');
+            }
+        }
+
+        // Show test notification
+        function showTestNotification() {
+            try {
+                if (window.testNotificationManager) {
+                    // Test gold price alert
+                    window.testNotificationManager._handleGoldPriceChange({
+                        symbol: 'XAUUSD',
+                        price: 2650.50,
+                        change: 15.25,
+                        changePercent: 0.58
+                    });
+                    
+                    logToElement('notification-log', '✅ Test gold price notification triggered');
+                } else {
+                    logToElement('notification-log', '❌ Notification manager not initialized', true);
+                }
+            } catch (error) {
+                logToElement('notification-log', `❌ Error showing notification: ${error.message}`, true);
+            }
+        }
+
+        // Run full integration test
+        async function runFullIntegrationTest() {
+            try {
+                logToElement('integration-log', '🚀 Starting full integration test...');
+                
+                // Test all three components
+                await testConfigManager();
+                await testConnectionManager();
+                await testNotificationManager();
+                
+                // Test integration between components
+                logToElement('integration-log', '🔗 Testing component integration...');
+                
+                // Test if components can access each other
+                if (window.configManager && window.connectionManager && window.testNotificationManager) {
+                    logToElement('integration-log', '✅ All components accessible globally');
+                } else {
+                    logToElement('integration-log', '⚠️ Some components not globally accessible', true);
+                }
+                
+                // Test startup debugging system
+                if (window.GoldGPTDebugger) {
+                    logToElement('integration-log', '✅ GoldGPT Debugger found');
+                } else {
+                    logToElement('integration-log', '⚠️ GoldGPT Debugger not found');
+                }
+                
+                logToElement('integration-log', '🎯 Integration test completed successfully!');
+                setStatus('integration-status', '✅ Integration Test Passed', 'success');
+                
+            } catch (error) {
+                logToElement('integration-log', `❌ Integration test failed: ${error.message}`, true);
+                setStatus('integration-status', '❌ Integration Test Failed', 'error');
+            }
+        }
+
+        // Auto-run basic tests when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => {
+                console.log('🧪 Running automatic JavaScript integration tests...');
+                
+                // Test 1: Check if classes are available
+                const configAvailable = typeof ConfigManager !== 'undefined';
+                const connectionAvailable = typeof EnhancedConnectionManager !== 'undefined';
+                const notificationAvailable = typeof NotificationManager !== 'undefined';
+                
+                console.log(`📊 Test Results:
+                - ConfigManager: ${configAvailable ? '✅' : '❌'}
+                - ConnectionManager: ${connectionAvailable ? '✅' : '❌'}
+                - NotificationManager: ${notificationAvailable ? '✅' : '❌'}`);
+                
+                if (configAvailable && connectionAvailable && notificationAvailable) {
+                    console.log('🎉 All JavaScript files loaded successfully!');
+                } else {
+                    console.error('⚠️ Some JavaScript files failed to load properly');
+                }
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,515 @@
+/* Advanced ML Client CSS Styles */
+/* Trading 212 inspired design for the advanced ML prediction interface */
+
+.advanced-ml-prediction {
+    background: linear-gradient(135deg, #1e1e2e 0%, #2d2d44 100%);
+    border: 1px solid #404040;
+    border-radius: 12px;
+    padding: 20px;
+    margin: 16px 0;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.advanced-ml-prediction:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+}
+
+.prediction-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #404040;
+}
+
+.prediction-header h4 {
+    color: #ffffff;
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.engine-badge {
+    background: linear-gradient(90deg, #00d4aa, #00c4aa);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 16px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    box-shadow: 0 2px 8px rgba(0, 212, 170, 0.3);
+}
+
+.prediction-content {
+    margin-bottom: 16px;
+}
+
+.price-prediction {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.price-prediction > div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.price-prediction label {
+    color: #b0b0b0;
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    letter-spacing: 0.5px;
+}
+
+.price-prediction .price {
+    color: #ffffff;
+    font-size: 20px;
+    font-weight: 700;
+    font-family: 'Courier New', monospace;
+}
+
+.price-change {
+    border: 2px solid;
+    border-radius: 8px;
+}
+
+.price-change.positive {
+    border-color: #00d4aa;
+    background: rgba(0, 212, 170, 0.1);
+}
+
+.price-change.positive span {
+    color: #00d4aa;
+}
+
+.price-change.negative {
+    border-color: #ff6b6b;
+    background: rgba(255, 107, 107, 0.1);
+}
+
+.price-change.negative span {
+    color: #ff6b6b;
+}
+
+.prediction-details {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.direction-confidence {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 16px;
+    align-items: center;
+}
+
+.direction {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 12px;
+    border-radius: 8px;
+}
+
+.direction.bullish {
+    background: rgba(0, 212, 170, 0.1);
+    border: 1px solid #00d4aa;
+}
+
+.direction.bearish {
+    background: rgba(255, 107, 107, 0.1);
+    border: 1px solid #ff6b6b;
+}
+
+.direction label {
+    color: #b0b0b0;
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+}
+
+.direction-value {
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.direction.bullish .direction-value {
+    color: #00d4aa;
+}
+
+.direction.bearish .direction-value {
+    color: #ff6b6b;
+}
+
+.confidence {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.confidence label {
+    color: #b0b0b0;
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+.confidence-value {
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.confidence-bar,
+.weight-bar {
+    width: 100%;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.confidence-fill,
+.weight-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #00d4aa, #00c4aa);
+    border-radius: 3px;
+    transition: width 0.5s ease;
+}
+
+.confidence-interval,
+.risk-management {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+}
+
+.confidence-interval {
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    text-align: center;
+}
+
+.confidence-interval label {
+    color: #b0b0b0;
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 4px;
+}
+
+.confidence-interval span {
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.stop-loss,
+.take-profit {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid;
+}
+
+.stop-loss {
+    border-color: #ff6b6b;
+    background: rgba(255, 107, 107, 0.1);
+}
+
+.take-profit {
+    border-color: #00d4aa;
+    background: rgba(0, 212, 170, 0.1);
+}
+
+.stop-loss label,
+.take-profit label {
+    color: #b0b0b0;
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+}
+
+.stop-loss-value {
+    color: #ff6b6b;
+    font-size: 16px;
+    font-weight: 700;
+    font-family: 'Courier New', monospace;
+}
+
+.take-profit-value {
+    color: #00d4aa;
+    font-size: 16px;
+    font-weight: 700;
+    font-family: 'Courier New', monospace;
+}
+
+.strategy-votes {
+    margin-top: 16px;
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.strategy-votes label {
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    display: block;
+}
+
+.votes-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.strategy-vote {
+    display: grid;
+    grid-template-columns: 1fr auto 2fr;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 0;
+}
+
+.strategy-name {
+    color: #b0b0b0;
+    font-size: 13px;
+    font-weight: 500;
+    text-transform: capitalize;
+}
+
+.strategy-weight {
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 600;
+    min-width: 45px;
+    text-align: right;
+}
+
+.prediction-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 12px;
+    border-top: 1px solid #404040;
+    margin-top: 16px;
+}
+
+.execution-time,
+.timestamp {
+    font-size: 11px;
+    color: #888;
+    font-weight: 400;
+}
+
+.execution-time span,
+.timestamp span {
+    color: #b0b0b0;
+}
+
+/* Strategy Performance Styles */
+.strategy-performance {
+    background: linear-gradient(135deg, #2d1b69 0%, #4c2885 100%);
+    border: 1px solid #6b46c1;
+    border-radius: 12px;
+    padding: 20px;
+    margin: 16px 0;
+    box-shadow: 0 8px 32px rgba(107, 70, 193, 0.2);
+    transition: all 0.3s ease;
+}
+
+.strategy-performance:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(107, 70, 193, 0.3);
+}
+
+.performance-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #6b46c1;
+}
+
+.performance-header h4 {
+    color: #ffffff;
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.total-strategies {
+    background: linear-gradient(90deg, #8b5cf6, #a855f7);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 16px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.strategies-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.strategy-item {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    border-radius: 8px;
+    padding: 16px;
+    transition: all 0.3s ease;
+}
+
+.strategy-item:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(139, 92, 246, 0.5);
+}
+
+.strategy-name {
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    text-transform: capitalize;
+}
+
+.strategy-metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 12px;
+}
+
+.metric {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.metric label {
+    color: #b0b0b0;
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+.weight-value,
+.accuracy-value,
+.prediction-count {
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .advanced-ml-prediction,
+    .strategy-performance {
+        padding: 16px;
+        margin: 12px 0;
+    }
+    
+    .price-prediction {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    
+    .direction-confidence {
+        grid-template-columns: 1fr;
+    }
+    
+    .confidence-interval,
+    .risk-management {
+        grid-template-columns: 1fr;
+    }
+    
+    .strategy-vote {
+        grid-template-columns: 1fr;
+        gap: 8px;
+        text-align: center;
+    }
+    
+    .prediction-meta {
+        flex-direction: column;
+        gap: 8px;
+        text-align: center;
+    }
+}
+
+/* Animation for loading states */
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+.loading {
+    animation: pulse 1.5s infinite;
+}
+
+/* Success/Error states */
+.prediction-success {
+    border-left: 4px solid #00d4aa;
+}
+
+.prediction-error {
+    border-left: 4px solid #ff6b6b;
+    background: rgba(255, 107, 107, 0.05);
+}
+
+.prediction-error .prediction-header h4 {
+    color: #ff6b6b;
+}
+
+/* Tooltip styles for additional information */
+.tooltip {
+    position: relative;
+    cursor: help;
+}
+
+.tooltip::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #333;
+    color: white;
+    padding: 6px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    z-index: 1000;
+}
+
+.tooltip:hover::after {
+    opacity: 1;
+    visibility: visible;
+}

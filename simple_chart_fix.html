@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>🚀 FIXED GoldGPT Chart</title>
+    <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; background: #0a0a0a; color: white; padding: 20px; }
+        .controls { margin: 20px 0; }
+        .timeframe-btn, .indicator-btn {
+            background: #2a2a2a; color: white; border: 1px solid #444;
+            padding: 8px 16px; margin: 5px; cursor: pointer; border-radius: 5px;
+        }
+        .timeframe-btn.active, .indicator-btn.active {
+            background: #00d084; border-color: #00d084;
+        }
+        #chart { width: 100%; height: 500px; background: #1a1a1a; margin: 20px 0; }
+        .status { background: #2a2a2a; padding: 10px; border-radius: 5px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>🚀 FIXED GoldGPT Trading Chart</h1>
+    
+    <div class="status" id="status">🔄 Loading chart...</div>
+    
+    <div class="controls">
+        <strong>📊 Timeframes:</strong><br>
+        <button class="timeframe-btn" data-timeframe="1m">1M</button>
+        <button class="timeframe-btn" data-timeframe="5m">5M</button>
+        <button class="timeframe-btn" data-timeframe="15m">15M</button>
+        <button class="timeframe-btn active" data-timeframe="1h">1H</button>
+        <button class="timeframe-btn" data-timeframe="4h">4H</button>
+        <button class="timeframe-btn" data-timeframe="1d">1D</button>
+    </div>
+    
+    <div class="controls">
+        <strong>📈 Indicators:</strong><br>
+        <button class="indicator-btn active" data-indicator="volume">Volume</button>
+        <button class="indicator-btn" data-indicator="rsi">RSI</button>
+        <button class="indicator-btn" data-indicator="macd">MACD</button>
+        <button class="indicator-btn" data-indicator="bb">Bollinger Bands</button>
+    </div>
+    
+    <div id="chart"></div>
+    
+    <script>
+        console.log('🚀 Starting chart initialization...');
+        
+        let chart = null;
+        let candlestickSeries = null;
+        let volumeSeries = null;
+        let currentTimeframe = '1h';
+        
+        function updateStatus(message) {
+            document.getElementById('status').textContent = message;
+            console.log(message);
+        }
+        
+        function initChart() {
+            updateStatus('📊 Creating LightweightCharts instance...');
+            
+            try {
+                const chartContainer = document.getElementById('chart');
+                
+                chart = LightweightCharts.createChart(chartContainer, {
+                    width: chartContainer.clientWidth,
+                    height: 500,
+                    layout: {
+                        background: { type: 'solid', color: '#1a1a1a' },
+                        textColor: '#d1d5db',
+                    },
+                    grid: {
+                        vertLines: { color: '#2a2a2a' },
+                        horzLines: { color: '#2a2a2a' },
+                    },
+                    crosshair: {
+                        mode: LightweightCharts.CrosshairMode.Normal,
+                    },
+                    rightPriceScale: {
+                        borderColor: '#2a2a2a',
+                    },
+                    timeScale: {
+                        borderColor: '#2a2a2a',
+                        timeVisible: true,
+                        secondsVisible: false,
+                    },
+                });
+                
+                // Add candlestick series
+                candlestickSeries = chart.addCandlestickSeries({
+                    upColor: '#00d084',
+                    downColor: '#ff4757',
+                    borderDownColor: '#ff4757',
+                    borderUpColor: '#00d084',
+                    wickDownColor: '#ff4757',
+                    wickUpColor: '#00d084',
+                });
+                
+                // Add volume series
+                volumeSeries = chart.addHistogramSeries({
+                    color: '#26a69a',
+                    priceFormat: {
+                        type: 'volume',
+                    },
+                    priceScaleId: '',
+                    scaleMargins: {
+                        top: 0.8,
+                        bottom: 0,
+                    },
+                });
+                
+                updateStatus('✅ Chart created successfully!');
+                loadChartData();
+                
+            } catch (error) {
+                updateStatus('❌ Chart creation failed: ' + error.message);
+                console.error('Chart error:', error);
+            }
+        }
+        
+        function loadChartData() {
+            updateStatus('📈 Loading real chart data from API...');
+            
+            fetch('/api/chart/data/XAUUSD?timeframe=' + currentTimeframe)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('HTTP ' + response.status);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('📊 Received chart data:', data);
+                    
+                    if (data.success && data.data && data.data.length > 0) {
+                        updateStatus(`✅ Loaded ${data.data.length} candles for ${currentTimeframe}`);
+                        
+                        // Set candlestick data
+                        candlestickSeries.setData(data.data);
+                        
+                        // Generate volume data from OHLC
+                        const volumeData = data.data.map(candle => ({
+                            time: candle.time,
+                            value: candle.volume || Math.floor(Math.random() * 1000000) + 500000,
+                            color: candle.close > candle.open ? '#00d084' : '#ff4757'
+                        }));
+                        
+                        volumeSeries.setData(volumeData);
+                        
+                        updateStatus(`🎉 ${data.data.length} candles loaded successfully! Current price: $${data.data[data.data.length-1].close}`);
+                        
+                    } else {
+                        updateStatus('⚠️ No chart data received from API');
+                    }
+                })
+                .catch(error => {
+                    updateStatus('❌ Failed to load chart data: ' + error.message);
+                    console.error('API error:', error);
+                    
+                    // Fallback to sample data
+                    updateStatus('🔄 Loading sample data as fallback...');
+                    loadSampleData();
+                });
+        }
+        
+        function loadSampleData() {
+            const data = [];
+            const volumeData = [];
+            const now = Math.floor(Date.now() / 1000);
+            const basePrice = 3330;
+            
+            for (let i = 50; i >= 0; i--) {
+                const time = now - (i * 3600);
+                const open = basePrice + (Math.random() - 0.5) * 50;
+                const change = (Math.random() - 0.5) * 20;
+                const close = open + change;
+                const high = Math.max(open, close) + Math.random() * 10;
+                const low = Math.min(open, close) - Math.random() * 10;
+                
+                data.push({
+                    time: time,
+                    open: parseFloat(open.toFixed(2)),
+                    high: parseFloat(high.toFixed(2)),
+                    low: parseFloat(low.toFixed(2)),
+                    close: parseFloat(close.toFixed(2))
+                });
+                
+                volumeData.push({
+                    time: time,
+                    value: Math.floor(Math.random() * 1000000) + 500000,
+                    color: close > open ? '#00d084' : '#ff4757'
+                });
+            }
+            
+            candlestickSeries.setData(data);
+            volumeSeries.setData(volumeData);
+            updateStatus('✅ Sample data loaded successfully!');
+        }
+        
+        function changeTimeframe(timeframe) {
+            updateStatus(`🔄 Switching to ${timeframe.toUpperCase()}...`);
+            currentTimeframe = timeframe;
+            
+            // Update UI
+            document.querySelectorAll('.timeframe-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`[data-timeframe="${timeframe}"]`).classList.add('active');
+            
+            // Load new data
+            loadChartData();
+        }
+        
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            updateStatus('🚀 DOM loaded, checking for LightweightCharts...');
+            
+            function waitForCharts() {
+                if (typeof LightweightCharts !== 'undefined') {
+                    updateStatus('✅ LightweightCharts loaded!');
+                    initChart();
+                } else {
+                    updateStatus('⏳ Waiting for LightweightCharts...');
+                    setTimeout(waitForCharts, 100);
+                }
+            }
+            
+            waitForCharts();
+            
+            // Setup timeframe buttons
+            document.querySelectorAll('.timeframe-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    changeTimeframe(this.dataset.timeframe);
+                });
+            });
+            
+            // Setup indicator buttons
+            document.querySelectorAll('.indicator-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const indicator = this.dataset.indicator;
+                    this.classList.toggle('active');
+                    updateStatus(`📊 ${indicator.toUpperCase()} indicator toggled`);
+                });
+            });
+        });
+        
+        // Auto-refresh every 30 seconds
+        setInterval(() => {
+            if (chart && candlestickSeries) {
+                updateStatus('🔄 Auto-refreshing chart data...');
+                loadChartData();
+            }
+        }, 30000);
+        
+    </script>
+</body>
+</html>

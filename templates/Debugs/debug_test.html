@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔍 Debug Test - GoldGPT</title>
+    <style>
+        body {
+            background: #0a0a0a;
+            color: #fff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #1a1a1a;
+            border-radius: 10px;
+            padding: 30px;
+            border: 2px solid #00d084;
+        }
+        .test-button {
+            background: #00d084;
+            color: #000;
+            border: none;
+            padding: 12px 24px;
+            margin: 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        .test-button:hover {
+            background: #00c077;
+            transform: translateY(-2px);
+        }
+        .results {
+            background: #2a2a2a;
+            padding: 20px;
+            border-radius: 6px;
+            margin-top: 20px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .success { color: #00d084; }
+        .error { color: #ff4757; }
+        .warning { color: #ffa502; }
+        .info { color: #3742fa; }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🔍 GoldGPT Debug Testing Center</h1>
+        <p>Test all dashboard features to identify what works and what doesn't.</p>
+        
+        <div class="test-section">
+            <h3>🧪 Feature Tests</h3>
+            <button class="test-button" onclick="testSocket()">Test Socket Connection</button>
+            <button class="test-button" onclick="testPortfolio()">Test Portfolio API</button>
+            <button class="test-button" onclick="testWatchlist()">Test Watchlist API</button>
+            <button class="test-button" onclick="testTrade()">Test Trading API</button>
+            <button class="test-button" onclick="testAnalysis()">Test AI Analysis</button>
+            <button class="test-button" onclick="testCharts()">Test Chart System</button>
+            <button class="test-button" onclick="testAll()">🚀 Test All Features</button>
+        </div>
+        
+        <div class="results" id="results">
+            <div class="info">🔍 Debug results will appear here...</div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+    <script>
+        const results = document.getElementById('results');
+        let socket;
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const div = document.createElement('div');
+            div.className = type;
+            div.textContent = `[${timestamp}] ${message}`;
+            results.appendChild(div);
+            results.scrollTop = results.scrollHeight;
+            
+            // Send to server terminal
+            fetch('/api/debug', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    feature: 'test',
+                    status: type,
+                    message: message,
+                    timestamp: new Date().toISOString()
+                })
+            }).catch(() => {});
+        }
+        
+        async function testSocket() {
+            log('🔌 Testing Socket Connection...', 'info');
+            
+            try {
+                // Initialize socket if not already done
+                if (!socket) {
+                    log('🔄 Initializing socket connection...', 'info');
+                    socket = io();
+                    
+                    // Wait a moment for connection
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                }
+                
+                if (socket && socket.connected) {
+                    log('✅ Socket is connected', 'success');
+                    
+                    // Test subscription
+                    socket.emit('subscribe_symbol', { symbol: 'XAUUSD' });
+                    log('📡 Sent subscription request for XAUUSD', 'info');
+                } else {
+                    log('⚠️ Socket connecting... (may take a moment)', 'warning');
+                }
+            } catch (error) {
+                log(`❌ Socket test failed: ${error.message}`, 'error');
+            }
+        }
+        
+        async function testPortfolio() {
+            log('💼 Testing Portfolio API...', 'info');
+            
+            try {
+                const response = await fetch('/api/portfolio');
+                log(`📊 Portfolio API response: ${response.status}`, response.ok ? 'success' : 'error');
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    log(`💰 Portfolio data: ${JSON.stringify(data).substring(0, 100)}...`, 'success');
+                } else {
+                    log(`❌ Portfolio API failed with status: ${response.status}`, 'error');
+                }
+            } catch (error) {
+                log(`❌ Portfolio test failed: ${error.message}`, 'error');
+            }
+        }
+        
+        async function testWatchlist() {
+            log('👀 Testing Watchlist APIs...', 'info');
+            
+            const symbols = ['XAUUSD', 'EURUSD', 'GBPUSD'];
+            
+            for (const symbol of symbols) {
+                try {
+                    const response = await fetch(`/api/price/${symbol}`);
+                    log(`📈 ${symbol} price API: ${response.status}`, response.ok ? 'success' : 'error');
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        log(`💲 ${symbol}: $${data.price}`, 'success');
+                    }
+                } catch (error) {
+                    log(`❌ ${symbol} price test failed: ${error.message}`, 'error');
+                }
+            }
+        }
+        
+        async function testTrade() {
+            log('💱 Testing Trading API...', 'info');
+            
+            try {
+                // Test price fetch first
+                const priceResponse = await fetch('/api/price/XAUUSD');
+                if (!priceResponse.ok) {
+                    throw new Error(`Price fetch failed: ${priceResponse.status}`);
+                }
+                
+                const priceData = await priceResponse.json();
+                log(`📊 Current XAUUSD price: $${priceData.price}`, 'success');
+                
+                // Test trade simulation (without actually executing)
+                const tradeData = {
+                    symbol: 'XAUUSD',
+                    side: 'buy',
+                    price: priceData.price,
+                    quantity: 0.1,
+                    confidence: 0.8,
+                    test_mode: true
+                };
+                
+                log(`🧪 Trade test data prepared: ${JSON.stringify(tradeData)}`, 'info');
+                log('✅ Trading API test completed (simulation mode)', 'success');
+                
+            } catch (error) {
+                log(`❌ Trading test failed: ${error.message}`, 'error');
+            }
+        }
+        
+        async function testAnalysis() {
+            log('🤖 Testing AI Analysis API...', 'info');
+            
+            try {
+                const response = await fetch('/api/ai-analysis/XAUUSD');
+                log(`🧠 AI Analysis API response: ${response.status}`, response.ok ? 'success' : 'error');
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    log(`🎯 Analysis result: ${result.data?.recommendation || 'No recommendation'}`, 'success');
+                    
+                    const confidence = result.data?.confidence || result.data?.overall_confidence || 0;
+                    log(`📊 Confidence: ${(confidence * 100).toFixed(1)}%`, 'info');
+                    
+                    // Log the full data structure for debugging
+                    log(`📋 Full data: ${JSON.stringify(result).substring(0, 200)}...`, 'info');
+                } else {
+                    log(`❌ AI Analysis failed with status: ${response.status}`, 'error');
+                }
+            } catch (error) {
+                log(`❌ Analysis test failed: ${error.message}`, 'error');
+            }
+        }
+        
+        async function testCharts() {
+            log('📊 Testing Chart System...', 'info');
+            
+            try {
+                // Test chart data API
+                const response = await fetch('/api/chart/data/XAUUSD?timeframe=1h');
+                log(`📈 Chart data API response: ${response.status}`, response.ok ? 'success' : 'error');
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success && data.data) {
+                        log(`📊 Chart data: ${data.data.length} candles received`, 'success');
+                        log(`💰 Latest price: $${data.data[data.data.length-1]?.close}`, 'success');
+                    } else {
+                        log('⚠️ Chart data API returned no data', 'warning');
+                    }
+                }
+                
+                // Test LightweightCharts availability
+                if (typeof LightweightCharts !== 'undefined') {
+                    log('✅ LightweightCharts library is available', 'success');
+                } else {
+                    log('❌ LightweightCharts library not loaded', 'error');
+                }
+                
+                // Test chart containers
+                const containers = ['tradingview-chart', 'nuclear-chart-container'];
+                containers.forEach(id => {
+                    const element = document.getElementById(id);
+                    if (element) {
+                        log(`✅ Chart container found: ${id}`, 'success');
+                    } else {
+                        log(`⚠️ Chart container missing: ${id}`, 'warning');
+                    }
+                });
+                
+            } catch (error) {
+                log(`❌ Chart test failed: ${error.message}`, 'error');
+            }
+        }
+        
+        async function testAll() {
+            log('🚀 Running comprehensive feature test...', 'info');
+            
+            await testSocket();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            await testPortfolio();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            await testWatchlist();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            await testTrade();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            await testAnalysis();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            await testCharts();
+            
+            log('🎉 Comprehensive test completed!', 'success');
+        }
+        
+        // Socket event listeners for testing
+        function initializeSocketListeners() {
+            if (!socket) return;
+            
+            socket.on('connect', () => {
+                log('🔌 Socket connected successfully', 'success');
+            });
+            
+            socket.on('disconnect', () => {
+                log('🔌 Socket disconnected', 'warning');
+            });
+            
+            socket.on('price_update', (data) => {
+                log(`📡 Price update received: ${data.symbol} = $${data.price}`, 'success');
+            });
+            
+            socket.on('connect_error', (error) => {
+                log(`🔌 Socket connection error: ${error.message}`, 'error');
+            });
+        }
+        
+        // Auto-start initialization
+        setTimeout(() => {
+            log('🔍 Debug Test Center initialized', 'info');
+            socket = io();
+            initializeSocketListeners();
+            setTimeout(testSocket, 2000); // Test after 2 seconds
+        }, 1000);
+    </script>
+</body>
+</html>

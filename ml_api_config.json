@@ -1,0 +1,39 @@
+{
+    "prediction_timeframes": [
+        "5min",
+        "15min",
+        "1h",
+        "4h",
+        "24h"
+    ],
+    "prediction_schedule_interval": 300,
+    "validation_schedule_interval": 1800,
+    "model_retrain_interval": 3600,
+    "confidence_threshold": 0.6,
+    "feature_importance_threshold": 0.05,
+    "learning_rate": 0.01,
+    "max_predictions_per_minute": 10,
+    "websocket_update_interval": 30,
+    "data_sources": {
+        "technical": {
+            "enabled": true,
+            "weight": 0.3
+        },
+        "sentiment": {
+            "enabled": true,
+            "weight": 0.25
+        },
+        "macro": {
+            "enabled": true,
+            "weight": 0.25
+        },
+        "pattern": {
+            "enabled": true,
+            "weight": 0.1
+        },
+        "momentum": {
+            "enabled": true,
+            "weight": 0.1
+        }
+    }
+}

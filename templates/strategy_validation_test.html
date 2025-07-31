@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Strategy Validation Link Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #0a0e1a;
+            color: white;
+        }
+        .test-button {
+            padding: 15px 30px;
+            margin: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 8px;
+            background: #00d4aa;
+            color: #000;
+            display: block;
+            width: 300px;
+        }
+        .test-button:hover {
+            background: #64ffda;
+        }
+    </style>
+</head>
+<body>
+    <h1>🛡️ Strategy Validation Link Test</h1>
+    
+    <p>Testing different ways to navigate to the Strategy Validation page:</p>
+    
+    <!-- Test 1: Regular link -->
+    <a href="/strategy-validation" class="test-button">Test 1: Regular Link</a>
+    
+    <!-- Test 2: Button with onclick -->
+    <button class="test-button" onclick="window.location.href='/strategy-validation'">
+        Test 2: Button with onclick
+    </button>
+    
+    <!-- Test 3: Button with window.open -->
+    <button class="test-button" onclick="window.open('/strategy-validation', '_self')">
+        Test 3: Button with window.open
+    </button>
+    
+    <!-- Test 4: Back to Dashboard -->
+    <button class="test-button" onclick="window.location.href='/dashboard'">
+        Test 4: Back to Dashboard
+    </button>
+    
+    <!-- Test 5: JavaScript navigation after delay -->
+    <button class="test-button" onclick="setTimeout(() => { console.log('Navigating...'); window.location.href='/strategy-validation'; }, 100)">
+        Test 5: Delayed Navigation
+    </button>
+    
+    <div style="margin-top: 20px; padding: 10px; background: rgba(255,255,255,0.1); border-radius: 8px;">
+        <p><strong>Current URL:</strong> <span id="currentUrl"></span></p>
+        <p><strong>Test Results:</strong> Check browser console for logs</p>
+    </div>
+    
+    <script>
+        document.getElementById('currentUrl').textContent = window.location.href;
+        console.log('🔍 Strategy Validation Test Page Loaded');
+        console.log('📍 Current URL:', window.location.href);
+    </script>
+</body>
+</html>

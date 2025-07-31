@@ -1,0 +1,147 @@
+{
+  "summary": {
+    "total_tests": 12,
+    "passed": 0,
+    "success_rate": "0.0%",
+    "total_duration": "135.288s"
+  },
+  "api_results": {
+    "/predictions": {
+      "status": "error",
+      "error": "HTTPConnectionPool(host='localhost', port=5000): Read timed out. (read timeout=10)"
+    },
+    "/performance": {
+      "status": "error",
+      "error": "HTTPConnectionPool(host='localhost', port=5000): Read timed out. (read timeout=10)"
+    },
+    "/feature-importance": {
+      "status": "error",
+      "error": "HTTPConnectionPool(host='localhost', port=5000): Read timed out. (read timeout=10)"
+    },
+    "/refresh-predictions": {
+      "status": "error",
+      "error": "HTTPConnectionPool(host='localhost', port=5000): Read timed out. (read timeout=10)"
+    },
+    "/market-analysis": {
+      "status": "error",
+      "error": "HTTPConnectionPool(host='localhost', port=5000): Read timed out. (read timeout=10)"
+    },
+    "/learning-data": {
+      "status": "error",
+      "error": "HTTPConnectionPool(host='localhost', port=5000): Read timed out. (read timeout=10)"
+    },
+    "/performance-metrics": {
+      "status": "error",
+      "error": "HTTPConnectionPool(host='localhost', port=5000): Read timed out. (read timeout=10)"
+    }
+  },
+  "websocket_results": {
+    "connection_error": "HTTPConnectionPool(host='localhost', port=5000): Read timed out. (read timeout=5)"
+  },
+  "frontend_results": {
+    "dashboard_template": {
+      "status": "error",
+      "error": "HTTPConnectionPool(host='localhost', port=5000): Read timed out. (read timeout=10)"
+    },
+    "/static/css/advanced-ml-dashboard-new.css": {
+      "status": "error",
+      "error": "HTTPConnectionPool(host='localhost', port=5000): Read timed out. (read timeout=10)"
+    },
+    "/static/js/advanced-ml-dashboard.js": {
+      "status": "error",
+      "error": "HTTPConnectionPool(host='localhost', port=5000): Read timed out. (read timeout=10)"
+    }
+  },
+  "performance_results": {
+    "api_performance": {
+      "status": "error",
+      "error": "HTTPConnectionPool(host='localhost', port=5000): Read timed out. (read timeout=5)"
+    }
+  },
+  "test_details": [
+    {
+      "test": "Multi-timeframe Predictions API",
+      "success": false,
+      "details": "HTTPConnectionPool(host='localhost', port=5000): Read timed out. (read timeout=10)",
+      "duration": "12.170s",
+      "timestamp": "2025-07-22T05:47:16.464831"
+    },
+    {
+      "test": "Performance Metrics API",
+      "success": false,
+      "details": "HTTPConnectionPool(host='localhost', port=5000): Read timed out. (read timeout=10)",
+      "duration": "12.085s",
+      "timestamp": "2025-07-22T05:47:28.557286"
+    },
+    {
+      "test": "Feature Importance API",
+      "success": false,
+      "details": "HTTPConnectionPool(host='localhost', port=5000): Read timed out. (read timeout=10)",
+      "duration": "12.107s",
+      "timestamp": "2025-07-22T05:47:40.666495"
+    },
+    {
+      "test": "Refresh Predictions API",
+      "success": false,
+      "details": "HTTPConnectionPool(host='localhost', port=5000): Read timed out. (read timeout=10)",
+      "duration": "12.104s",
+      "timestamp": "2025-07-22T05:47:52.772987"
+    },
+    {
+      "test": "Market Analysis API",
+      "success": false,
+      "details": "HTTPConnectionPool(host='localhost', port=5000): Read timed out. (read timeout=10)",
+      "duration": "12.109s",
+      "timestamp": "2025-07-22T05:48:04.885936"
+    },
+    {
+      "test": "Learning Data API",
+      "success": false,
+      "details": "HTTPConnectionPool(host='localhost', port=5000): Read timed out. (read timeout=10)",
+      "duration": "12.093s",
+      "timestamp": "2025-07-22T05:48:16.982108"
+    },
+    {
+      "test": "System Performance API",
+      "success": false,
+      "details": "HTTPConnectionPool(host='localhost', port=5000): Read timed out. (read timeout=10)",
+      "duration": "12.111s",
+      "timestamp": "2025-07-22T05:48:29.096015"
+    },
+    {
+      "test": "WebSocket Connection",
+      "success": false,
+      "details": "HTTPConnectionPool(host='localhost', port=5000): Read timed out. (read timeout=5)",
+      "duration": "0.000s",
+      "timestamp": "2025-07-22T05:48:36.211937"
+    },
+    {
+      "test": "Dashboard Template",
+      "success": false,
+      "details": "HTTPConnectionPool(host='localhost', port=5000): Read timed out. (read timeout=10)",
+      "duration": "12.100s",
+      "timestamp": "2025-07-22T05:48:48.315762"
+    },
+    {
+      "test": "Dashboard CSS File",
+      "success": false,
+      "details": "HTTPConnectionPool(host='localhost', port=5000): Read timed out. (read timeout=10)",
+      "duration": "12.093s",
+      "timestamp": "2025-07-22T05:49:00.410882"
+    },
+    {
+      "test": "Dashboard JavaScript File",
+      "success": false,
+      "details": "HTTPConnectionPool(host='localhost', port=5000): Read timed out. (read timeout=10)",
+      "duration": "12.066s",
+      "timestamp": "2025-07-22T05:49:12.478954"
+    },
+    {
+      "test": "API Performance Benchmark",
+      "success": false,
+      "details": "HTTPConnectionPool(host='localhost', port=5000): Read timed out. (read timeout=5)",
+      "duration": "0.000s",
+      "timestamp": "2025-07-22T05:49:19.565614"
+    }
+  ]
+}

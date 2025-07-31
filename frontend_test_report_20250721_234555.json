@@ -1,0 +1,96 @@
+{
+  "timestamp": "2025-07-21T23:45:55.825997",
+  "summary": {
+    "total_tests": 14,
+    "passed": 5,
+    "failed": 5,
+    "warnings": 4,
+    "success_rate": 35.714285714285715
+  },
+  "test_results": [
+    {
+      "timestamp": "2025-07-21T23:45:30.547166",
+      "test_name": "Dashboard Accessibility",
+      "status": "PASS",
+      "details": "All required elements present (Response: 200)"
+    },
+    {
+      "timestamp": "2025-07-21T23:45:32.732806",
+      "test_name": "Static Asset /static/css/advanced-ml-dashboard.css",
+      "status": "PASS",
+      "details": "Loaded successfully (10077 bytes)"
+    },
+    {
+      "timestamp": "2025-07-21T23:45:34.820815",
+      "test_name": "Static Asset /static/js/advanced-ml-dashboard.js",
+      "status": "PASS",
+      "details": "Loaded successfully (44560 bytes)"
+    },
+    {
+      "timestamp": "2025-07-21T23:45:36.905440",
+      "test_name": "Static Asset /static/css/advanced-ml-dashboard-new.css",
+      "status": "PASS",
+      "details": "Loaded successfully (27052 bytes)"
+    },
+    {
+      "timestamp": "2025-07-21T23:45:38.974122",
+      "test_name": "API Endpoint /api/advanced-ml/status",
+      "status": "FAIL",
+      "details": "Endpoint not found - Advanced ML API may not be integrated"
+    },
+    {
+      "timestamp": "2025-07-21T23:45:41.039592",
+      "test_name": "API Endpoint /api/advanced-ml/predictions",
+      "status": "FAIL",
+      "details": "Endpoint not found - Advanced ML API may not be integrated"
+    },
+    {
+      "timestamp": "2025-07-21T23:45:43.113198",
+      "test_name": "API Endpoint /api/advanced-ml/accuracy-stats",
+      "status": "FAIL",
+      "details": "Endpoint not found - Advanced ML API may not be integrated"
+    },
+    {
+      "timestamp": "2025-07-21T23:45:45.195202",
+      "test_name": "API Endpoint /api/advanced-ml/feature-importance",
+      "status": "FAIL",
+      "details": "Endpoint not found - Advanced ML API may not be integrated"
+    },
+    {
+      "timestamp": "2025-07-21T23:45:47.274726",
+      "test_name": "API Endpoint /api/advanced-ml/health",
+      "status": "WARNING",
+      "details": "Response: {'api_version': '1.0', 'engine_available': False, 'prediction_function_available': True, 'status': 'healthy', 'strategies_count': 0, 'timestamp': '2025-07-21T22:45:47.272721+00:00'}"
+    },
+    {
+      "timestamp": "2025-07-21T23:45:47.599966",
+      "test_name": "WebSocket Connection",
+      "status": "FAIL",
+      "details": "Connection failed: Client.connect() got an unexpected keyword argument 'timeout'"
+    },
+    {
+      "timestamp": "2025-07-21T23:45:49.654265",
+      "test_name": "JavaScript Integration",
+      "status": "WARNING",
+      "details": "Limited JS components: socket.io"
+    },
+    {
+      "timestamp": "2025-07-21T23:45:51.700409",
+      "test_name": "Responsive Design",
+      "status": "WARNING",
+      "details": "Limited responsive indicators: viewport"
+    },
+    {
+      "timestamp": "2025-07-21T23:45:53.771642",
+      "test_name": "Trading212 Design System",
+      "status": "PASS",
+      "details": "Found design elements: 7/7"
+    },
+    {
+      "timestamp": "2025-07-21T23:45:55.823012",
+      "test_name": "Dashboard Performance",
+      "status": "WARNING",
+      "details": "Slow load time: 2.05s, Size: 10,507 bytes"
+    }
+  ]
+}

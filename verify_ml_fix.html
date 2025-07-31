@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>✅ ML Predictions Fix Verification</title>
+    <style>
+        body { 
+            font-family: monospace; 
+            background: #0a0a0a; 
+            color: #00ff00; 
+            padding: 20px; 
+            margin: 0; 
+        }
+        .status { 
+            background: #1a1a1a; 
+            border: 2px solid #333; 
+            border-radius: 8px; 
+            padding: 15px; 
+            margin: 10px 0; 
+        }
+        .success { border-color: #00d084; color: #00d084; }
+        .error { border-color: #ff4757; color: #ff4757; }
+        .warning { border-color: #ffa502; color: #ffa502; }
+        button { 
+            background: #333; 
+            color: #00ff00; 
+            border: 1px solid #666; 
+            padding: 12px 24px; 
+            margin: 10px 5px; 
+            cursor: pointer; 
+            border-radius: 4px; 
+            font-size: 14px;
+        }
+        button:hover { background: #555; }
+        pre { 
+            background: #000; 
+            padding: 15px; 
+            border-radius: 4px; 
+            overflow-x: auto; 
+            font-size: 12px;
+        }
+        .dashboard-window {
+            width: 90%;
+            height: 600px;
+            border: 2px solid #333;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>✅ ML Predictions Fix - Final Verification</h1>
+    <p>This page will verify that your dashboard is now showing REAL ML predictions instead of fake data.</p>
+    
+    <button onclick="checkCurrentAPI()">📊 Check Current ML API</button>
+    <button onclick="openDashboardInFrame()">🖥️ Load Dashboard</button>
+    <button onclick="injectEmergencyFix()">🚨 Force Emergency Fix</button>
+    <button onclick="comparePredictions()">🔍 Compare Real vs Dashboard</button>
+    
+    <div id="results"></div>
+    
+    <iframe id="dashboardFrame" class="dashboard-window" style="display: none;"></iframe>
+
+    <script>
+        const results = document.getElementById('results');
+        let currentMLData = null;
+        
+        function addResult(message, type = 'info') {
+            const div = document.createElement('div');
+            div.className = `status ${type}`;
+            div.innerHTML = `<pre>${new Date().toLocaleTimeString()}: ${message}</pre>`;
+            results.appendChild(div);
+            console.log(message);
+        }
+
+        async function checkCurrentAPI() {
+            addResult('📊 Fetching current ML API data...', 'info');
+            
+            try {
+                const response = await fetch('/api/ml-predictions/XAUUSD');
+                const data = await response.json();
+                
+                if (data.success && data.predictions) {
+                    currentMLData = data;
+                    addResult(`✅ ML API Working! Current Price: $${data.current_price}`, 'success');
+                    
+                    data.predictions.forEach((pred, i) => {
+                        const timeframes = ['1H', '4H', '1D'];
+                        const tf = timeframes[i] || pred.timeframe;
+                        const change = pred.change_percent;
+                        const price = Math.round(pred.predicted_price);
+                        const conf = Math.round(pred.confidence * 100);
+                        const direction = change >= 0 ? '📈' : '📉';
+                        
+                        addResult(`${tf}: ${change.toFixed(3)}% ($${price}) - ${conf}% ${direction}`, 
+                                change < 0 ? 'error' : 'success');
+                    });
+                } else {
+                    addResult('❌ ML API returned invalid data', 'error');
+                    addResult(JSON.stringify(data, null, 2), 'error');
+                }
+            } catch (error) {
+                addResult(`❌ ML API Error: ${error.message}`, 'error');
+            }
+        }
+
+        function openDashboardInFrame() {
+            addResult('🖥️ Loading dashboard in frame...', 'info');
+            const frame = document.getElementById('dashboardFrame');
+            frame.src = '/';
+            frame.style.display = 'block';
+            
+            frame.onload = () => {
+                addResult('✅ Dashboard loaded! Check the ML Predictions section', 'success');
+                setTimeout(checkDashboardValues, 3000);
+            };
+        }
+
+        function checkDashboardValues() {
+            try {
+                const frame = document.getElementById('dashboardFrame');
+                const frameDoc = frame.contentDocument || frame.contentWindow.document;
+                
+                const predictionItems = frameDoc.querySelectorAll('#ml-predictions .prediction-item');
+                
+                if (predictionItems.length === 0) {
+                    addResult('❌ No prediction items found in dashboard', 'error');
+                    return;
+                }
+                
+                addResult(`✅ Found ${predictionItems.length} prediction items in dashboard`, 'success');
+                
+                predictionItems.forEach((item, i) => {
+                    const valueSpan = item.querySelector('.prediction-value');
+                    const confSpan = item.querySelector('.confidence');
+                    
+                    if (valueSpan && confSpan) {
+                        const valueText = valueSpan.textContent;
+                        const confText = confSpan.textContent;
+                        
+                        if (valueText.includes('Loading')) {
+                            addResult(`⚠️ Item ${i+1}: Still showing "${valueText}"`, 'warning');
+                        } else if (valueText.includes('+0.8%') || valueText.includes('+1.2%') || valueText.includes('+0.3%')) {
+                            addResult(`❌ Item ${i+1}: Still showing FAKE data "${valueText}"`, 'error');
+                        } else {
+                            addResult(`✅ Item ${i+1}: "${valueText}" | "${confText}"`, 'success');
+                        }
+                    }
+                });
+                
+            } catch (error) {
+                addResult(`❌ Could not access dashboard frame: ${error.message}`, 'error');
+                addResult('💡 Try opening dashboard in new window instead', 'warning');
+            }
+        }
+
+        function injectEmergencyFix() {
+            addResult('🚨 Injecting emergency fix into dashboard...', 'warning');
+            
+            try {
+                const frame = document.getElementById('dashboardFrame');
+                const frameDoc = frame.contentDocument || frame.contentWindow.document;
+                const frameWindow = frame.contentWindow;
+                
+                if (frameWindow.emergencyMLUpdate) {
+                    addResult('🔧 Emergency fix already loaded, running it...', 'info');
+                    frameWindow.emergencyMLUpdate().then(success => {
+                        if (success) {
+                            addResult('✅ Emergency fix executed successfully!', 'success');
+                            setTimeout(checkDashboardValues, 2000);
+                        } else {
+                            addResult('❌ Emergency fix failed', 'error');
+                        }
+                    });
+                } else {
+                    addResult('⚠️ Emergency fix not loaded in dashboard', 'warning');
+                    addResult('💡 Try refreshing the dashboard', 'info');
+                }
+                
+            } catch (error) {
+                addResult(`❌ Could not inject emergency fix: ${error.message}`, 'error');
+            }
+        }
+
+        async function comparePredictions() {
+            if (!currentMLData) {
+                await checkCurrentAPI();
+            }
+            
+            if (!currentMLData) {
+                addResult('❌ No ML API data to compare', 'error');
+                return;
+            }
+            
+            addResult('🔍 Comparing ML API vs Dashboard...', 'info');
+            
+            try {
+                const frame = document.getElementById('dashboardFrame');
+                const frameDoc = frame.contentDocument || frame.contentWindow.document;
+                const predictionItems = frameDoc.querySelectorAll('#ml-predictions .prediction-item');
+                
+                currentMLData.predictions.forEach((apiPred, i) => {
+                    const item = predictionItems[i];
+                    if (!item) return;
+                    
+                    const valueSpan = item.querySelector('.prediction-value');
+                    const timeframes = ['1H', '4H', '1D'];
+                    const tf = timeframes[i];
+                    
+                    if (valueSpan) {
+                        const dashboardText = valueSpan.textContent;
+                        const apiChange = apiPred.change_percent.toFixed(1);
+                        const apiPrice = Math.round(apiPred.predicted_price);
+                        
+                        const expectedText = `${apiChange >= 0 ? '+' : ''}${apiChange}% ($${apiPrice.toLocaleString()})`;
+                        
+                        if (dashboardText.includes(apiChange) && dashboardText.includes(apiPrice.toString())) {
+                            addResult(`✅ ${tf}: Dashboard matches API! "${dashboardText}"`, 'success');
+                        } else {
+                            addResult(`❌ ${tf}: MISMATCH!`, 'error');
+                            addResult(`   API: ${expectedText}`, 'error');
+                            addResult(`   Dashboard: "${dashboardText}"`, 'error');
+                        }
+                    }
+                });
+                
+            } catch (error) {
+                addResult(`❌ Comparison failed: ${error.message}`, 'error');
+            }
+        }
+
+        // Auto-start
+        setTimeout(checkCurrentAPI, 1000);
+    </script>
+</body>
+</html>

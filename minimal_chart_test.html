@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Minimal Chart Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #0a0a0a; color: white; padding: 20px; }
+        #chart { width: 100%; height: 400px; background: #1a1a1a; margin: 20px 0; }
+        .status { background: #2a2a2a; padding: 10px; border-radius: 5px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Minimal Chart Test</h1>
+    <div class="status" id="status">Testing chart libraries...</div>
+    <div id="chart"></div>
+    
+    <script>
+        const status = document.getElementById('status');
+        
+        function updateStatus(msg) {
+            status.textContent = msg;
+            console.log(msg);
+        }
+        
+        updateStatus('🔄 Loading LightweightCharts...');
+        
+        // Try to load LightweightCharts
+        const script = document.createElement('script');
+        script.src = 'https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js';
+        script.onload = function() {
+            updateStatus('✅ LightweightCharts loaded, creating chart...');
+            
+            try {
+                const chartContainer = document.getElementById('chart');
+                const chart = LightweightCharts.createChart(chartContainer, {
+                    width: chartContainer.clientWidth,
+                    height: 400,
+                    layout: {
+                        background: { type: 'solid', color: '#1a1a1a' },
+                        textColor: '#d1d5db',
+                    }
+                });
+                
+                const candlestickSeries = chart.addCandlestickSeries({
+                    upColor: '#00d084',
+                    downColor: '#ff4757'
+                });
+                
+                // Generate simple test data
+                const data = [];
+                const basePrice = 3350;
+                const now = Math.floor(Date.now() / 1000);
+                
+                for (let i = 20; i >= 0; i--) {
+                    const time = now - (i * 3600);
+                    const open = basePrice + (Math.random() - 0.5) * 50;
+                    const close = open + (Math.random() - 0.5) * 20;
+                    const high = Math.max(open, close) + Math.random() * 10;
+                    const low = Math.min(open, close) - Math.random() * 10;
+                    
+                    data.push({
+                        time: time,
+                        open: parseFloat(open.toFixed(2)),
+                        high: parseFloat(high.toFixed(2)),
+                        low: parseFloat(low.toFixed(2)),
+                        close: parseFloat(close.toFixed(2))
+                    });
+                }
+                
+                candlestickSeries.setData(data);
+                updateStatus('🎉 Chart created successfully!');
+                
+            } catch (error) {
+                updateStatus('❌ Chart creation failed: ' + error.message);
+            }
+        };
+        
+        script.onerror = function() {
+            updateStatus('❌ Failed to load LightweightCharts from CDN');
+            
+            // Try Chart.js fallback
+            updateStatus('🔄 Trying Chart.js fallback...');
+            const chartjs = document.createElement('script');
+            chartjs.src = 'https://cdn.jsdelivr.net/npm/chart.js';
+            chartjs.onload = function() {
+                updateStatus('✅ Chart.js loaded, creating basic chart...');
+                
+                const canvas = document.createElement('canvas');
+                canvas.width = 800;
+                canvas.height = 400;
+                document.getElementById('chart').appendChild(canvas);
+                
+                new Chart(canvas, {
+                    type: 'line',
+                    data: {
+                        labels: ['1', '2', '3', '4', '5'],
+                        datasets: [{
+                            label: 'Gold Price',
+                            data: [3340, 3350, 3345, 3360, 3355],
+                            borderColor: '#00d084',
+                            backgroundColor: 'rgba(0, 208, 132, 0.1)'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        scales: {
+                            y: { 
+                                beginAtZero: false,
+                                grid: { color: '#2a2a2a' },
+                                ticks: { color: '#d1d5db' }
+                            },
+                            x: {
+                                grid: { color: '#2a2a2a' },
+                                ticks: { color: '#d1d5db' }
+                            }
+                        }
+                    }
+                });
+                
+                updateStatus('🎉 Chart.js chart created successfully!');
+            };
+            chartjs.onerror = function() {
+                updateStatus('❌ All chart libraries failed to load');
+            };
+            document.head.appendChild(chartjs);
+        };
+        
+        document.head.appendChild(script);
+    </script>
+</body>
+</html>

@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Container Test - GoldGPT</title>
+    <style>
+        body {
+            background: #1a1a1a;
+            color: white;
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        
+        .chart-content {
+            border: 2px solid #00d084;
+            padding: 20px;
+            margin: 10px 0;
+            background: #2a2a2a;
+        }
+        
+        #nuclear-chart-container {
+            border: 2px solid #ff6b6b;
+            height: 300px;
+            background: #333;
+        }
+        
+        .test-result {
+            background: #333;
+            padding: 10px;
+            margin: 5px 0;
+            border-left: 4px solid #00d084;
+        }
+        
+        .error {
+            border-left-color: #ff6b6b;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 Container Detection Test</h1>
+    
+    <div class="test-result" id="dom-status">⏳ Checking DOM readiness...</div>
+    
+    <!-- Chart containers exactly as they appear in dashboard -->
+    <div class="chart-content" id="tradingview-chart">
+        <h2>📊 Main Chart Container</h2>
+        <!-- NUCLEAR CHART INJECTION -->
+        <div id="nuclear-chart-overlay" style="position: relative; background: #1a1a1a; padding: 10px;">
+            <div style="background: #00d084; color: black; padding: 10px; text-align: center; font-weight: bold;">
+                🚀 NUCLEAR CHART ACTIVE - WORKING SOLUTION
+            </div>
+            <div style="padding: 10px; text-align: center;">
+                <button onclick="testButton('1h')" style="background: #00d084; color: black; border: none; padding: 5px 10px; margin: 2px; cursor: pointer; border-radius: 3px;">1H</button>
+                <button onclick="testButton('4h')" style="background: #2a2a2a; color: white; border: 1px solid #444; padding: 5px 10px; margin: 2px; cursor: pointer; border-radius: 3px;">4H</button>
+                <button onclick="testButton('1d')" style="background: #2a2a2a; color: white; border: 1px solid #444; padding: 5px 10px; margin: 2px; cursor: pointer; border-radius: 3px;">1D</button>
+            </div>
+            <div id="nuclear-chart-container" style="width: 100%; height: 300px;">
+                <div style="padding: 20px; text-align: center;">
+                    <h3>Nuclear Chart Container</h3>
+                    <p>This is where the chart should render</p>
+                </div>
+            </div>
+            <div id="nuclear-status" style="padding: 5px 10px; font-size: 12px; background: #2a2a2a; color: #00d084;">🔄 Initializing nuclear chart...</div>
+        </div>
+    </div>
+    
+    <div class="test-result" id="container-tests">⏳ Running container tests...</div>
+    
+    <script>
+        // Comprehensive container detection test
+        function runContainerTests() {
+            const tests = [];
+            
+            // Test 1: Check if DOM is ready
+            tests.push({
+                name: 'DOM Ready',
+                result: document.readyState === 'complete',
+                details: `Document state: ${document.readyState}`
+            });
+            
+            // Test 2: Find tradingview-chart
+            const tvChart = document.getElementById('tradingview-chart');
+            tests.push({
+                name: 'TradingView Chart Container',
+                result: !!tvChart,
+                details: tvChart ? `Found: ${tvChart.tagName} with ${tvChart.children.length} children` : 'Not found'
+            });
+            
+            // Test 3: Find nuclear-chart-container
+            const nuclearChart = document.getElementById('nuclear-chart-container');
+            tests.push({
+                name: 'Nuclear Chart Container',
+                result: !!nuclearChart,
+                details: nuclearChart ? `Found: ${nuclearChart.tagName}, Dimensions: ${nuclearChart.offsetWidth}x${nuclearChart.offsetHeight}` : 'Not found'
+            });
+            
+            // Test 4: Check visibility
+            if (nuclearChart) {
+                const style = window.getComputedStyle(nuclearChart);
+                tests.push({
+                    name: 'Nuclear Container Visibility',
+                    result: style.display !== 'none' && style.visibility !== 'hidden',
+                    details: `Display: ${style.display}, Visibility: ${style.visibility}`
+                });
+            }
+            
+            // Test 5: Query selector test
+            const queryTest = document.querySelector('#nuclear-chart-container');
+            tests.push({
+                name: 'Query Selector Test',
+                result: !!queryTest,
+                details: queryTest ? 'Query selector works' : 'Query selector failed'
+            });
+            
+            // Display results
+            const container = document.getElementById('container-tests');
+            container.innerHTML = '<h3>🧪 Container Test Results:</h3>';
+            
+            tests.forEach(test => {
+                const div = document.createElement('div');
+                div.className = `test-result ${test.result ? '' : 'error'}`;
+                div.innerHTML = `
+                    <strong>${test.result ? '✅' : '❌'} ${test.name}</strong><br>
+                    ${test.details}
+                `;
+                container.appendChild(div);
+            });
+            
+            // Overall status
+            const allPassed = tests.every(test => test.result);
+            document.getElementById('dom-status').innerHTML = allPassed ? 
+                '✅ All container tests PASSED!' : 
+                '❌ Some container tests FAILED!';
+            document.getElementById('dom-status').className = allPassed ? 'test-result' : 'test-result error';
+        }
+        
+        function testButton(timeframe) {
+            alert(`Button clicked: ${timeframe} - Container is accessible!`);
+        }
+        
+        // Run tests when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', runContainerTests);
+        } else {
+            runContainerTests();
+        }
+        
+        // Also run after a short delay to catch any dynamic changes
+        setTimeout(() => {
+            console.log('🔄 Re-running tests after delay...');
+            runContainerTests();
+        }, 1000);
+    </script>
+</body>
+</html>

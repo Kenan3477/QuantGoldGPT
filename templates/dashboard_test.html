@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GoldGPT Dashboard Test</title>
+    <style>
+        body {
+            background: #000;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        .test-section {
+            background: #1a1a1a;
+            padding: 20px;
+            margin: 10px 0;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 GoldGPT Dashboard Test</h1>
+    
+    <div class="test-section">
+        <h2>✅ Template Loading Test</h2>
+        <p>If you can see this, the template system is working.</p>
+    </div>
+    
+    <div class="test-section">
+        <h2>🧪 JavaScript Test</h2>
+        <p id="js-test">JavaScript not loaded</p>
+    </div>
+    
+    <div class="test-section">
+        <h2>🔗 Navigation</h2>
+        <p><a href="/" style="color: #4CAF50;">Back to Main Dashboard</a></p>
+    </div>
+    
+    <script>
+        console.log('✅ JavaScript is working');
+        document.getElementById('js-test').textContent = '✅ JavaScript is working';
+        
+        // Test if we can fetch ML data
+        fetch('/api/ml-predictions/multi-strategy')
+            .then(response => response.json())
+            .then(data => {
+                console.log('✅ ML API is working:', data);
+            })
+            .catch(error => {
+                console.error('❌ ML API error:', error);
+            });
+    </script>
+</body>
+</html>

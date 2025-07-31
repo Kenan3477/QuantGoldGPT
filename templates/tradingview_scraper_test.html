@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔍 TradingView Gold Price Scraping Test</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0a0a;
+            color: #ffffff;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            color: #000;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .widget-section {
+            background: #1a1a1a;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #333;
+        }
+        
+        .scraped-data {
+            background: #2a2a2a;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #FFD700;
+        }
+        
+        .price-display {
+            font-size: 24px;
+            font-weight: bold;
+            color: #FFD700;
+            text-align: center;
+            padding: 15px;
+            background: rgba(255, 215, 0, 0.1);
+            border: 2px solid #FFD700;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+        
+        .btn {
+            background: #FFD700;
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .btn:hover {
+            background: #FFA500;
+            transform: translateY(-2px);
+        }
+        
+        .log-output {
+            background: #000;
+            color: #00ff00;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            height: 300px;
+            overflow-y: auto;
+            border: 1px solid #333;
+        }
+        
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        
+        .status.success { background: rgba(0, 255, 0, 0.2); color: #00ff00; }
+        .status.warning { background: rgba(255, 165, 0, 0.2); color: #FFA500; }
+        .status.error { background: rgba(255, 0, 0, 0.2); color: #ff4757; }
+        
+        .tradingview-widget-container {
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 TradingView Widget Gold Price Scraper</h1>
+            <p>Testing JavaScript DOM scraping of live gold prices from TradingView widgets</p>
+        </div>
+        
+        <div class="widget-section">
+            <h2>📊 TradingView XAU/USD Widget</h2>
+            <div class="tradingview-widget-container">
+                <div class="tradingview-widget-container__widget"></div>
+                <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js" async>
+                {
+                  "symbol": "OANDA:XAUUSD",
+                  "width": "100%",
+                  "height": "200",
+                  "locale": "en",
+                  "dateRange": "12M",
+                  "colorTheme": "dark",
+                  "trendLineColor": "rgba(255, 215, 0, 1)",
+                  "underLineColor": "rgba(255, 215, 0, 0.3)",
+                  "underLineBottomColor": "rgba(255, 215, 0, 0)",
+                  "isTransparent": false,
+                  "autosize": true,
+                  "largeChartUrl": ""
+                }
+                </script>
+            </div>
+        </div>
+        
+        <div class="widget-section">
+            <h2>🎯 Scraped Gold Price Data</h2>
+            <div class="price-display" id="scraped-price">
+                Waiting for price data...
+            </div>
+            
+            <div class="scraped-data">
+                <div><strong>Current Price:</strong> <span id="current-price">--</span></div>
+                <div><strong>Last Update:</strong> <span id="last-update">--</span></div>
+                <div><strong>Data Source:</strong> <span id="data-source">--</span></div>
+                <div><strong>Change:</strong> <span id="price-change">--</span></div>
+                <div><strong>Status:</strong> <span id="scraping-status">Initializing...</span></div>
+            </div>
+        </div>
+        
+        <div class="widget-section">
+            <h2>🔧 Scraper Controls</h2>
+            <div class="controls">
+                <button class="btn" onclick="manualScrape()">🔍 Manual Scrape</button>
+                <button class="btn" onclick="findWidgets()">📊 Find Widgets</button>
+                <button class="btn" onclick="toggleScraping()">⏯️ Toggle Scraping</button>
+                <button class="btn" onclick="clearLog()">🗑️ Clear Log</button>
+                <button class="btn" onclick="showDebugInfo()">🐛 Debug Info</button>
+            </div>
+            
+            <div id="status-display" class="status warning">
+                ⚠️ Scraper initializing... Please wait for TradingView widget to load.
+            </div>
+        </div>
+        
+        <div class="widget-section">
+            <h2>📋 Scraping Log</h2>
+            <div class="log-output" id="log-output">
+                Console output will appear here...
+            </div>
+        </div>
+        
+        <div class="widget-section">
+            <h2>ℹ️ How This Works</h2>
+            <ul>
+                <li><strong>DOM Scraping:</strong> Searches for price elements in the TradingView widget HTML</li>
+                <li><strong>Pattern Matching:</strong> Uses regex patterns to identify gold prices (2000-5000 range)</li>
+                <li><strong>Mutation Observer:</strong> Watches for DOM changes to catch price updates</li>
+                <li><strong>Multiple Selectors:</strong> Tries various CSS selectors commonly used by TradingView</li>
+                <li><strong>Iframe Handling:</strong> Attempts to access iframe content (usually blocked by CORS)</li>
+                <li><strong>Periodic Updates:</strong> Scrapes every 5 seconds for continuous monitoring</li>
+            </ul>
+            
+            <div class="status warning">
+                <strong>⚠️ Important Notes:</strong>
+                <ul>
+                    <li>This is for educational/testing purposes only</li>
+                    <li>May violate TradingView's Terms of Service</li>
+                    <li>Widget structure can change, breaking the scraper</li>
+                    <li>CORS restrictions may prevent iframe access</li>
+                    <li>Consider using official APIs for production use</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load the scraper script -->
+    <script src="{{ url_for('static', filename='js/tradingview-gold-scraper.js') }}"></script>
+    
+    <script>
+        let scrapingActive = true;
+        
+        // Redirect console.log to our log display
+        const originalLog = console.log;
+        const logOutput = document.getElementById('log-output');
+        
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            
+            const message = args.map(arg => 
+                typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
+            ).join(' ');
+            
+            const timestamp = new Date().toLocaleTimeString();
+            logOutput.innerHTML += `<div>[${timestamp}] ${message}</div>`;
+            logOutput.scrollTop = logOutput.scrollHeight;
+        };
+        
+        // Listen for gold price updates
+        document.addEventListener('goldPriceUpdate', (event) => {
+            const { price, change, changePercent, source, timestamp } = event.detail;
+            
+            document.getElementById('scraped-price').textContent = `$${price.toFixed(2)}`;
+            document.getElementById('current-price').textContent = `$${price.toFixed(2)}`;
+            document.getElementById('last-update').textContent = timestamp.toLocaleTimeString();
+            document.getElementById('data-source').textContent = source;
+            document.getElementById('price-change').textContent = `${change >= 0 ? '+' : ''}$${change.toFixed(2)} (${changePercent}%)`;
+            document.getElementById('scraping-status').textContent = 'Active - Receiving Updates';
+            
+            document.getElementById('status-display').className = 'status success';
+            document.getElementById('status-display').innerHTML = '✅ Successfully scraping live gold prices!';
+        });
+        
+        // Control functions
+        function manualScrape() {
+            const price = window.tvGoldScraper.manualScrape();
+            if (!price) {
+                document.getElementById('status-display').className = 'status warning';
+                document.getElementById('status-display').innerHTML = '⚠️ No price found in manual scrape. Widget may not be loaded yet.';
+            }
+        }
+        
+        function findWidgets() {
+            const widgets = window.tvGoldScraper.findTradingViewWidgets();
+            document.getElementById('status-display').className = 'status success';
+            document.getElementById('status-display').innerHTML = `📊 Found ${widgets.length} TradingView widget(s)`;
+        }
+        
+        function toggleScraping() {
+            if (scrapingActive) {
+                window.tvGoldScraper.stopScraping();
+                document.getElementById('status-display').className = 'status warning';
+                document.getElementById('status-display').innerHTML = '⏸️ Scraping paused';
+            } else {
+                window.tvGoldScraper.startScraping();
+                document.getElementById('status-display').className = 'status success';
+                document.getElementById('status-display').innerHTML = '▶️ Scraping resumed';
+            }
+            scrapingActive = !scrapingActive;
+        }
+        
+        function clearLog() {
+            document.getElementById('log-output').innerHTML = '';
+        }
+        
+        function showDebugInfo() {
+            const info = window.debugTVScraper.getCurrentPrice();
+            console.log('🐛 Debug Info:', info);
+            
+            document.getElementById('status-display').className = 'status success';
+            document.getElementById('status-display').innerHTML = `🐛 Debug info logged to console`;
+        }
+        
+        // Initialize status
+        setTimeout(() => {
+            if (document.getElementById('current-price').textContent === '--') {
+                document.getElementById('status-display').className = 'status warning';
+                document.getElementById('status-display').innerHTML = '⚠️ Waiting for widget to load or price data not found';
+            }
+        }, 10000);
+    </script>
+</body>
+</html>

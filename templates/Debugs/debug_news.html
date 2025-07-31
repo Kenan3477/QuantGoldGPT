@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug News - GoldGPT</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/enhanced-news-display.css') }}">
+    <style>
+        body {
+            background: #0a0a0a;
+            color: white;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        .debug-container {
+            max-width: 400px;
+            margin: 0 auto;
+            background: #1a1a1a;
+            border-radius: 8px;
+            padding: 20px;
+            border: 1px solid #333;
+        }
+        .debug-title {
+            color: #fff;
+            margin-bottom: 20px;
+            text-align: center;
+            border-bottom: 1px solid #333;
+            padding-bottom: 10px;
+        }
+        .debug-log {
+            background: #222;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .test-button {
+            background: #0066cc;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+            width: 100%;
+        }
+        .test-button:hover {
+            background: #0088ff;
+        }
+    </style>
+</head>
+<body>
+    <div class="debug-container">
+        <h1 class="debug-title">🔧 News Debug Test</h1>
+        
+        <div class="debug-log" id="debug-log">
+            <div>Initializing debug test...</div>
+        </div>
+        
+        <button class="test-button" onclick="testAPI()">Test News API</button>
+        <button class="test-button" onclick="testManager()">Test News Manager</button>
+        <button class="test-button" onclick="testContainer()">Test Container</button>
+        
+        <!-- News container for testing -->
+        <div id="enhanced-news-container" class="enhanced-news-container" style="min-height: 300px; border: 1px solid #333; background: #1a1a1a; margin-top: 20px;">
+            <div class="news-loading" style="text-align: center; padding: 40px; color: #fff;">
+                <i class="fas fa-spinner fa-spin" style="font-size: 24px; color: #0088ff; margin-bottom: 12px; display: block;"></i>
+                <span style="font-size: 14px;">Loading enhanced news analysis...</span>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/enhanced-news-manager.js') }}"></script>
+    <script>
+        function log(message) {
+            const logEl = document.getElementById('debug-log');
+            logEl.innerHTML += '<div>' + new Date().toLocaleTimeString() + ': ' + message + '</div>';
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+        
+        async function testAPI() {
+            log('Testing API...');
+            try {
+                const response = await fetch('/api/news/enhanced?limit=3');
+                const data = await response.json();
+                log('API Response: ' + JSON.stringify(data, null, 2).substring(0, 200) + '...');
+            } catch (error) {
+                log('API Error: ' + error.message);
+            }
+        }
+        
+        function testManager() {
+            log('Testing News Manager...');
+            if (typeof EnhancedNewsManager !== 'undefined') {
+                log('✅ EnhancedNewsManager class found');
+                if (window.enhancedNewsManager) {
+                    log('✅ Manager instance exists');
+                    window.enhancedNewsManager.loadEnhancedNews();
+                    log('🔄 Called loadEnhancedNews()');
+                } else {
+                    log('Creating new manager instance...');
+                    window.enhancedNewsManager = new EnhancedNewsManager();
+                }
+            } else {
+                log('❌ EnhancedNewsManager class NOT found');
+            }
+        }
+        
+        function testContainer() {
+            log('Testing Container...');
+            const container = document.getElementById('enhanced-news-container');
+            if (container) {
+                log('✅ Container found: ' + container.tagName + ' with ID: ' + container.id);
+                log('Container dimensions: ' + container.offsetWidth + 'x' + container.offsetHeight);
+                log('Container children: ' + container.children.length);
+            } else {
+                log('❌ Container NOT found');
+            }
+        }
+        
+        // Auto-initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            log('DOM loaded');
+            setTimeout(() => {
+                testContainer();
+                testManager();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

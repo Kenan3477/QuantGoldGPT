@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>🚀 IMMEDIATE CHART FIX</title>
+    <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+</head>
+<body>
+    <script>
+        // IMMEDIATE NUCLEAR CHART ACTIVATION
+        console.log('🚀 STARTING IMMEDIATE CHART FIX...');
+        
+        function activateNuclearChart() {
+            console.log('🔍 Looking for nuclear chart container...');
+            
+            const container = document.getElementById('nuclear-chart-container');
+            if (!container) {
+                console.error('❌ Nuclear chart container not found!');
+                return;
+            }
+            
+            console.log('✅ Nuclear chart container found!', container);
+            console.log('📏 Container dimensions:', container.offsetWidth, 'x', container.offsetHeight);
+            
+            try {
+                console.log('📊 Creating LightweightCharts instance...');
+                
+                const chart = LightweightCharts.createChart(container, {
+                    width: container.offsetWidth || 800,
+                    height: 300,
+                    layout: {
+                        background: { type: 'solid', color: '#1a1a1a' },
+                        textColor: '#d1d5db',
+                    },
+                    grid: {
+                        vertLines: { color: '#2a2a2a' },
+                        horzLines: { color: '#2a2a2a' },
+                    },
+                });
+
+                const candlestickSeries = chart.addCandlestickSeries({
+                    upColor: '#00d084',
+                    downColor: '#ff4757',
+                    borderDownColor: '#ff4757',
+                    borderUpColor: '#00d084',
+                    wickDownColor: '#ff4757',
+                    wickUpColor: '#00d084',
+                });
+
+                console.log('🎉 NUCLEAR CHART CREATED SUCCESSFULLY!');
+                
+                // Load sample data immediately
+                const data = [];
+                const now = Math.floor(Date.now() / 1000);
+                const basePrice = 3330;
+                
+                for (let i = 50; i >= 0; i--) {
+                    const time = now - (i * 3600);
+                    const open = basePrice + (Math.random() - 0.5) * 50;
+                    const change = (Math.random() - 0.5) * 20;
+                    const close = open + change;
+                    const high = Math.max(open, close) + Math.random() * 10;
+                    const low = Math.min(open, close) - Math.random() * 10;
+                    
+                    data.push({
+                        time: time,
+                        open: parseFloat(open.toFixed(2)),
+                        high: parseFloat(high.toFixed(2)),
+                        low: parseFloat(low.toFixed(2)),
+                        close: parseFloat(close.toFixed(2))
+                    });
+                }
+                
+                candlestickSeries.setData(data);
+                console.log('📈 SAMPLE DATA LOADED! Chart should now be visible!');
+                
+                // Update status if available
+                const statusEl = document.getElementById('nuclear-status');
+                if (statusEl) {
+                    statusEl.textContent = '🎉 NUCLEAR CHART ACTIVE! Sample data loaded.';
+                    statusEl.style.color = '#00d084';
+                }
+                
+                // Also try to load real data
+                loadRealData(candlestickSeries);
+                
+            } catch (error) {
+                console.error('❌ Nuclear chart creation failed:', error);
+                const statusEl = document.getElementById('nuclear-status');
+                if (statusEl) {
+                    statusEl.textContent = '❌ Chart error: ' + error.message;
+                    statusEl.style.color = '#ff4757';
+                }
+            }
+        }
+        
+        function loadRealData(series) {
+            console.log('📡 Attempting to load real chart data...');
+            
+            fetch('/api/chart/data/XAUUSD?timeframe=1h')
+                .then(response => {
+                    console.log('📊 Chart API response:', response.status);
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('📊 Chart data received:', data);
+                    if (data.success && data.data && data.data.length > 0) {
+                        series.setData(data.data);
+                        console.log('🎉 REAL DATA LOADED!', data.data.length, 'candles');
+                        
+                        const statusEl = document.getElementById('nuclear-status');
+                        if (statusEl) {
+                            statusEl.textContent = `🎉 REAL DATA! ${data.data.length} candles. Price: $${data.data[data.data.length-1].close}`;
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.log('⚠️ Real data failed, keeping sample data:', error.message);
+                });
+        }
+        
+        function waitForLibraryAndContainer() {
+            if (typeof LightweightCharts === 'undefined') {
+                console.log('⏳ Waiting for LightweightCharts library...');
+                setTimeout(waitForLibraryAndContainer, 100);
+                return;
+            }
+            
+            const container = document.getElementById('nuclear-chart-container');
+            if (!container) {
+                console.log('⏳ Waiting for nuclear chart container...');
+                setTimeout(waitForLibraryAndContainer, 100);
+                return;
+            }
+            
+            console.log('✅ Both library and container ready!');
+            activateNuclearChart();
+        }
+        
+        // Start the process
+        waitForLibraryAndContainer();
+        
+        // Also try again after DOM is fully loaded
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', waitForLibraryAndContainer);
+        }
+        
+        // And try again after a delay
+        setTimeout(waitForLibraryAndContainer, 2000);
+    </script>
+</body>
+</html>

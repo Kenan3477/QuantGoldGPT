@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dual ML Predictions Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #0a0a0a;
+            color: white;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .test-section {
+            background: #1a1a1a;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+            border: 1px solid #333;
+        }
+        .ml-predictions-container {
+            min-height: 200px;
+            background: #222;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+        .loading {
+            text-align: center;
+            color: #00d4aa;
+            padding: 50px;
+        }
+        button {
+            background: #00d4aa;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px;
+        }
+        button:hover {
+            background: #00b894;
+        }
+        pre {
+            background: #111;
+            padding: 15px;
+            border-radius: 5px;
+            font-size: 12px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 Dual ML Predictions Test</h1>
+        
+        <div class="test-section">
+            <h2>API Test Results</h2>
+            <button onclick="testDualAPI()">Test Dual API</button>
+            <button onclick="testAccuracyAPI()">Test Accuracy API</button>
+            <button onclick="refreshPredictions()">Refresh Predictions</button>
+            
+            <div id="api-results">
+                <div class="loading">Click buttons above to test APIs</div>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h2>Dual ML Predictions Display</h2>
+            <div class="ml-predictions-container" id="ml-predictions">
+                <div class="loading">Initializing dual ML predictions...</div>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h2>Console Logs</h2>
+            <div id="console-logs">
+                <div class="loading">Console output will appear here...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Capture console logs
+        const originalLog = console.log;
+        const originalError = console.error;
+        const originalWarn = console.warn;
+        
+        const logContainer = document.getElementById('console-logs');
+        
+        function addLog(message, type = 'log') {
+            const logDiv = document.createElement('div');
+            logDiv.style.color = type === 'error' ? '#ff4757' : type === 'warn' ? '#ffa502' : '#00d4aa';
+            logDiv.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logContainer.appendChild(logDiv);
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+        
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            addLog(args.join(' '), 'log');
+        };
+        
+        console.error = function(...args) {
+            originalError.apply(console, args);
+            addLog(args.join(' '), 'error');
+        };
+        
+        console.warn = function(...args) {
+            originalWarn.apply(console, args);
+            addLog(args.join(' '), 'warn');
+        };
+        
+        // API Test Functions
+        async function testDualAPI() {
+            const resultsDiv = document.getElementById('api-results');
+            resultsDiv.innerHTML = '<div class="loading">Testing Dual Predictions API...</div>';
+            
+            try {
+                const response = await fetch('/api/ml-predictions/dual');
+                const data = await response.json();
+                
+                resultsDiv.innerHTML = `
+                    <h3>Dual Predictions API Response:</h3>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+                
+                console.log('✅ Dual API Response:', data);
+            } catch (error) {
+                resultsDiv.innerHTML = `
+                    <h3>Dual Predictions API Error:</h3>
+                    <pre style="color: #ff4757;">${error.message}</pre>
+                `;
+                console.error('❌ Dual API Error:', error);
+            }
+        }
+        
+        async function testAccuracyAPI() {
+            const resultsDiv = document.getElementById('api-results');
+            resultsDiv.innerHTML = '<div class="loading">Testing Accuracy Stats API...</div>';
+            
+            try {
+                const response = await fetch('/api/ml-accuracy/stats');
+                const data = await response.json();
+                
+                resultsDiv.innerHTML = `
+                    <h3>Accuracy Stats API Response:</h3>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+                
+                console.log('✅ Accuracy API Response:', data);
+            } catch (error) {
+                resultsDiv.innerHTML = `
+                    <h3>Accuracy Stats API Error:</h3>
+                    <pre style="color: #ff4757;">${error.message}</pre>
+                `;
+                console.error('❌ Accuracy API Error:', error);
+            }
+        }
+        
+        function refreshPredictions() {
+            if (window.dualMLDisplay) {
+                console.log('🔄 Refreshing predictions...');
+                window.dualMLDisplay.refreshPredictions();
+            } else {
+                console.warn('⚠️ Dual ML Display not initialized');
+            }
+        }
+        
+        // Initialize when ready
+        console.log('🚀 Test page loaded, initializing...');
+    </script>
+    
+    <!-- Load the dual ML display script -->
+    <script src="/static/js/dual-ml-display.js"></script>
+</body>
+</html>

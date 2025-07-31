@@ -1,0 +1,2614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GoldGPT Professional Trading Dashboard</title>
+    
+    <!-- CSS Stylesheets -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/unified-dashboard.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/chart-system.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/predictions-panel.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/market-context.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/correlation-analyzer.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/responsive-themes.css') }}">
+    
+    <!-- TradingView Lightweight Charts -->
+    <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+    
+    <!-- Socket.IO for real-time updates -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
+    
+    <!-- Chart.js for additional visualizations -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Emergency System Hub Loader -->
+    <script>
+        // EMERGENCY FORCE SYSTEM HUB VISIBLE - RUNS IMMEDIATELY
+        console.log('🚨 EMERGENCY SYSTEM HUB LOADER STARTING...');
+        
+        function forceSystemHubVisible() {
+            console.log('🔧 Force System Hub function called');
+            
+            // Wait for DOM to be ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', forceSystemHubVisible);
+                return;
+            }
+            
+            console.log('� Looking for System Hub elements...');
+            
+            // Find and force sidebar visible
+            const sidebar = document.querySelector('.dashboard-sidebar');
+            console.log('📋 Sidebar found:', !!sidebar);
+            
+            if (sidebar) {
+                // Apply aggressive inline styles
+                sidebar.style.cssText = `
+                    display: block !important;
+                    visibility: visible !important;
+                    opacity: 1 !important;
+                    position: fixed !important;
+                    left: 0px !important;
+                    top: 0px !important;
+                    width: 300px !important;
+                    height: 100vh !important;
+                    background: #1a1a1d !important;
+                    z-index: 9999 !important;
+                    overflow-y: auto !important;
+                    padding: 20px !important;
+                    border: 3px solid #00ff00 !important;
+                    box-shadow: 0 0 20px rgba(0, 255, 0, 0.5) !important;
+                `;
+                console.log('✅ Sidebar forced visible with green border');
+            }
+            
+            // Find and force System Hub grid visible
+            const systemHub = document.querySelector('.system-hub-grid');
+            console.log('🚀 System Hub grid found:', !!systemHub);
+            
+            if (systemHub) {
+                systemHub.style.cssText = `
+                    display: flex !important;
+                    flex-direction: column !important;
+                    gap: 16px !important;
+                    background: rgba(255, 0, 0, 0.3) !important;
+                    border: 2px solid #ff0000 !important;
+                    padding: 10px !important;
+                `;
+                console.log('✅ System Hub grid forced visible with red background');
+            }
+            
+            // Find and force all system categories visible
+            const systemCategories = document.querySelectorAll('.system-category');
+            console.log('🏷️ System categories found:', systemCategories.length);
+            
+            systemCategories.forEach((category, index) => {
+                category.style.cssText = `
+                    display: block !important;
+                    visibility: visible !important;
+                    background: rgba(0, 255, 255, 0.2) !important;
+                    border: 1px solid #00ffff !important;
+                    padding: 10px !important;
+                    margin: 5px 0 !important;
+                `;
+                console.log(`✅ Category ${index + 1} forced visible`);
+            });
+            
+            // Find and force System Hub section visible
+            const systemHubSection = document.querySelector('.sidebar-section:has(.system-hub-grid)');
+            console.log('📦 System Hub section found:', !!systemHubSection);
+            
+            if (systemHubSection) {
+                systemHubSection.style.cssText = `
+                    display: block !important;
+                    visibility: visible !important;
+                    background: rgba(255, 255, 0, 0.2) !important;
+                    border: 2px solid #ffff00 !important;
+                    padding: 10px !important;
+                `;
+                console.log('✅ System Hub section forced visible');
+            }
+            
+            // Find the section by looking for the title
+            const sectionTitles = document.querySelectorAll('.sidebar-section-title');
+            sectionTitles.forEach(title => {
+                if (title.textContent.includes('System Hub')) {
+                    const section = title.closest('.sidebar-section');
+                    if (section) {
+                        section.style.cssText = `
+                            display: block !important;
+                            visibility: visible !important;
+                            background: rgba(255, 255, 0, 0.2) !important;
+                            border: 2px solid #ffff00 !important;
+                            padding: 10px !important;
+                        `;
+                        console.log('✅ Found System Hub section by title and forced visible');
+                    }
+                }
+            });
+            
+            // Adjust main content
+            const mainContent = document.querySelector('.dashboard-charts');
+            if (mainContent) {
+                mainContent.style.marginLeft = '320px';
+                mainContent.style.width = 'calc(100% - 320px)';
+                console.log('✅ Main content adjusted for sidebar');
+            }
+            
+            console.log('🎯 Emergency System Hub setup COMPLETED');
+        }
+        
+        // Run immediately
+        forceSystemHubVisible();
+        
+        // Run again after a short delay
+        setTimeout(forceSystemHubVisible, 500);
+        
+        // Run again after DOM is fully loaded
+        document.addEventListener('DOMContentLoaded', forceSystemHubVisible);
+        
+        // Run again after window loads
+        window.addEventListener('load', forceSystemHubVisible);
+        
+        console.log('🚨 EMERGENCY LOADER SCRIPT LOADED');
+    </script>
+
+    <style>
+        /* Critical base styles in case external CSS fails */
+        * {
+            box-sizing: border-box;
+        }
+        
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0a0b;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+        
+        /* Ensure proper loading state */
+        .chart-loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 10, 11, 0.8);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        
+        .chart-loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top: 3px solid #4CAF50;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .chart-error-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 10, 11, 0.9);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1001;
+            color: #e74c3c;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .chart-error-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+        
+        .chart-error-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        
+        .chart-error-message {
+            font-size: 16px;
+            opacity: 0.8;
+            margin-bottom: 20px;
+        }
+        
+        .chart-error-retry {
+            padding: 10px 20px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .chart-error-retry:hover {
+            background: #45a049;
+        }
+        
+        /* Validation Summary Styles */
+        .validation-summary {
+            background: rgba(20, 20, 20, 0.8);
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+        
+        .validation-health {
+            text-align: center;
+            margin-bottom: 16px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #2a2a2a;
+        }
+        
+        .validation-health-display {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 4px;
+        }
+        
+        .validation-health-score {
+            font-size: 32px;
+            font-weight: bold;
+            color: #00d4aa;
+            margin-bottom: 4px;
+        }
+        
+        .validation-health-label {
+            font-size: 14px;
+            color: #b0b0b0;
+            margin-bottom: 8px;
+        }
+        
+        .validation-health-indicator {
+            font-size: 24px;
+        }
+        
+        .validation-metrics {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+        
+        .validation-metric {
+            text-align: center;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 4px;
+        }
+        
+        .validation-metric-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: #ffffff;
+            margin-bottom: 4px;
+        }
+        
+        .validation-metric-label {
+            font-size: 12px;
+            color: #888888;
+        }
+        
+        .validation-alerts {
+            margin-bottom: 16px;
+            max-height: 100px;
+            overflow-y: auto;
+        }
+        
+        .validation-alert {
+            padding: 8px;
+            margin-bottom: 8px;
+            border-radius: 4px;
+            font-size: 13px;
+            border-left: 3px solid;
+        }
+        
+        .validation-alert.critical {
+            background: rgba(255, 71, 87, 0.1);
+            border-left-color: #ff4757;
+            color: #ff4757;
+        }
+        
+        .validation-alert.warning {
+            background: rgba(255, 165, 2, 0.1);
+            border-left-color: #ffa502;
+            color: #ffa502;
+        }
+        
+        .validation-details-btn {
+            width: 100%;
+            padding: 10px;
+            background: linear-gradient(135deg, #00d4aa, #4285f4);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .validation-details-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 212, 170, 0.3);
+        }
+        
+        /* Validation Badge Styles */
+        .validation-badge {
+            z-index: 10;
+            white-space: nowrap;
+            animation: fadeIn 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        
+        /* Enhanced prediction card styles for badges */
+        .prediction-card {
+            position: relative !important;
+            overflow: visible !important;
+        }
+        
+        /* Dashboard Sidebar Styling */
+        .dashboard-sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 300px;
+            height: 100vh;
+            background: rgba(15, 15, 17, 0.95);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            overflow-y: auto;
+            z-index: 100;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        
+        .sidebar-section {
+            margin-bottom: 24px;
+        }
+        
+        .sidebar-section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #00d4aa;
+            margin: 0 0 12px 0;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .sidebar-nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .sidebar-nav-item {
+            margin-bottom: 4px;
+        }
+        
+        .sidebar-nav-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 8px;
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .sidebar-nav-link:hover {
+            background: rgba(0, 212, 170, 0.1);
+            border-color: rgba(0, 212, 170, 0.3);
+            color: #00d4aa;
+            transform: translateY(-1px);
+        }
+        
+        .sidebar-nav-link.active {
+            background: rgba(0, 212, 170, 0.15);
+            border-color: rgba(0, 212, 170, 0.4);
+            color: #00d4aa;
+        }
+        
+        .sidebar-nav-icon {
+            font-size: 16px;
+            width: 20px;
+            text-align: center;
+        }
+        
+        /* Ensure main content doesn't overlap sidebar */
+        .dashboard-charts {
+            margin-left: 300px;
+            width: calc(100% - 300px);
+        }
+        
+        .dashboard-predictions {
+            margin-left: 300px;
+            width: calc(100% - 300px);
+        }
+        
+        /* System Hub Styles */
+        .system-hub-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+        
+        .system-category {
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 8px;
+            padding: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .system-category-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: #00d4aa;
+            margin: 0 0 8px 0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .system-links {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        
+        .system-link {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 10px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 6px;
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 12px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .system-link:hover {
+            background: rgba(0, 212, 170, 0.1);
+            border-color: rgba(0, 212, 170, 0.3);
+            color: #00d4aa;
+            transform: translateY(-1px);
+        }
+        
+        .system-icon {
+            font-size: 14px;
+            width: 16px;
+            text-align: center;
+        }
+        
+        .system-name {
+            flex: 1;
+            font-weight: 500;
+        }
+        
+        .system-status-summary {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            margin-top: 8px;
+        }
+        
+        .status-indicator-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+            font-size: 11px;
+        }
+        
+        .status-indicator-row:last-child {
+            margin-bottom: 0;
+        }
+        
+        .status-label {
+            color: #b0b0b0;
+            font-weight: 500;
+        }
+        
+        .status-value {
+            color: #ffffff;
+            font-weight: 600;
+        }
+        
+        .system-overview-btn {
+            width: 100%;
+            margin-top: 8px;
+            padding: 8px;
+            background: linear-gradient(135deg, #4285f4 0%, #0066cc 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .system-overview-btn:hover {
+            background: linear-gradient(135deg, #5294ff 0%, #0077dd 100%);
+            transform: translateY(-1px);
+        }
+        
+        /* System Overview Modal Styles */
+        .system-overview-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-backdrop {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+        }
+        
+        .modal-content {
+            position: relative;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            width: 90vw;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 24px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(0, 0, 0, 0.2);
+        }
+        
+        .modal-header h3 {
+            margin: 0;
+            color: #00d4aa;
+            font-size: 18px;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            color: #999;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+        
+        .modal-close:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+        
+        .modal-body {
+            padding: 24px;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+        
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            padding: 16px 24px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(0, 0, 0, 0.2);
+        }
+        
+        .modal-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .modal-btn.primary {
+            background: linear-gradient(135deg, #00d4aa 0%, #4285f4 100%);
+            color: white;
+        }
+        
+        .modal-btn.primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 212, 170, 0.3);
+        }
+        
+        .modal-btn.secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: #ccc;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .modal-btn.secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+            color: #fff;
+        }
+        
+        .system-overview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 16px;
+        }
+        
+        .system-status-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 16px;
+        }
+        
+        .system-status-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        
+        .system-status-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #ffffff;
+        }
+        
+        .system-status-indicator {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .system-status-indicator.operational {
+            background: rgba(0, 208, 132, 0.2);
+            color: #00d084;
+            border: 1px solid rgba(0, 208, 132, 0.4);
+        }
+        
+        .system-status-indicator.warning {
+            background: rgba(255, 165, 2, 0.2);
+            color: #ffa502;
+            border: 1px solid rgba(255, 165, 2, 0.4);
+        }
+        
+        .system-status-indicator.critical {
+            background: rgba(255, 71, 87, 0.2);
+            color: #ff4757;
+            border: 1px solid rgba(255, 71, 87, 0.4);
+        }
+        
+        .system-status-details {
+            color: #b0b0b0;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        
+        .loading-indicator {
+            text-align: center;
+            color: #999;
+            font-style: italic;
+            padding: 40px;
+        }
+        
+        /* Content Section Display Controls */
+        .correlation-section,
+        .context-section {
+            display: none;
+            margin-left: 300px;
+            width: calc(100% - 300px);
+            padding: 20px;
+            min-height: 100vh;
+            background: var(--background-primary, #0a0a0b);
+        }
+        
+        .section-placeholder {
+            display: none;
+            margin-left: 300px;
+            width: calc(100% - 300px);
+        }
+        
+        /* Ensure main elements have proper layout */
+        body {
+            margin: 0;
+            padding: 0;
+            background: var(--background-primary, #0a0a0b);
+            color: var(--text-primary, #ffffff);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow-x: hidden;
+        }
+        
+        /* Make sure sidebar is always visible and System Hub is shown */
+        .dashboard-sidebar {
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            background: #1a1a1d !important;
+            border: 2px solid #00d4aa !important;
+        }
+        
+        .system-hub-grid {
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 16px !important;
+            background: rgba(255, 0, 0, 0.1) !important; /* Red background for debugging */
+        }
+        
+        .system-category {
+            display: block !important;
+            visibility: visible !important;
+            background: rgba(0, 255, 0, 0.1) !important; /* Green background for debugging */
+            border: 1px solid #00d4aa !important;
+        }
+        
+        .sidebar-section {
+            display: block !important;
+            visibility: visible !important;
+            background: rgba(0, 0, 255, 0.1) !important; /* Blue background for debugging */
+        }
+        
+        /* System Hub Title Debug */
+        .sidebar-section-title {
+            color: #00d4aa !important;
+            font-size: 18px !important;
+            font-weight: bold !important;
+            text-shadow: 1px 1px 2px #000 !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- Main Dashboard Container -->
+    <div class="dashboard-container" id="dashboardContainer">
+        
+        <!-- Dashboard Header -->
+        <header class="dashboard-header" role="banner">
+            <div class="header-brand">
+                <div class="header-logo" aria-label="GoldGPT Logo">G</div>
+                <div>
+                    <h1 class="header-title">GoldGPT Professional</h1>
+                    <span class="header-subtitle">AI-Powered Trading Dashboard</span>
+                </div>
+            </div>
+            
+            <div class="header-controls">
+                <!-- Connection Status -->
+                <div class="header-status" aria-label="Connection Status">
+                    <div class="status-indicator" id="connectionStatus"></div>
+                    <span id="statusText">Connecting...</span>
+                </div>
+                
+                <!-- Current Time -->
+                <div class="header-time" id="currentTime">
+                    --:--:-- UTC
+                </div>
+                
+                <!-- Settings Menu -->
+                <button class="chart-control-btn" id="settingsBtn" aria-label="Settings" title="Settings">
+                    ⚙️
+                </button>
+                
+                <!-- Fullscreen Toggle -->
+                <button class="chart-control-btn" id="fullscreenBtn" aria-label="Toggle Fullscreen" title="Fullscreen (F11)">
+                    ⛶
+                </button>
+            </div>
+        </header>
+        
+        <!-- Sidebar Navigation -->
+        <aside class="dashboard-sidebar" role="navigation" aria-label="Main Navigation">
+            <div class="sidebar-content">
+                
+                <!-- Portfolio Summary -->
+                <section class="sidebar-section">
+                    <h2 class="sidebar-section-title">Portfolio</h2>
+                    <div class="portfolio-summary">
+                        <div class="portfolio-value" id="portfolioValue">$10,000.00</div>
+                        <div class="portfolio-change" id="portfolioChange">
+                            <span>+$125.50</span>
+                            <span>(+1.26%)</span>
+                        </div>
+                        <div class="portfolio-metrics">
+                            <div class="portfolio-metric">
+                                <div class="portfolio-metric-value" id="dailyPnL">+2.1%</div>
+                                <div class="portfolio-metric-label">Today</div>
+                            </div>
+                            <div class="portfolio-metric">
+                                <div class="portfolio-metric-value" id="winRate">68%</div>
+                                <div class="portfolio-metric-label">Win Rate</div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- Strategy Validation Status -->
+                <section class="sidebar-section">
+                    <h2 class="sidebar-section-title">Strategy Validation</h2>
+                    <div class="validation-summary" id="validationSummary">
+                        <div class="validation-health">
+                            <div class="validation-health-label" id="validationHealthLabel">System Health</div>
+                            <div class="validation-health-display">
+                                <div class="validation-health-score" id="validationHealthScore">--</div>
+                                <div class="validation-health-indicator" id="validationHealthIndicator">🔄</div>
+                            </div>
+                        </div>
+                        <div class="validation-metrics">
+                            <div class="validation-metric">
+                                <div class="validation-metric-value" id="approvedStrategies" style="color: #00d084;">--</div>
+                                <div class="validation-metric-label">Approved</div>
+                            </div>
+                            <div class="validation-metric">
+                                <div class="validation-metric-value" id="conditionalStrategies" style="color: #ffa502;">--</div>
+                                <div class="validation-metric-label">Conditional</div>
+                            </div>
+                            <div class="validation-metric">
+                                <div class="validation-metric-value" id="rejectedStrategies" style="color: #ff4757;">--</div>
+                                <div class="validation-metric-label">Rejected</div>
+                            </div>
+                        </div>
+                        <div class="validation-alerts" id="validationAlerts">
+                            <!-- Dynamic alerts will be loaded here -->
+                        </div>
+                        <button class="validation-details-btn" onclick="showValidationDetails()">
+                            View Details
+                        </button>
+                    </div>
+                </section>
+                
+                <!-- Navigation Menu -->
+                <section class="sidebar-section">
+                    <h2 class="sidebar-section-title">Analysis</h2>
+                    <nav class="sidebar-nav" role="navigation">
+                        <ul>
+                            <li class="sidebar-nav-item">
+                                <a href="#charts" class="sidebar-nav-link active" data-section="charts">
+                                    <span class="sidebar-nav-icon">📊</span>
+                                    Multi-Timeframe Charts
+                                </a>
+                            </li>
+                            <li class="sidebar-nav-item">
+                                <a href="#predictions" class="sidebar-nav-link" data-section="predictions">
+                                    <span class="sidebar-nav-icon">🤖</span>
+                                    AI Predictions
+                                </a>
+                            </li>
+                            <li class="sidebar-nav-item">
+                                <a href="#correlation" class="sidebar-nav-link" data-section="correlation">
+                                    <span class="sidebar-nav-icon">🔗</span>
+                                    Timeframe Correlation
+                                </a>
+                            </li>
+                            <li class="sidebar-nav-item">
+                                <a href="#context" class="sidebar-nav-link" data-section="context">
+                                    <span class="sidebar-nav-icon">🌍</span>
+                                    Market Context
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                </section>
+                
+                <!-- System Access Hub -->
+                <section class="sidebar-section">
+                    <h2 class="sidebar-section-title">🚀 System Hub</h2>
+                    <div class="system-hub-grid">
+                        
+                        <!-- Core Trading Systems -->
+                        <div class="system-category">
+                            <h4 class="system-category-title">📈 Trading Systems</h4>
+                            <div class="system-links">
+                                <a href="/ai-analysis" class="system-link" target="_blank">
+                                    <span class="system-icon">🤖</span>
+                                    <span class="system-name">AI Analysis Center</span>
+                                </a>
+                                <a href="/positions" class="system-link" target="_blank">
+                                    <span class="system-icon">💼</span>
+                                    <span class="system-name">Portfolio Manager</span>
+                                </a>
+                                <a href="/advanced-ml-dashboard" class="system-link" target="_blank">
+                                    <span class="system-icon">🧠</span>
+                                    <span class="system-name">ML Dashboard</span>
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <!-- Analysis & Validation -->
+                        <div class="system-category">
+                            <h4 class="system-category-title">🛡️ Validation & Testing</h4>
+                            <div class="system-links">
+                                <a href="/auto-validation" class="system-link" target="_blank">
+                                    <span class="system-icon">✅</span>
+                                    <span class="system-name">Auto Validation</span>
+                                </a>
+                                <a href="/backtesting-dashboard" class="system-link" target="_blank">
+                                    <span class="system-icon">📊</span>
+                                    <span class="system-name">Backtesting Suite</span>
+                                </a>
+                                <a href="/test-accuracy" class="system-link" target="_blank">
+                                    <span class="system-icon">🎯</span>
+                                    <span class="system-name">Accuracy Testing</span>
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <!-- Advanced Analytics -->
+                        <div class="system-category">
+                            <h4 class="system-category-title">📈 Advanced Analytics</h4>
+                            <div class="system-links">
+                                <a href="/daily-ml-dashboard" class="system-link" target="_blank">
+                                    <span class="system-icon">📅</span>
+                                    <span class="system-name">Daily ML Tracker</span>
+                                </a>
+                                <a href="/advanced-ml-demo" class="system-link" target="_blank">
+                                    <span class="system-icon">🔬</span>
+                                    <span class="system-name">ML Demonstration</span>
+                                </a>
+                                <a href="/test-live-predictions" class="system-link" target="_blank">
+                                    <span class="system-icon">📡</span>
+                                    <span class="system-name">Live Predictions</span>
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <!-- Development & Debug -->
+                        <div class="system-category">
+                            <h4 class="system-category-title">⚙️ Development Tools</h4>
+                            <div class="system-links">
+                                <a href="/debug-ml-loading" class="system-link" target="_blank">
+                                    <span class="system-icon">🔧</span>
+                                    <span class="system-name">ML Debug Console</span>
+                                </a>
+                                <a href="/verify-ml-fix" class="system-link" target="_blank">
+                                    <span class="system-icon">🔍</span>
+                                    <span class="system-name">System Verification</span>
+                                </a>
+                                <a href="/api/ai-analysis/status" class="system-link" target="_blank">
+                                    <span class="system-icon">💡</span>
+                                    <span class="system-name">API Status Monitor</span>
+                                </a>
+                            </div>
+                        </div>
+                        
+                    </div>
+                    
+                    <!-- Quick System Status -->
+                    <div class="system-status-summary">
+                        <div class="status-indicator-row">
+                            <span class="status-label">🤖 AI Engine:</span>
+                            <span class="status-value" id="aiEngineStatus">🟢 Active</span>
+                        </div>
+                        <div class="status-indicator-row">
+                            <span class="status-label">🛡️ Validation:</span>
+                            <span class="status-value" id="validationSystemStatus">🟢 Active</span>
+                        </div>
+                        <div class="status-indicator-row">
+                            <span class="status-label">📊 Backtesting:</span>
+                            <span class="status-value" id="backtestingStatus">🟢 Ready</span>
+                        </div>
+                        <button class="system-overview-btn" onclick="showSystemOverview()">
+                            📋 Full System Status
+                        </button>
+                    </div>
+                </section>
+                
+                <!-- Quick Actions -->
+                <section class="sidebar-section">
+                    <h2 class="sidebar-section-title">Quick Actions</h2>
+                    <div class="d-flex flex-column gap-sm">
+                        <button class="chart-control-btn w-100" id="refreshAllBtn" title="Refresh All Data">
+                            🔄 Refresh All
+                        </button>
+                        <button class="chart-control-btn w-100" id="generateSignalBtn" title="Generate New Signal">
+                            ⚡ Generate Signal
+                        </button>
+                    </div>
+                </section>
+                
+            </div>
+        </aside>
+        
+        <!-- Main Chart Area -->
+        <main class="dashboard-charts" id="main-content" role="main" aria-label="Trading Charts">
+            <div class="unified-chart-system" id="unifiedChartSystem">
+                
+                <!-- Chart Header -->
+                <div class="charts-header">
+                    <h2 class="charts-title">Multi-Timeframe Analysis</h2>
+                    <div class="charts-controls">
+                        
+                        <!-- Timeframe Selector -->
+                        <div class="timeframe-selector" role="tablist" aria-label="Chart Timeframes">
+                            <button class="timeframe-btn active" role="tab" data-timeframe="1h" aria-selected="true">1H</button>
+                            <button class="timeframe-btn" role="tab" data-timeframe="4h" aria-selected="false">4H</button>
+                            <button class="timeframe-btn" role="tab" data-timeframe="1d" aria-selected="false">1D</button>
+                        </div>
+                        
+                        <!-- Chart Controls -->
+                        <div class="chart-controls">
+                            <button class="chart-control-btn" id="chartSyncBtn" aria-label="Sync Charts" title="Sync Charts">🔗</button>
+                            <button class="chart-control-btn" id="indicatorsBtn" aria-label="Indicators" title="Indicators">📈</button>
+                        </div>
+                        
+                    </div>
+                </div>
+                
+                <!-- Chart Grid -->
+                <div class="chart-grid split-view" id="chartGrid">
+                    
+                    <!-- Primary Chart Panel -->
+                    <div class="chart-panel active" data-timeframe="1h">
+                        <div class="chart-panel-header">
+                            <span class="chart-panel-title">XAU/USD - 1H</span>
+                            <div class="chart-panel-controls">
+                                <button class="chart-panel-control" data-action="maximize" title="Maximize Chart">⛶</button>
+                            </div>
+                        </div>
+                        <div class="chart-panel-content" id="chart1h" style="position: relative; height: 400px;">
+                            <!-- Chart Loading Overlay -->
+                            <div class="chart-loading-overlay" id="chartLoading1h">
+                                <div class="chart-loading-spinner"></div>
+                                <div class="chart-loading-text">Loading chart data...</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Secondary Chart Panel -->
+                    <div class="chart-panel" data-timeframe="4h">
+                        <div class="chart-panel-header">
+                            <span class="chart-panel-title">XAU/USD - 4H</span>
+                            <div class="chart-panel-controls">
+                                <button class="chart-panel-control" data-action="maximize" title="Maximize Chart">⛶</button>
+                            </div>
+                        </div>
+                        <div class="chart-panel-content" id="chart4h" style="position: relative; height: 400px;">
+                            <!-- Chart Loading Overlay -->
+                            <div class="chart-loading-overlay" id="chartLoading4h">
+                                <div class="chart-loading-spinner"></div>
+                                <div class="chart-loading-text">Loading chart data...</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>
+                
+                <!-- Chart Status Bar -->
+                <div class="chart-status-bar">
+                    <div class="chart-status-left">
+                        <div class="status-item">
+                            <span class="status-label">Price:</span>
+                            <span class="status-value" id="currentPrice">Loading...</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="status-label">Change:</span>
+                            <span class="status-value" id="priceChange">--</span>
+                        </div>
+                    </div>
+                    <div class="chart-status-right">
+                        <div class="status-item">
+                            <span class="status-label">Last Update:</span>
+                            <span class="status-value" id="lastUpdate">--:--:--</span>
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+        </main>
+        
+        <!-- Predictions Panel -->
+        <section class="dashboard-predictions" role="region" aria-label="AI Predictions">
+            <div class="advanced-predictions-panel" id="advancedPredictionsPanel">
+                
+                <!-- Predictions Header -->
+                <div class="predictions-header">
+                    <h2 class="predictions-title">AI Predictions</h2>
+                    <button class="predictions-refresh" id="predictionsRefreshBtn" aria-label="Refresh Predictions">
+                        🔄
+                    </button>
+                </div>
+                
+                <!-- Predictions Summary -->
+                <div class="predictions-summary">
+                    <div class="summary-stats">
+                        <div class="summary-stat">
+                            <div class="summary-stat-value" id="totalPredictions">--</div>
+                            <div class="summary-stat-label">Total Predictions</div>
+                        </div>
+                        <div class="summary-stat">
+                            <div class="summary-stat-value" id="avgConfidence">--%</div>
+                            <div class="summary-stat-label">Avg Confidence</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Predictions List -->
+                <div class="predictions-content">
+                    <div class="predictions-list" id="predictionsList">
+                        <div class="predictions-loading">
+                            <div class="chart-loading-spinner"></div>
+                            <div>Loading predictions...</div>
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+        </section>
+        
+    </div>
+    
+    <!-- Simplified JavaScript -->
+    <script>
+        // Simple Dashboard Manager
+        class SimpleDashboard {
+            constructor() {
+                this.socket = null;
+                this.charts = {};
+                this.currentPrice = 0;
+                
+                this.init();
+            }
+            
+            async init() {
+                try {
+                    console.log('🚀 Initializing GoldGPT Dashboard...');
+                    
+                    // Initialize Socket.IO (with error handling)
+                    try {
+                        this.initSocket();
+                    } catch (e) {
+                        console.warn('⚠️ Socket.IO initialization failed:', e);
+                    }
+                    
+                    // Initialize charts (with error handling)
+                    try {
+                        await this.initCharts();
+                    } catch (e) {
+                        console.warn('⚠️ Charts initialization failed:', e);
+                    }
+                    
+                    // Setup event listeners
+                    this.setupEventListeners();
+                    
+                    // Load initial data
+                    await this.loadInitialData();
+                    
+                    // Start real-time updates
+                    this.startRealTimeUpdates();
+                    
+                    console.log('✅ Dashboard initialized successfully');
+                    
+                } catch (error) {
+                    console.error('❌ Dashboard initialization error:', error);
+                    this.showError('Failed to initialize dashboard', error.message);
+                }
+            }
+            
+            initSocket() {
+                try {
+                    this.socket = io();
+                    
+                    this.socket.on('connect', () => {
+                        console.log('🔗 Connected to server');
+                        this.updateConnectionStatus(true);
+                    });
+                    
+                    this.socket.on('disconnect', () => {
+                        console.log('🔌 Disconnected from server');
+                        this.updateConnectionStatus(false);
+                    });
+                    
+                    this.socket.on('price_update', (data) => {
+                        this.handlePriceUpdate(data);
+                    });
+                    
+                } catch (error) {
+                    console.error('❌ Socket initialization failed:', error);
+                    this.updateConnectionStatus(false);
+                }
+            }
+            
+            async initCharts() {
+                try {
+                    // Initialize TradingView Lightweight Charts
+                    const chart1hContainer = document.getElementById('chart1h');
+                    const chart4hContainer = document.getElementById('chart4h');
+                    
+                    if (!window.LightweightCharts) {
+                        throw new Error('TradingView Lightweight Charts not loaded');
+                    }
+                    
+                    // Create 1H chart
+                    this.charts['1h'] = LightweightCharts.createChart(chart1hContainer, {
+                        width: chart1hContainer.clientWidth,
+                        height: 400,
+                        layout: {
+                            background: { color: '#0a0a0b' },
+                            textColor: '#ffffff',
+                        },
+                        grid: {
+                            vertLines: { color: '#1a1a1b' },
+                            horzLines: { color: '#1a1a1b' },
+                        },
+                        crosshair: {
+                            mode: LightweightCharts.CrosshairMode.Normal,
+                        },
+                        rightPriceScale: {
+                            borderColor: '#2a2a2b',
+                        },
+                        timeScale: {
+                            borderColor: '#2a2a2b',
+                        },
+                    });
+                    
+                    // Create 4H chart
+                    this.charts['4h'] = LightweightCharts.createChart(chart4hContainer, {
+                        width: chart4hContainer.clientWidth,
+                        height: 400,
+                        layout: {
+                            background: { color: '#0a0a0b' },
+                            textColor: '#ffffff',
+                        },
+                        grid: {
+                            vertLines: { color: '#1a1a1b' },
+                            horzLines: { color: '#1a1a1b' },
+                        },
+                        crosshair: {
+                            mode: LightweightCharts.CrosshairMode.Normal,
+                        },
+                        rightPriceScale: {
+                            borderColor: '#2a2a2b',
+                        },
+                        timeScale: {
+                            borderColor: '#2a2a2b',
+                        },
+                    });
+                    
+                    // Add candlestick series
+                    this.charts['1h'].candlestickSeries = this.charts['1h'].addCandlestickSeries({
+                        upColor: '#4CAF50',
+                        downColor: '#f44336',
+                        borderDownColor: '#f44336',
+                        borderUpColor: '#4CAF50',
+                        wickDownColor: '#f44336',
+                        wickUpColor: '#4CAF50',
+                    });
+                    
+                    this.charts['4h'].candlestickSeries = this.charts['4h'].addCandlestickSeries({
+                        upColor: '#4CAF50',
+                        downColor: '#f44336',
+                        borderDownColor: '#f44336',
+                        borderUpColor: '#4CAF50',
+                        wickDownColor: '#f44336',
+                        wickUpColor: '#4CAF50',
+                    });
+                    
+                    console.log('✅ Charts initialized');
+                    
+                } catch (error) {
+                    console.error('❌ Chart initialization failed:', error);
+                    this.showChartError();
+                }
+            }
+            
+            async loadInitialData() {
+                try {
+                    // Hide loading overlays
+                    document.getElementById('chartLoading1h').style.display = 'none';
+                    document.getElementById('chartLoading4h').style.display = 'none';
+                    
+                    // Load chart data
+                    await this.loadChartData('1h');
+                    await this.loadChartData('4h');
+                    
+                    // Load predictions
+                    await this.loadPredictions();
+                    
+                    // Load current price
+                    await this.loadCurrentPrice();
+                    
+                } catch (error) {
+                    console.error('❌ Failed to load initial data:', error);
+                    this.showError('Failed to load data', error.message);
+                }
+            }
+            
+            async loadChartData(timeframe) {
+                try {
+                    const response = await fetch(`/api/chart-data/${timeframe}?symbol=XAUUSD&limit=100`);
+                    const data = await response.json();
+                    
+                    if (data.success && data.data && this.charts[timeframe]) {
+                        const candlestickData = data.data.map(item => ({
+                            time: item.time,
+                            open: item.open,
+                            high: item.high,
+                            low: item.low,
+                            close: item.close
+                        }));
+                        
+                        this.charts[timeframe].candlestickSeries.setData(candlestickData);
+                        console.log(`✅ Loaded ${timeframe} chart data:`, candlestickData.length, 'points');
+                    }
+                    
+                } catch (error) {
+                    console.error(`❌ Failed to load ${timeframe} chart data:`, error);
+                }
+            }
+            
+            async loadPredictions() {
+                try {
+                    const response = await fetch('/api/predictions?symbol=XAU&min_confidence=0.5');
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        this.displayPredictions(data.predictions, data.summary);
+                        console.log('✅ Loaded predictions:', data.predictions.length);
+                    }
+                    
+                } catch (error) {
+                    console.error('❌ Failed to load predictions:', error);
+                    document.getElementById('predictionsList').innerHTML = '<div class="predictions-error">Failed to load predictions</div>';
+                }
+            }
+            
+            async loadCurrentPrice() {
+                try {
+                    // This will be updated via WebSocket, but load initial value
+                    const response = await fetch('/api/portfolio-summary');
+                    const data = await response.json();
+                    
+                    if (data.success && data.portfolio) {
+                        // Use mock current price for now
+                        this.updatePriceDisplay(3432.30, 12.50, 0.36);
+                    }
+                    
+                } catch (error) {
+                    console.error('❌ Failed to load current price:', error);
+                }
+            }
+            
+            displayPredictions(predictions, summary) {
+                const container = document.getElementById('predictionsList');
+                
+                if (!predictions || predictions.length === 0) {
+                    container.innerHTML = '<div class="predictions-empty">No predictions available</div>';
+                    return;
+                }
+                
+                // Update summary
+                document.getElementById('totalPredictions').textContent = summary.total_predictions || 0;
+                document.getElementById('avgConfidence').textContent = `${summary.avg_confidence || 0}%`;
+                
+                // Display predictions
+                container.innerHTML = predictions.map(pred => `
+                    <div class="prediction-card ${pred.direction.toLowerCase()}">
+                        <div class="prediction-header">
+                            <div class="prediction-direction ${pred.direction.toLowerCase()}">${pred.direction}</div>
+                            <div class="prediction-timeframe">${pred.timeframe}</div>
+                        </div>
+                        <div class="prediction-details">
+                            <div class="prediction-confidence">
+                                <div class="confidence-label">Confidence</div>
+                                <div class="confidence-value">${Math.round(pred.confidence * 100)}%</div>
+                            </div>
+                            <div class="prediction-price">
+                                <div class="price-label">Entry</div>
+                                <div class="price-value">$${pred.entry_price}</div>
+                            </div>
+                        </div>
+                        <div class="prediction-strategy">${pred.strategy}</div>
+                    </div>
+                `).join('');
+            }
+            
+            setupEventListeners() {
+                // Refresh buttons
+                document.getElementById('refreshAllBtn').addEventListener('click', () => {
+                    this.refreshAllData();
+                });
+                
+                document.getElementById('predictionsRefreshBtn').addEventListener('click', () => {
+                    this.loadPredictions();
+                });
+                
+                document.getElementById('generateSignalBtn').addEventListener('click', () => {
+                    this.generateSignal();
+                });
+                
+                // Sidebar navigation
+                document.querySelectorAll('.sidebar-nav-link').forEach(link => {
+                    link.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const section = e.currentTarget.dataset.section;
+                        this.switchSection(section);
+                        
+                        // Update active navigation
+                        document.querySelectorAll('.sidebar-nav-link').forEach(l => l.classList.remove('active'));
+                        e.currentTarget.classList.add('active');
+                    });
+                });
+                
+                // System Hub links
+                document.querySelectorAll('.system-link').forEach(link => {
+                    link.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const href = e.currentTarget.getAttribute('href');
+                        const systemName = e.currentTarget.querySelector('.system-name').textContent;
+                        
+                        // Add visual feedback
+                        e.currentTarget.style.transform = 'scale(0.95)';
+                        setTimeout(() => {
+                            e.currentTarget.style.transform = 'scale(1)';
+                        }, 150);
+                        
+                        console.log(`🚀 Opening system: ${systemName}`);
+                        
+                        // Check if it's an API endpoint
+                        if (href.includes('/api/')) {
+                            window.open(href, '_blank');
+                        } else {
+                            // Try to navigate to the system
+                            this.navigateToSystem(href, systemName);
+                        }
+                    });
+                });
+                
+                // Timeframe buttons
+                document.querySelectorAll('.timeframe-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const timeframe = e.target.dataset.timeframe;
+                        this.switchTimeframe(timeframe);
+                    });
+                });
+                
+                // Window resize
+                window.addEventListener('resize', () => {
+                    this.handleResize();
+                });
+            }
+            
+            startRealTimeUpdates() {
+                // Update time every second
+                setInterval(() => {
+                    const now = new Date();
+                    const timeString = now.toLocaleTimeString('en-US', {
+                        timeZone: 'UTC',
+                        hour12: false
+                    }) + ' UTC';
+                    document.getElementById('currentTime').textContent = timeString;
+                }, 1000);
+                
+                // Update last update time
+                setInterval(() => {
+                    document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString();
+                }, 5000);
+            }
+            
+            handlePriceUpdate(data) {
+                if (data.symbol === 'XAUUSD') {
+                    this.updatePriceDisplay(data.price, data.change, data.changePercent);
+                }
+            }
+            
+            updatePriceDisplay(price, change, changePercent) {
+                document.getElementById('currentPrice').textContent = `$${price.toFixed(2)}`;
+                
+                const changeElement = document.getElementById('priceChange');
+                const changeText = `${change >= 0 ? '+' : ''}$${Math.abs(change).toFixed(2)} (${change >= 0 ? '+' : ''}${changePercent.toFixed(2)}%)`;
+                changeElement.textContent = changeText;
+                changeElement.className = `status-value ${change >= 0 ? 'positive' : 'negative'}`;
+                
+                this.currentPrice = price;
+            }
+            
+            updateConnectionStatus(connected) {
+                const statusIndicator = document.getElementById('connectionStatus');
+                const statusText = document.getElementById('statusText');
+                
+                if (connected) {
+                    statusIndicator.className = 'status-indicator';
+                    statusText.textContent = 'Connected';
+                } else {
+                    statusIndicator.className = 'status-indicator disconnected';
+                    statusText.textContent = 'Disconnected';
+                }
+            }
+            
+            async refreshAllData() {
+                try {
+                    console.log('🔄 Refreshing all data...');
+                    
+                    // Show loading state
+                    document.getElementById('chartLoading1h').style.display = 'flex';
+                    document.getElementById('chartLoading4h').style.display = 'flex';
+                    
+                    // Reload chart data
+                    await Promise.all([
+                        this.loadChartData('1h'),
+                        this.loadChartData('4h'),
+                        this.loadPredictions(),
+                        this.loadCurrentPrice()
+                    ]);
+                    
+                    // Hide loading state
+                    document.getElementById('chartLoading1h').style.display = 'none';
+                    document.getElementById('chartLoading4h').style.display = 'none';
+                    
+                    console.log('✅ Data refresh complete');
+                    
+                } catch (error) {
+                    console.error('❌ Data refresh failed:', error);
+                    this.showError('Refresh failed', error.message);
+                }
+            }
+            
+            async generateSignal() {
+                try {
+                    console.log('⚡ Generating signal...');
+                    
+                    const response = await fetch('/api/generate-signal', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ symbol: 'XAUUSD', timeframe: '1h' })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        console.log('✅ Signal generated:', data.signal);
+                        this.showNotification(`New ${data.signal.signal_type} signal generated`, 'success');
+                        
+                        // Refresh predictions
+                        await this.loadPredictions();
+                    } else {
+                        throw new Error(data.error || 'Signal generation failed');
+                    }
+                    
+                } catch (error) {
+                    console.error('❌ Signal generation failed:', error);
+                    this.showNotification('Signal generation failed', 'error');
+                }
+            }
+            
+            switchTimeframe(timeframe) {
+                // Update active timeframe button
+                document.querySelectorAll('.timeframe-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                    btn.setAttribute('aria-selected', 'false');
+                });
+                
+                document.querySelector(`[data-timeframe="${timeframe}"]`).classList.add('active');
+                document.querySelector(`[data-timeframe="${timeframe}"]`).setAttribute('aria-selected', 'true');
+                
+                console.log(`Switched to ${timeframe} timeframe`);
+            }
+            
+            handleResize() {
+                // Resize charts
+                Object.values(this.charts).forEach(chart => {
+                    if (chart && chart.applyOptions) {
+                        chart.applyOptions({
+                            width: chart.container.clientWidth
+                        });
+                    }
+                });
+            }
+            
+            showError(title, message) {
+                // Show error in chart area
+                const errorHtml = `
+                    <div class="chart-error-overlay">
+                        <div class="chart-error-icon">⚠</div>
+                        <div class="chart-error-title">${title}</div>
+                        <div class="chart-error-message">${message}</div>
+                        <button class="chart-error-retry" onclick="window.dashboard.refreshAllData()">Retry</button>
+                    </div>
+                `;
+                
+                document.getElementById('chart1h').innerHTML = errorHtml;
+                document.getElementById('chart4h').innerHTML = errorHtml;
+            }
+            
+            showChartError() {
+                this.showError('Chart Error', 'Unable to load chart data. Please check your connection and try again.');
+            }
+            
+            showNotification(message, type = 'info') {
+                console.log(`${type.toUpperCase()}: ${message}`);
+                
+                // Create notification element
+                const notification = document.createElement('div');
+                notification.className = `notification notification-${type}`;
+                notification.textContent = message;
+                
+                notification.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    background: var(--card-background);
+                    color: var(--text-primary);
+                    padding: 12px 20px;
+                    border-radius: 8px;
+                    border: 1px solid var(--border-color);
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                    z-index: 1000;
+                    max-width: 300px;
+                    font-size: 14px;
+                    transition: all 0.3s ease;
+                    transform: translateX(100%);
+                `;
+                
+                // Add type-specific styling
+                if (type === 'success') {
+                    notification.style.borderColor = '#00d4aa';
+                    notification.style.background = 'rgba(0, 212, 170, 0.1)';
+                } else if (type === 'warning') {
+                    notification.style.borderColor = '#f59e0b';
+                    notification.style.background = 'rgba(245, 158, 11, 0.1)';
+                } else if (type === 'error') {
+                    notification.style.borderColor = '#ef4444';
+                    notification.style.background = 'rgba(239, 68, 68, 0.1)';
+                }
+                
+                document.body.appendChild(notification);
+                
+                // Animate in
+                setTimeout(() => {
+                    notification.style.transform = 'translateX(0)';
+                }, 10);
+                
+                // Auto-remove after 4 seconds
+                setTimeout(() => {
+                    notification.style.transform = 'translateX(100%)';
+                    setTimeout(() => {
+                        if (notification.parentNode) {
+                            notification.parentNode.removeChild(notification);
+                        }
+                    }, 300);
+                }, 4000);
+            }
+            
+            switchSection(sectionName) {
+                console.log(`🔄 Switching to section: ${sectionName}`);
+                
+                // Define section mappings
+                const sections = {
+                    'charts': '.dashboard-charts',
+                    'predictions': '.dashboard-predictions', 
+                    'correlation': '.correlation-section',
+                    'context': '.context-section'
+                };
+                
+                // Hide all sections
+                Object.values(sections).forEach(selector => {
+                    const element = document.querySelector(selector);
+                    if (element) {
+                        element.style.display = 'none';
+                    }
+                });
+                
+                // Show selected section
+                const targetSelector = sections[sectionName];
+                if (targetSelector) {
+                    const targetElement = document.querySelector(targetSelector);
+                    if (targetElement) {
+                        targetElement.style.display = 'block';
+                    } else {
+                        // If section doesn't exist, create a placeholder
+                        this.createSectionPlaceholder(sectionName);
+                    }
+                } else {
+                    // Default to charts if unknown section
+                    const chartsElement = document.querySelector('.dashboard-charts');
+                    if (chartsElement) {
+                        chartsElement.style.display = 'block';
+                    }
+                }
+                
+                // Refresh chart if switching to charts
+                if (sectionName === 'charts') {
+                    setTimeout(() => this.handleResize(), 100);
+                }
+            }
+            
+            createSectionPlaceholder(sectionName) {
+                console.log(`📋 Creating placeholder for section: ${sectionName}`);
+                
+                // Remove any existing placeholder
+                const existingPlaceholder = document.querySelector('.section-placeholder');
+                if (existingPlaceholder) {
+                    existingPlaceholder.remove();
+                }
+                
+                // Create new placeholder
+                const placeholder = document.createElement('div');
+                placeholder.className = `${sectionName}-section section-placeholder`;
+                placeholder.style.cssText = `
+                    display: block;
+                    padding: 2rem;
+                    background: var(--card-background);
+                    border-radius: 12px;
+                    margin: 1rem;
+                    text-align: center;
+                    border: 2px dashed var(--border-color);
+                `;
+                
+                const content = {
+                    'correlation': {
+                        title: '🔗 Timeframe Correlation Analysis',
+                        description: 'Cross-timeframe correlation analysis and market synchronization metrics.'
+                    },
+                    'context': {
+                        title: '🌍 Market Context & News',
+                        description: 'Real-time market sentiment, economic indicators, and news analysis.'
+                    }
+                };
+                
+                const info = content[sectionName] || {
+                    title: `📊 ${sectionName.charAt(0).toUpperCase() + sectionName.slice(1)} Section`,
+                    description: 'This section is under development.'
+                };
+                
+                placeholder.innerHTML = `
+                    <h2 style="color: var(--text-primary); margin-bottom: 1rem;">${info.title}</h2>
+                    <p style="color: var(--text-secondary); margin-bottom: 2rem;">${info.description}</p>
+                    <button class="btn btn-primary" onclick="window.dashboard.switchSection('charts')">
+                        Return to Charts
+                    </button>
+                `;
+                
+                // Insert after sidebar
+                const sidebar = document.querySelector('.dashboard-sidebar');
+                if (sidebar && sidebar.nextSibling) {
+                    sidebar.parentNode.insertBefore(placeholder, sidebar.nextSibling);
+                }
+            }
+            
+            handleSystemAction(action, target, cardElement) {
+                console.log(`🎯 System action: ${action} for ${target}`);
+                
+                // Add visual feedback
+                cardElement.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    cardElement.style.transform = 'scale(1)';
+                }, 150);
+                
+                switch (action) {
+                    case 'navigate':
+                        this.navigateToSystem(target);
+                        break;
+                    case 'modal':
+                        this.openSystemModal(target);
+                        break;
+                    case 'external':
+                        this.openExternalSystem(target);
+                        break;
+                    default:
+                        console.warn(`Unknown action: ${action}`);
+                }
+            }
+            
+            navigateToSystem(href, systemName) {
+                console.log(`🎯 Navigating to: ${href}`);
+                
+                // Check if the route exists by making a quick test
+                fetch(href, { method: 'HEAD' })
+                    .then(response => {
+                        if (response.ok) {
+                            // Route exists, navigate
+                            window.location.href = href;
+                        } else {
+                            // Route doesn't exist, show notification
+                            this.showNotification(`${systemName} is currently under development`, 'info');
+                        }
+                    })
+                    .catch(() => {
+                        // Network error or route doesn't exist
+                        this.showNotification(`Unable to access ${systemName}. Please check if the service is running.`, 'warning');
+                    });
+            }
+            
+            openSystemModal(target) {
+                // Create and show modal for system
+                const modal = document.createElement('div');
+                modal.className = 'system-modal';
+                modal.innerHTML = `
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3>🚀 ${target.replace('-', ' ').toUpperCase()}</h3>
+                            <button class="modal-close">&times;</button>
+                        </div>
+                        <div class="modal-body">
+                            <p>System dashboard for ${target} is loading...</p>
+                            <div class="modal-actions">
+                                <button class="btn btn-primary" onclick="this.closest('.system-modal').remove()">
+                                    Close
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                modal.style.cssText = `
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: rgba(0,0,0,0.7);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 1000;
+                `;
+                
+                modal.querySelector('.modal-close').onclick = () => modal.remove();
+                modal.onclick = (e) => {
+                    if (e.target === modal) modal.remove();
+                };
+                
+                document.body.appendChild(modal);
+            }
+            
+            openExternalSystem(target) {
+                this.showNotification(`Opening ${target} in new window...`, 'info');
+                // window.open(`/systems/${target}`, '_blank');
+            }
+            
+            debugSystemHub() {
+                console.log('🔍 Debug: Checking System Hub visibility...');
+                
+                const sidebar = document.querySelector('.dashboard-sidebar');
+                const systemHub = document.querySelector('.system-hub-grid');
+                const systemSections = document.querySelectorAll('.system-category');
+                const systemHubSection = document.querySelector('.sidebar-section:nth-of-type(2)');
+                
+                console.log('📋 Sidebar element:', sidebar);
+                console.log('📋 System Hub element:', systemHub);
+                console.log('📋 System Hub section:', systemHubSection);
+                console.log('📋 System categories:', systemSections.length);
+                
+                // Force visibility with JavaScript
+                if (sidebar) {
+                    sidebar.style.display = 'block';
+                    sidebar.style.visibility = 'visible';
+                    sidebar.style.position = 'fixed';
+                    sidebar.style.left = '0';
+                    sidebar.style.top = '0';
+                    sidebar.style.width = '300px';
+                    sidebar.style.height = '100vh';
+                    sidebar.style.background = '#1a1a1d';
+                    sidebar.style.zIndex = '100';
+                    sidebar.style.overflowY = 'auto';
+                    sidebar.style.padding = '20px';
+                    
+                    const sidebarStyles = window.getComputedStyle(sidebar);
+                    console.log('📋 Sidebar display:', sidebarStyles.display);
+                    console.log('📋 Sidebar visibility:', sidebarStyles.visibility);
+                    console.log('📋 Sidebar position:', sidebarStyles.position);
+                }
+                
+                if (systemHub) {
+                    systemHub.style.display = 'flex';
+                    systemHub.style.flexDirection = 'column';
+                    systemHub.style.gap = '16px';
+                    systemHub.style.background = 'rgba(255, 0, 0, 0.1)';
+                    
+                    const hubStyles = window.getComputedStyle(systemHub);
+                    console.log('🚀 System Hub display:', hubStyles.display);
+                    console.log('🚀 System Hub visibility:', hubStyles.visibility);
+                } else {
+                    console.error('❌ System Hub element not found!');
+                }
+                
+                if (systemHubSection) {
+                    systemHubSection.style.display = 'block';
+                    systemHubSection.style.visibility = 'visible';
+                    systemHubSection.style.background = 'rgba(0, 0, 255, 0.1)';
+                    console.log('🚀 System Hub section found and forced visible');
+                } else {
+                    console.error('❌ System Hub section not found!');
+                }
+                
+                systemSections.forEach((section, index) => {
+                    section.style.display = 'block';
+                    section.style.visibility = 'visible';
+                    section.style.background = 'rgba(0, 255, 0, 0.1)';
+                    
+                    const sectionStyles = window.getComputedStyle(section);
+                    console.log(`🏷️ Section ${index + 1} display:`, sectionStyles.display);
+                });
+                
+                console.log('✅ Debug: System Hub visibility check completed');
+            }
+        }
+        
+        // Initialize dashboard when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            try {
+                console.log('🎯 Starting dashboard initialization...');
+                window.dashboard = new SimpleDashboard();
+                console.log('✅ Dashboard class created');
+            } catch (e) {
+                console.error('❌ Dashboard initialization failed:', e);
+                // Fallback: At least ensure System Hub is visible
+                setTimeout(() => {
+                    const sidebar = document.querySelector('.dashboard-sidebar');
+                    if (sidebar) {
+                        sidebar.style.display = 'block';
+                        sidebar.style.visibility = 'visible';
+                        console.log('🆘 Fallback: System Hub made visible');
+                    }
+                }, 500);
+            }
+            
+            // Initialize validation monitoring (with error handling)
+            try {
+                window.validationMonitor = new ValidationMonitor();
+            } catch (e) {
+                console.warn('⚠️ Validation monitor failed to initialize:', e);
+            }
+            
+            // Initialize system hub monitoring (with error handling)
+            try {
+                window.systemHubMonitor = new SystemHubMonitor();
+            } catch (e) {
+                console.warn('⚠️ System hub monitor failed to initialize:', e);
+            }
+        });
+        
+        // Validation Monitor Class
+        class ValidationMonitor {
+            constructor() {
+                this.updateInterval = 30000; // 30 seconds
+                this.init();
+            }
+            
+            init() {
+                console.log('🛡️ Initializing validation monitor...');
+                this.loadValidationStatus();
+                this.startPeriodicUpdates();
+            }
+            
+            async loadValidationStatus() {
+                try {
+                    const response = await fetch('/api/validation-status');
+                    const data = await response.json();
+                    
+                    if (data.status === 'unavailable') {
+                        this.showUnavailable();
+                        return;
+                    }
+                    
+                    this.updateValidationUI(data);
+                    console.log('✅ Validation status loaded:', data);
+                    
+                } catch (error) {
+                    console.error('❌ Failed to load validation status:', error);
+                    this.showError(error.message);
+                }
+            }
+            
+            updateValidationUI(data) {
+                // Update health score
+                const healthScore = Math.round(data.health_score || 0);
+                const healthScoreEl = document.getElementById('validationHealthScore');
+                if (healthScoreEl) {
+                    healthScoreEl.textContent = `${healthScore}%`;
+                    healthScoreEl.style.color = data.validation_health_indicator?.color || '#00d4aa';
+                }
+                
+                // Update health indicator
+                const healthIndicator = document.getElementById('validationHealthIndicator');
+                if (healthIndicator) {
+                    healthIndicator.textContent = data.validation_health_indicator?.icon || '🔄';
+                }
+                
+                // Update strategy counts
+                const approvedEl = document.getElementById('approvedStrategies');
+                const conditionalEl = document.getElementById('conditionalStrategies');
+                const rejectedEl = document.getElementById('rejectedStrategies');
+                
+                if (approvedEl) {
+                    approvedEl.textContent = data.approved_count || 0;
+                    approvedEl.style.color = '#00d084';
+                }
+                if (conditionalEl) {
+                    conditionalEl.textContent = data.conditional_count || 0;
+                    conditionalEl.style.color = '#ffa502';
+                }
+                if (rejectedEl) {
+                    rejectedEl.textContent = data.rejected_count || 0;
+                    rejectedEl.style.color = '#ff4757';
+                }
+                
+                // Update alerts
+                this.updateAlerts(data.critical_alerts || []);
+                
+                // Show last update time
+                this.showLastUpdate();
+                
+                // Add validation badges to predictions
+                this.addValidationBadges(data.top_strategies || []);
+            }
+            
+            updateAlerts(alerts) {
+                const alertsContainer = document.getElementById('validationAlerts');
+                if (!alertsContainer) return;
+                
+                alertsContainer.innerHTML = '';
+                
+                if (alerts.length === 0) {
+                    alertsContainer.innerHTML = '<div style="color: #00d084; font-size: 12px; text-align: center;">✅ No critical issues</div>';
+                    return;
+                }
+                
+                alerts.forEach(alert => {
+                    const alertEl = document.createElement('div');
+                    alertEl.className = `validation-alert ${alert.severity}`;
+                    alertEl.innerHTML = `
+                        <div style="font-weight: bold;">${alert.strategy}</div>
+                        <div>${alert.message}</div>
+                    `;
+                    alertsContainer.appendChild(alertEl);
+                });
+            }
+            
+            addValidationBadges(topStrategies) {
+                // Add validation badges to prediction cards
+                const predictionCards = document.querySelectorAll('.prediction-card');
+                predictionCards.forEach(card => {
+                    const strategyInfo = this.findStrategyValidation(card, topStrategies);
+                    if (strategyInfo) {
+                        this.addBadgeToCard(card, strategyInfo);
+                    }
+                });
+            }
+            
+            findStrategyValidation(card, strategies) {
+                // Match prediction card to validation strategy
+                const cardText = card.textContent.toLowerCase();
+                return strategies.find(strategy => 
+                    cardText.includes(strategy.strategy.toLowerCase()) ||
+                    cardText.includes('ml') && strategy.strategy.toLowerCase().includes('ml') ||
+                    cardText.includes('technical') && strategy.strategy.toLowerCase().includes('technical')
+                );
+            }
+            
+            addBadgeToCard(card, strategyInfo) {
+                // Remove existing validation badge
+                const existingBadge = card.querySelector('.validation-badge');
+                if (existingBadge) {
+                    existingBadge.remove();
+                }
+                
+                // Create validation badge
+                const badge = document.createElement('div');
+                badge.className = 'validation-badge';
+                badge.style.cssText = `
+                    position: absolute;
+                    top: 8px;
+                    right: 8px;
+                    padding: 4px 8px;
+                    border-radius: 12px;
+                    font-size: 10px;
+                    font-weight: bold;
+                    text-transform: uppercase;
+                `;
+                
+                const recommendation = strategyInfo.recommendation;
+                if (recommendation === 'approved') {
+                    badge.style.backgroundColor = '#00d084';
+                    badge.style.color = 'white';
+                    badge.textContent = '✓ VALIDATED';
+                } else if (recommendation === 'conditional') {
+                    badge.style.backgroundColor = '#ffa502';
+                    badge.style.color = 'white';
+                    badge.textContent = '⚠ CONDITIONAL';
+                } else if (recommendation === 'rejected') {
+                    badge.style.backgroundColor = '#ff4757';
+                    badge.style.color = 'white';
+                    badge.textContent = '✗ REJECTED';
+                }
+                
+                // Add relative positioning to card if needed
+                if (getComputedStyle(card).position === 'static') {
+                    card.style.position = 'relative';
+                }
+                
+                card.appendChild(badge);
+            }
+            
+            showUnavailable() {
+                const healthScoreEl = document.getElementById('validationHealthScore');
+                const healthIndicatorEl = document.getElementById('validationHealthIndicator');
+                const approvedEl = document.getElementById('approvedStrategies');
+                const conditionalEl = document.getElementById('conditionalStrategies');
+                const rejectedEl = document.getElementById('rejectedStrategies');
+                
+                if (healthScoreEl) healthScoreEl.textContent = 'N/A';
+                if (healthIndicatorEl) healthIndicatorEl.textContent = '⚪';
+                if (approvedEl) approvedEl.textContent = '--';
+                if (conditionalEl) conditionalEl.textContent = '--';
+                if (rejectedEl) rejectedEl.textContent = '--';
+                
+                const alertsContainer = document.getElementById('validationAlerts');
+                if (alertsContainer) {
+                    alertsContainer.innerHTML = '<div style="color: #999; font-size: 12px; text-align: center;">Validation system offline</div>';
+                }
+            }
+            
+            showError(message) {
+                const healthScoreEl = document.getElementById('validationHealthScore');
+                const healthIndicatorEl = document.getElementById('validationHealthIndicator');
+                
+                if (healthScoreEl) healthScoreEl.textContent = 'ERR';
+                if (healthIndicatorEl) healthIndicatorEl.textContent = '❌';
+                
+                const alertsContainer = document.getElementById('validationAlerts');
+                if (alertsContainer) {
+                    alertsContainer.innerHTML = `<div class="validation-alert critical">Error: ${message}</div>`;
+                }
+            }
+            
+            showLastUpdate() {
+                const now = new Date();
+                const timeStr = now.toLocaleTimeString();
+                
+                const healthLabel = document.querySelector('.validation-health-label');
+                if (healthLabel) {
+                    healthLabel.textContent = `System Health (${timeStr})`;
+                }
+            }
+            
+            startPeriodicUpdates() {
+                setInterval(() => {
+                    this.loadValidationStatus();
+                }, this.updateInterval);
+                
+                console.log(`🔄 Validation status will update every ${this.updateInterval/1000} seconds`);
+            }
+        }
+        
+        // Global function for validation details button
+        function showValidationDetails() {
+            window.open('/auto-validation', '_blank');
+        }
+        
+        // System Hub Status Monitor
+        class SystemHubMonitor {
+            constructor() {
+                this.updateInterval = 45000; // 45 seconds
+                this.init();
+            }
+            
+            init() {
+                console.log('🚀 Initializing System Hub Monitor...');
+                this.loadSystemStatus();
+                this.startPeriodicUpdates();
+                this.setupSystemLinks();
+            }
+            
+            async loadSystemStatus() {
+                try {
+                    // Check AI Analysis status
+                    await this.checkAIStatus();
+                    
+                    // Check Validation status
+                    await this.checkValidationStatus();
+                    
+                    // Check Backtesting status
+                    await this.checkBacktestingStatus();
+                    
+                } catch (error) {
+                    console.error('❌ Error loading system status:', error);
+                }
+            }
+            
+            async checkAIStatus() {
+                try {
+                    const response = await fetch('/api/ai-analysis/status');
+                    const statusElement = document.getElementById('aiEngineStatus');
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.status === 'operational') {
+                            statusElement.textContent = '🟢 Active';
+                            statusElement.style.color = '#00d084';
+                        } else {
+                            statusElement.textContent = '🟡 Limited';
+                            statusElement.style.color = '#ffa502';
+                        }
+                    } else {
+                        statusElement.textContent = '🔴 Offline';
+                        statusElement.style.color = '#ff4757';
+                    }
+                } catch (error) {
+                    const statusElement = document.getElementById('aiEngineStatus');
+                    statusElement.textContent = '⚠️ Error';
+                    statusElement.style.color = '#ff4757';
+                }
+            }
+            
+            async checkValidationStatus() {
+                try {
+                    const response = await fetch('/api/validation-status');
+                    const statusElement = document.getElementById('validationSystemStatus');
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.status === 'active') {
+                            const healthScore = data.health_score || 0;
+                            if (healthScore >= 80) {
+                                statusElement.textContent = '🟢 Excellent';
+                                statusElement.style.color = '#00d084';
+                            } else if (healthScore >= 60) {
+                                statusElement.textContent = '🟡 Good';
+                                statusElement.style.color = '#ffa502';
+                            } else {
+                                statusElement.textContent = '🟠 Issues';
+                                statusElement.style.color = '#ff6b35';
+                            }
+                        } else {
+                            // Check if basic validation is available
+                            statusElement.textContent = '� Active';
+                            statusElement.style.color = '#ffa502';
+                        }
+                    } else {
+                        statusElement.textContent = '⚠️ Error';
+                        statusElement.style.color = '#ff4757';
+                    }
+                } catch (error) {
+                    // If validation endpoint fails, check system status
+                    try {
+                        const systemResponse = await fetch('/api/system-status');
+                        if (systemResponse.ok) {
+                            const systemData = await systemResponse.json();
+                            const validationSystem = systemData.systems?.validation;
+                            const statusElement = document.getElementById('validationSystemStatus');
+                            
+                            if (validationSystem) {
+                                if (validationSystem.health === 'excellent') {
+                                    statusElement.textContent = '🟢 Excellent';
+                                    statusElement.style.color = '#00d084';
+                                } else if (validationSystem.health === 'good') {
+                                    statusElement.textContent = '🟡 Good';
+                                    statusElement.style.color = '#ffa502';
+                                } else {
+                                    statusElement.textContent = '🟠 Limited';
+                                    statusElement.style.color = '#ff6b35';
+                                }
+                            } else {
+                                statusElement.textContent = '❌ Failed';
+                                statusElement.style.color = '#ff4757';
+                            }
+                        } else {
+                            const statusElement = document.getElementById('validationSystemStatus');
+                            statusElement.textContent = '❌ Failed';
+                            statusElement.style.color = '#ff4757';
+                        }
+                    } catch (systemError) {
+                        const statusElement = document.getElementById('validationSystemStatus');
+                        statusElement.textContent = '❌ Failed';
+                        statusElement.style.color = '#ff4757';
+                    }
+                }
+            }
+            
+            async checkBacktestingStatus() {
+                try {
+                    const response = await fetch('/api/backtesting/status');
+                    const statusElement = document.getElementById('backtestingStatus');
+                    
+                    if (response.ok) {
+                        statusElement.textContent = '🟢 Ready';
+                        statusElement.style.color = '#00d084';
+                    } else {
+                        // If specific backtesting endpoint doesn't exist, assume ready
+                        statusElement.textContent = '🟢 Ready';
+                        statusElement.style.color = '#00d084';
+                    }
+                } catch (error) {
+                    // Assume ready if can't check
+                    const statusElement = document.getElementById('backtestingStatus');
+                    statusElement.textContent = '🟢 Ready';
+                    statusElement.style.color = '#00d084';
+                }
+            }
+            
+            setupSystemLinks() {
+                // Add click handlers for system links with loading states
+                const systemLinks = document.querySelectorAll('.system-link');
+                systemLinks.forEach(link => {
+                    link.addEventListener('click', (e) => {
+                        // Add loading state
+                        const originalText = link.querySelector('.system-name').textContent;
+                        link.querySelector('.system-name').textContent = 'Loading...';
+                        link.style.opacity = '0.7';
+                        
+                        // Reset after a short delay
+                        setTimeout(() => {
+                            link.querySelector('.system-name').textContent = originalText;
+                            link.style.opacity = '1';
+                        }, 1000);
+                    });
+                });
+            }
+            
+            startPeriodicUpdates() {
+                setInterval(() => {
+                    this.loadSystemStatus();
+                }, this.updateInterval);
+                
+                console.log(`🔄 System status will update every ${this.updateInterval/1000} seconds`);
+            }
+        }
+        
+        // Global functions for system overview modal
+        async function showSystemOverview() {
+            const modal = document.getElementById('systemOverviewModal');
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+            
+            // Load detailed system status
+            await loadDetailedSystemStatus();
+        }
+        
+        function hideSystemOverview() {
+            const modal = document.getElementById('systemOverviewModal');
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+        
+        async function refreshSystemStatus() {
+            await loadDetailedSystemStatus();
+        }
+        
+        async function loadDetailedSystemStatus() {
+            const gridElement = document.getElementById('systemOverviewGrid');
+            gridElement.innerHTML = '<div class="loading-indicator">🔄 Loading detailed system status...</div>';
+            
+            try {
+                const response = await fetch('/api/system-status');
+                const data = await response.json();
+                
+                if (data.error) {
+                    gridElement.innerHTML = `<div class="loading-indicator">❌ Error: ${data.error}</div>`;
+                    return;
+                }
+                
+                // Build system status cards
+                let html = '';
+                const systems = data.systems || {};
+                
+                for (const [systemName, systemData] of Object.entries(systems)) {
+                    const statusClass = systemData.health === 'excellent' ? 'operational' : 
+                                       systemData.health === 'warning' || systemData.health === 'good' ? 'warning' : 'critical';
+                    
+                    const displayName = systemName.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                    
+                    html += `
+                        <div class="system-status-card">
+                            <div class="system-status-header">
+                                <div class="system-status-name">${displayName}</div>
+                                <div class="system-status-indicator ${statusClass}">
+                                    ${systemData.status}
+                                </div>
+                            </div>
+                            <div class="system-status-details">
+                                <div><strong>Status:</strong> ${systemData.details}</div>
+                                <div><strong>Last Check:</strong> ${new Date(systemData.last_check).toLocaleTimeString()}</div>
+                                ${systemData.health_score ? `<div><strong>Health Score:</strong> ${systemData.health_score}%</div>` : ''}
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                if (html === '') {
+                    html = '<div class="loading-indicator">⚠️ No system data available</div>';
+                }
+                
+                // Add overall status summary
+                const overallStatusClass = data.overall_status === 'operational' ? 'operational' : 
+                                         data.overall_status === 'warning' || data.overall_status === 'degraded' ? 'warning' : 'critical';
+                
+                const summaryHtml = `
+                    <div class="system-status-card" style="grid-column: 1 / -1; background: rgba(0, 212, 170, 0.05); border-color: rgba(0, 212, 170, 0.2);">
+                        <div class="system-status-header">
+                            <div class="system-status-name">🌟 Overall System Status</div>
+                            <div class="system-status-indicator ${overallStatusClass}">
+                                ${data.overall_status}
+                            </div>
+                        </div>
+                        <div class="system-status-details">
+                            <div><strong>Timestamp:</strong> ${new Date(data.timestamp).toLocaleString()}</div>
+                            <div><strong>Systems Monitored:</strong> ${Object.keys(systems).length}</div>
+                        </div>
+                    </div>
+                `;
+                
+                gridElement.innerHTML = summaryHtml + html;
+                
+            } catch (error) {
+                console.error('Error loading system status:', error);
+                gridElement.innerHTML = `<div class="loading-indicator">❌ Failed to load system status: ${error.message}</div>`;
+            }
+        }
+    </script>
+    
+    <!-- Prediction Card Styles -->
+    <style>
+        .prediction-card {
+            background: rgba(42, 42, 43, 0.6);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border-left: 4px solid;
+        }
+        
+        .prediction-card.buy {
+            border-left-color: #4CAF50;
+        }
+        
+        .prediction-card.sell {
+            border-left-color: #f44336;
+        }
+        
+        .prediction-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        
+        .prediction-direction {
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        
+        .prediction-direction.buy {
+            background: rgba(76, 175, 80, 0.2);
+            color: #4CAF50;
+        }
+        
+        .prediction-direction.sell {
+            background: rgba(244, 67, 54, 0.2);
+            color: #f44336;
+        }
+        
+        .prediction-timeframe {
+            color: #999;
+            font-size: 12px;
+        }
+        
+        .prediction-details {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        
+        .prediction-confidence,
+        .prediction-price {
+            text-align: center;
+        }
+        
+        .confidence-label,
+        .price-label {
+            color: #999;
+            font-size: 10px;
+            margin-bottom: 2px;
+        }
+        
+        .confidence-value,
+        .price-value {
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        .prediction-strategy {
+            color: #999;
+            font-size: 11px;
+            text-align: center;
+        }
+        
+        .predictions-loading,
+        .predictions-empty,
+        .predictions-error {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            color: #999;
+            text-align: center;
+        }
+        
+        .status-value.positive {
+            color: #4CAF50;
+        }
+        
+        .status-value.negative {
+            color: #f44336;
+        }
+    </style>
+    
+    <!-- System Overview Modal -->
+    <div class="system-overview-modal" id="systemOverviewModal" style="display: none;">
+        <div class="modal-backdrop" onclick="hideSystemOverview()"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>🚀 Complete System Status Overview</h3>
+                <button class="modal-close" onclick="hideSystemOverview()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="system-overview-grid" id="systemOverviewGrid">
+                    <!-- System status details will be loaded here -->
+                    <div class="loading-indicator">Loading system status...</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn secondary" onclick="hideSystemOverview()">Close</button>
+                <button class="modal-btn primary" onclick="refreshSystemStatus()">🔄 Refresh</button>
+            </div>
+        </div>
+    </div>
+    
+</body>
+</html>

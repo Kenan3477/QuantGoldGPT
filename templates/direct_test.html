@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GoldGPT - Direct Test</title>
+    <style>
+        body {
+            background: #0a0a0a;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 GoldGPT Direct Access Test</h1>
+    <p>If you can see this, the Flask template system is working.</p>
+    
+    <div id="test-results">
+        <h2>Connection Tests:</h2>
+        <div id="ping-test">Testing ping...</div>
+        <div id="api-test">Testing API...</div>
+    </div>
+    
+    <script>
+        // Test if we can reach the Flask API endpoints
+        console.log('Starting connection tests...');
+        
+        // Test ping endpoint
+        fetch('/ping')
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('ping-test').innerHTML = '✅ Ping: ' + data;
+            })
+            .catch(error => {
+                document.getElementById('ping-test').innerHTML = '❌ Ping failed: ' + error;
+            });
+        
+        // Test ML predictions endpoint
+        fetch('/api/ml-predictions/multi-strategy')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('api-test').innerHTML = '✅ ML API: Working with ' + data.predictions.length + ' predictions';
+            })
+            .catch(error => {
+                document.getElementById('api-test').innerHTML = '❌ ML API failed: ' + error;
+            });
+    </script>
+</body>
+</html>

@@ -1,0 +1,96 @@
+{
+  "timestamp": "2025-07-21T23:56:09.433341",
+  "summary": {
+    "total_tests": 14,
+    "passed": 10,
+    "failed": 1,
+    "warnings": 3,
+    "success_rate": 71.42857142857143
+  },
+  "test_results": [
+    {
+      "timestamp": "2025-07-21T23:55:44.259285",
+      "test_name": "Dashboard Accessibility",
+      "status": "PASS",
+      "details": "All required elements present (Response: 200)"
+    },
+    {
+      "timestamp": "2025-07-21T23:55:46.378091",
+      "test_name": "Static Asset /static/css/advanced-ml-dashboard.css",
+      "status": "PASS",
+      "details": "Loaded successfully (10077 bytes)"
+    },
+    {
+      "timestamp": "2025-07-21T23:55:48.446786",
+      "test_name": "Static Asset /static/js/advanced-ml-dashboard.js",
+      "status": "PASS",
+      "details": "Loaded successfully (44560 bytes)"
+    },
+    {
+      "timestamp": "2025-07-21T23:55:50.543322",
+      "test_name": "Static Asset /static/css/advanced-ml-dashboard-new.css",
+      "status": "PASS",
+      "details": "Loaded successfully (27052 bytes)"
+    },
+    {
+      "timestamp": "2025-07-21T23:55:52.602413",
+      "test_name": "API Endpoint /api/advanced-ml/status",
+      "status": "PASS",
+      "details": "Valid JSON response with success=True"
+    },
+    {
+      "timestamp": "2025-07-21T23:55:54.679601",
+      "test_name": "API Endpoint /api/advanced-ml/predictions",
+      "status": "PASS",
+      "details": "Valid JSON response with success=True"
+    },
+    {
+      "timestamp": "2025-07-21T23:55:56.768449",
+      "test_name": "API Endpoint /api/advanced-ml/accuracy-stats",
+      "status": "PASS",
+      "details": "Valid JSON response with success=True"
+    },
+    {
+      "timestamp": "2025-07-21T23:55:58.840388",
+      "test_name": "API Endpoint /api/advanced-ml/feature-importance",
+      "status": "PASS",
+      "details": "Valid JSON response with success=True"
+    },
+    {
+      "timestamp": "2025-07-21T23:56:00.894298",
+      "test_name": "API Endpoint /api/advanced-ml/health",
+      "status": "PASS",
+      "details": "Valid JSON response with success=True"
+    },
+    {
+      "timestamp": "2025-07-21T23:56:01.216445",
+      "test_name": "WebSocket Connection",
+      "status": "FAIL",
+      "details": "Connection failed: Client.connect() got an unexpected keyword argument 'timeout'"
+    },
+    {
+      "timestamp": "2025-07-21T23:56:03.294882",
+      "test_name": "JavaScript Integration",
+      "status": "WARNING",
+      "details": "Limited JS components: socket.io"
+    },
+    {
+      "timestamp": "2025-07-21T23:56:05.332542",
+      "test_name": "Responsive Design",
+      "status": "WARNING",
+      "details": "Limited responsive indicators: viewport"
+    },
+    {
+      "timestamp": "2025-07-21T23:56:07.380355",
+      "test_name": "Trading212 Design System",
+      "status": "PASS",
+      "details": "Found design elements: 7/7"
+    },
+    {
+      "timestamp": "2025-07-21T23:56:09.429931",
+      "test_name": "Dashboard Performance",
+      "status": "WARNING",
+      "details": "Slow load time: 2.05s, Size: 10,507 bytes"
+    }
+  ]
+}

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced News Test</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/enhanced-news-display.css') }}">
+    <style>
+        body {
+            background: #0a0a0a;
+            color: white;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        .test-container {
+            max-width: 400px;
+            margin: 0 auto;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        .panel-section-title {
+            color: #fff;
+            font-weight: 600;
+            margin-bottom: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .news-refresh-btn {
+            background: #333;
+            border: 1px solid #555;
+            color: #fff;
+            border-radius: 4px;
+            padding: 6px 8px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <div class="panel-section-title">
+            <span><i class="fas fa-newspaper"></i> Enhanced News Test</span>
+            <button class="news-refresh-btn" onclick="testEnhancedNews()">
+                <i class="fas fa-sync-alt"></i>
+            </button>
+        </div>
+        
+        <div id="enhanced-news-container" class="enhanced-news-container" style="min-height: 350px; border: 1px solid #333;">
+            <div class="news-loading" style="text-align: center; padding: 40px; color: #fff;">
+                <i class="fas fa-spinner fa-spin" style="font-size: 24px; color: #0088ff; margin-bottom: 12px; display: block;"></i>
+                <span style="font-size: 14px;">Loading enhanced news analysis...</span>
+                <div style="font-size: 12px; color: #888; margin-top: 8px;">Testing sentiment data display</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/enhanced-news-manager.js') }}"></script>
+    <script>
+        function testEnhancedNews() {
+            console.log('🧪 Testing Enhanced News...');
+            if (window.enhancedNewsManager) {
+                enhancedNewsManager.loadEnhancedNews();
+            } else {
+                console.log('📱 Creating Enhanced News Manager...');
+                window.enhancedNewsManager = new EnhancedNewsManager();
+            }
+        }
+        
+        // Auto-initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Auto-initializing Enhanced News Test...');
+            setTimeout(testEnhancedNews, 1000);
+        });
+    </script>
+</body>
+</html>

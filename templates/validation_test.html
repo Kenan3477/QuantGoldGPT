@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Validation Status Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #1a1a1a;
+            color: white;
+            padding: 20px;
+        }
+        .status-card {
+            background: #2a2a2a;
+            border: 1px solid #444;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .status-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: #00d4aa;
+            margin: 10px 0;
+        }
+        .status-label {
+            font-size: 14px;
+            color: #888;
+        }
+        .alert {
+            background: #4a1a1a;
+            border: 1px solid #aa4444;
+            border-radius: 4px;
+            padding: 10px;
+            margin: 5px 0;
+            color: #ff6666;
+        }
+        button {
+            background: #00d4aa;
+            color: #1a1a1a;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #00b894;
+        }
+    </style>
+</head>
+<body>
+    <h1>🛡️ Strategy Validation Status Test</h1>
+    
+    <div class="status-card">
+        <h3>System Status</h3>
+        <div class="status-value" id="systemStatus">Loading...</div>
+        <div class="status-label">Current validation system state</div>
+    </div>
+
+    <div class="status-card">
+        <h3>Strategies Monitored</h3>
+        <div class="status-value" id="strategiesCount">Loading...</div>
+        <div class="status-label">Active ML strategies under validation</div>
+    </div>
+
+    <div class="status-card">
+        <h3>System Health</h3>
+        <div class="status-value" id="systemHealth">Loading...</div>
+        <div class="status-label">Overall validation system health</div>
+    </div>
+
+    <div class="status-card">
+        <h3>Risk Alerts</h3>
+        <div id="alertsList">Loading...</div>
+    </div>
+
+    <div class="status-card">
+        <h3>Controls</h3>
+        <button onclick="updateStatus()">🔄 Refresh Status</button>
+        <button onclick="triggerValidation()">▶️ Run Validation</button>
+        <button onclick="openDashboard()">📊 Open Dashboard</button>
+    </div>
+
+    <div class="status-card">
+        <h3>Debug Info</h3>
+        <div id="debugInfo">Ready...</div>
+    </div>
+
+    <script>
+        let debugLog = '';
+        
+        function debug(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            debugLog += `[${timestamp}] ${message}\n`;
+            document.getElementById('debugInfo').innerHTML = '<pre>' + debugLog + '</pre>';
+            console.log(message);
+        }
+
+        function updateElement(id, value) {
+            const element = document.getElementById(id);
+            if (element) {
+                element.textContent = value;
+                debug(`✅ Updated ${id}: ${value}`);
+            } else {
+                debug(`❌ Element not found: ${id}`);
+            }
+        }
+
+        async function updateStatus() {
+            try {
+                debug('🔄 Fetching validation status...');
+                
+                const response = await fetch('/api/auto-validation/status');
+                debug(`📡 Response status: ${response.status}`);
+                
+                const data = await response.json();
+                debug(`📊 Response data received: ${JSON.stringify(data, null, 2)}`);
+                
+                if (data.success && data.status) {
+                    const status = data.status;
+                    
+                    updateElement('systemStatus', status.system_status || 'UNKNOWN');
+                    updateElement('strategiesCount', status.strategies_monitored || 0);
+                    updateElement('systemHealth', status.system_health || 'UNKNOWN');
+                    
+                    // Update alerts
+                    const alertsList = document.getElementById('alertsList');
+                    if (status.risk_alerts && status.risk_alerts.length > 0) {
+                        const alertsHtml = status.risk_alerts.map(alert => 
+                            `<div class="alert">⚠️ ${alert}</div>`
+                        ).join('');
+                        alertsList.innerHTML = alertsHtml;
+                    } else {
+                        alertsList.innerHTML = '<div style="color: #00d4aa;">✅ No alerts</div>';
+                    }
+                    
+                    debug('✅ Status updated successfully');
+                } else {
+                    throw new Error(data.error || 'Invalid response format');
+                }
+                
+            } catch (error) {
+                debug(`❌ Error updating status: ${error.message}`);
+                updateElement('systemStatus', 'ERROR');
+                updateElement('strategiesCount', '--');
+                updateElement('systemHealth', '--');
+                
+                const alertsList = document.getElementById('alertsList');
+                alertsList.innerHTML = `<div class="alert">❌ Failed to load: ${error.message}</div>`;
+            }
+        }
+
+        async function triggerValidation() {
+            try {
+                debug('▶️ Triggering validation...');
+                
+                const response = await fetch('/api/auto-validation/validate-all', {
+                    method: 'POST'
+                });
+                
+                const data = await response.json();
+                debug(`📊 Validation response: ${JSON.stringify(data, null, 2)}`);
+                
+                if (data.success) {
+                    debug('✅ Validation triggered successfully');
+                    // Refresh status after a delay
+                    setTimeout(updateStatus, 3000);
+                } else {
+                    throw new Error(data.error || 'Failed to trigger validation');
+                }
+                
+            } catch (error) {
+                debug(`❌ Error triggering validation: ${error.message}`);
+            }
+        }
+
+        function openDashboard() {
+            debug('🔗 Opening auto validation dashboard...');
+            window.open('/auto-validation', '_blank');
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            debug('🚀 Page loaded, initializing...');
+            updateStatus();
+            
+            // Auto-refresh every 30 seconds
+            setInterval(updateStatus, 30000);
+            debug('⏰ Auto-refresh enabled (30s interval)');
+        });
+    </script>
+</body>
+</html>

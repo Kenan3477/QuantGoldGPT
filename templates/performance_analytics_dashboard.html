@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📈 GoldGPT Performance Analytics Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: #ffffff;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #00ff88;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .controls {
+            display: flex;
+            gap: 1rem;
+            margin: 1rem 2rem;
+            flex-wrap: wrap;
+        }
+
+        .timeframe-selector {
+            display: flex;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .timeframe-btn {
+            padding: 0.5rem 1rem;
+            background: transparent;
+            border: none;
+            color: #ffffff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .timeframe-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .timeframe-btn.active {
+            background: #00ff88;
+            color: #000000;
+            font-weight: 600;
+        }
+
+        .refresh-btn {
+            padding: 0.5rem 1rem;
+            background: rgba(0, 255, 136, 0.2);
+            border: 1px solid #00ff88;
+            border-radius: 8px;
+            color: #00ff88;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .refresh-btn:hover {
+            background: #00ff88;
+            color: #000000;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            padding: 1rem 2rem;
+        }
+
+        .dashboard-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 1.5rem;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 1rem;
+        }
+
+        .metric-item {
+            text-align: center;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .metric-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .metric-label {
+            font-size: 0.8rem;
+            opacity: 0.8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .accuracy-positive {
+            color: #00ff88;
+        }
+
+        .accuracy-neutral {
+            color: #ffeb3b;
+        }
+
+        .accuracy-negative {
+            color: #ff5722;
+        }
+
+        .chart-container {
+            height: 300px;
+            margin-top: 1rem;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .chart-placeholder {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.9rem;
+        }
+
+        .strategy-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .strategy-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .strategy-name {
+            font-weight: 500;
+            flex: 1;
+        }
+
+        .strategy-metrics {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.85rem;
+        }
+
+        .strategy-metric {
+            text-align: center;
+        }
+
+        .strategy-metric-value {
+            font-weight: 600;
+            display: block;
+        }
+
+        .strategy-metric-label {
+            opacity: 0.7;
+            font-size: 0.7rem;
+        }
+
+        .calibration-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem;
+            margin-bottom: 0.5rem;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .calibration-bucket {
+            font-weight: 500;
+            text-transform: capitalize;
+        }
+
+        .calibration-scores {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.85rem;
+        }
+
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            font-size: 1.1rem;
+            opacity: 0.7;
+        }
+
+        .error {
+            background: rgba(255, 87, 34, 0.2);
+            border: 1px solid #ff5722;
+            color: #ff5722;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            .controls {
+                justify-content: center;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+                padding: 1rem;
+            }
+
+            .metric-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* Enhanced animations */
+        .dashboard-card {
+            animation: fadeInUp 0.6s ease forwards;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .dashboard-card:nth-child(1) { animation-delay: 0.1s; }
+        .dashboard-card:nth-child(2) { animation-delay: 0.2s; }
+        .dashboard-card:nth-child(3) { animation-delay: 0.3s; }
+        .dashboard-card:nth-child(4) { animation-delay: 0.4s; }
+        .dashboard-card:nth-child(5) { animation-delay: 0.5s; }
+        .dashboard-card:nth-child(6) { animation-delay: 0.6s; }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .metric-value {
+            transition: all 0.3s ease;
+        }
+
+        .metric-value.updating {
+            animation: pulse-update 0.5s ease;
+        }
+
+        @keyframes pulse-update {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📈 GoldGPT Performance Analytics</h1>
+        <div class="status-indicator">
+            <div class="status-dot"></div>
+            <span>Live Analytics</span>
+            <span id="lastUpdated">Loading...</span>
+        </div>
+    </div>
+
+    <div class="controls">
+        <div class="timeframe-selector">
+            <button class="timeframe-btn" data-timeframe="1h">1H</button>
+            <button class="timeframe-btn" data-timeframe="4h">4H</button>
+            <button class="timeframe-btn" data-timeframe="12h">12H</button>
+            <button class="timeframe-btn active" data-timeframe="24h">24H</button>
+            <button class="timeframe-btn" data-timeframe="7d">7D</button>
+            <button class="timeframe-btn" data-timeframe="30d">30D</button>
+        </div>
+        <button class="refresh-btn" id="refreshBtn">🔄 Refresh</button>
+    </div>
+
+    <div id="errorContainer"></div>
+
+    <div class="dashboard-grid">
+        <!-- Current Performance Metrics -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                🎯 Current Performance
+            </div>
+            <div class="metric-grid">
+                <div class="metric-item">
+                    <div class="metric-value accuracy-positive" id="overallAccuracy">--</div>
+                    <div class="metric-label">Overall Accuracy</div>
+                </div>
+                <div class="metric-item">
+                    <div class="metric-value accuracy-neutral" id="directionalAccuracy">--</div>
+                    <div class="metric-label">Directional</div>
+                </div>
+                <div class="metric-item">
+                    <div class="metric-value accuracy-neutral" id="priceAccuracy">--</div>
+                    <div class="metric-label">Price Accuracy</div>
+                </div>
+                <div class="metric-item">
+                    <div class="metric-value" id="predictionVolume">--</div>
+                    <div class="metric-label">Predictions</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Confidence Calibration -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                🎲 Confidence Calibration
+            </div>
+            <div class="metric-item" style="margin-bottom: 1rem;">
+                <div class="metric-value" id="calibrationScore">--</div>
+                <div class="metric-label">Calibration Score</div>
+            </div>
+            <div id="calibrationDetails">
+                <div class="loading">Loading calibration data...</div>
+            </div>
+        </div>
+
+        <!-- Accuracy Trends -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                📊 Accuracy Trends
+            </div>
+            <div class="chart-container">
+                <div class="chart-placeholder">Real-time accuracy trends chart</div>
+            </div>
+        </div>
+
+        <!-- Strategy Performance -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                🧠 Strategy Performance
+            </div>
+            <div class="strategy-list" id="strategyList">
+                <div class="loading">Loading strategy data...</div>
+            </div>
+        </div>
+
+        <!-- Feature Importance -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                🔧 Top Features
+            </div>
+            <div id="featureList">
+                <div class="loading">Loading feature importance...</div>
+            </div>
+        </div>
+
+        <!-- Learning Progress -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                🚀 Learning Progress
+            </div>
+            <div class="chart-container">
+                <div class="chart-placeholder">Learning progress visualization</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class PerformanceAnalyticsDashboard {
+            constructor() {
+                this.currentTimeframe = '24h';
+                this.refreshInterval = null;
+                this.isLoading = false;
+                this.init();
+            }
+
+            init() {
+                this.setupEventListeners();
+                this.loadDashboard();
+                this.startAutoRefresh();
+            }
+
+            setupEventListeners() {
+                // Timeframe selection
+                document.querySelectorAll('.timeframe-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        document.querySelectorAll('.timeframe-btn').forEach(b => b.classList.remove('active'));
+                        e.target.classList.add('active');
+                        this.currentTimeframe = e.target.dataset.timeframe;
+                        this.loadDashboard();
+                    });
+                });
+
+                // Refresh button
+                document.getElementById('refreshBtn').addEventListener('click', () => {
+                    this.loadDashboard();
+                });
+            }
+
+            async loadDashboard() {
+                if (this.isLoading) return;
+                
+                this.isLoading = true;
+                this.showLoading();
+
+                try {
+                    const response = await fetch(`/api/analytics/dashboard?timeframe=${this.currentTimeframe}`);
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+
+                    const data = await response.json();
+                    
+                    if (data.error) {
+                        throw new Error(data.error);
+                    }
+
+                    this.updateDashboard(data);
+                    this.clearError();
+                    
+                } catch (error) {
+                    console.error('Dashboard load error:', error);
+                    this.showError(error.message);
+                } finally {
+                    this.isLoading = false;
+                }
+            }
+
+            updateDashboard(data) {
+                // Update current metrics
+                this.updateCurrentMetrics(data.current_metrics);
+                
+                // Update confidence calibration
+                this.updateCalibration(data.confidence_calibration);
+                
+                // Update strategy performance
+                this.updateStrategies(data.strategy_performance);
+                
+                // Update feature importance
+                this.updateFeatures(data.current_metrics?.top_features);
+                
+                // Update last updated time
+                document.getElementById('lastUpdated').textContent = 
+                    `Updated: ${new Date(data.last_updated).toLocaleTimeString()}`;
+            }
+
+            updateCurrentMetrics(metrics) {
+                if (!metrics) return;
+
+                this.updateMetricValue('overallAccuracy', this.formatPercentage(metrics.overall_accuracy));
+                this.updateMetricValue('directionalAccuracy', this.formatPercentage(metrics.directional_accuracy));
+                this.updateMetricValue('priceAccuracy', this.formatPercentage(metrics.price_accuracy));
+                this.updateMetricValue('predictionVolume', metrics.prediction_volume || 0);
+                this.updateMetricValue('calibrationScore', this.formatPercentage(metrics.confidence_calibration));
+            }
+
+            updateCalibration(calibrationData) {
+                const container = document.getElementById('calibrationDetails');
+                
+                if (!calibrationData || calibrationData.length === 0) {
+                    container.innerHTML = '<div class="chart-placeholder">No calibration data available</div>';
+                    return;
+                }
+
+                const html = calibrationData.map(cal => `
+                    <div class="calibration-item">
+                        <div class="calibration-bucket">${cal.confidence_bucket}</div>
+                        <div class="calibration-scores">
+                            <div>
+                                <span class="strategy-metric-value">${this.formatPercentage(cal.predicted_accuracy)}</span>
+                                <span class="strategy-metric-label">Predicted</span>
+                            </div>
+                            <div>
+                                <span class="strategy-metric-value">${this.formatPercentage(cal.actual_accuracy)}</span>
+                                <span class="strategy-metric-label">Actual</span>
+                            </div>
+                            <div>
+                                <span class="strategy-metric-value">${cal.prediction_count}</span>
+                                <span class="strategy-metric-label">Count</span>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+
+                container.innerHTML = html;
+            }
+
+            updateStrategies(strategyData) {
+                const container = document.getElementById('strategyList');
+                
+                if (!strategyData || strategyData.length === 0) {
+                    container.innerHTML = '<div class="chart-placeholder">No strategy data available</div>';
+                    return;
+                }
+
+                const html = strategyData.slice(0, 10).map(strategy => `
+                    <div class="strategy-item">
+                        <div class="strategy-name">${strategy.strategy_name}</div>
+                        <div class="strategy-metrics">
+                            <div class="strategy-metric">
+                                <span class="strategy-metric-value">${this.formatPercentage(strategy.success_rate)}</span>
+                                <span class="strategy-metric-label">Success</span>
+                            </div>
+                            <div class="strategy-metric">
+                                <span class="strategy-metric-value">${strategy.contribution_percentage.toFixed(1)}%</span>
+                                <span class="strategy-metric-label">Contribution</span>
+                            </div>
+                            <div class="strategy-metric">
+                                <span class="strategy-metric-value">${strategy.predictions_count}</span>
+                                <span class="strategy-metric-label">Count</span>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+
+                container.innerHTML = html;
+            }
+
+            updateFeatures(features) {
+                const container = document.getElementById('featureList');
+                
+                if (!features || Object.keys(features).length === 0) {
+                    container.innerHTML = '<div class="chart-placeholder">No feature data available</div>';
+                    return;
+                }
+
+                const sortedFeatures = Object.entries(features)
+                    .sort(([,a], [,b]) => b - a)
+                    .slice(0, 10);
+
+                const html = sortedFeatures.map(([feature, importance]) => `
+                    <div class="strategy-item">
+                        <div class="strategy-name">${feature}</div>
+                        <div class="strategy-metrics">
+                            <div class="strategy-metric">
+                                <span class="strategy-metric-value">${importance.toFixed(3)}</span>
+                                <span class="strategy-metric-label">Importance</span>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+
+                container.innerHTML = html;
+            }
+
+            updateMetricValue(elementId, value) {
+                const element = document.getElementById(elementId);
+                if (element) {
+                    element.textContent = value;
+                    element.classList.add('updating');
+                    setTimeout(() => element.classList.remove('updating'), 500);
+                }
+            }
+
+            formatPercentage(value) {
+                if (value === null || value === undefined || isNaN(value)) return '--';
+                return `${(value * 100).toFixed(1)}%`;
+            }
+
+            showLoading() {
+                // Add loading states to cards
+            }
+
+            showError(message) {
+                const container = document.getElementById('errorContainer');
+                container.innerHTML = `
+                    <div class="error">
+                        ⚠️ Error loading dashboard: ${message}
+                    </div>
+                `;
+            }
+
+            clearError() {
+                document.getElementById('errorContainer').innerHTML = '';
+            }
+
+            startAutoRefresh() {
+                // Refresh every 30 seconds
+                this.refreshInterval = setInterval(() => {
+                    this.loadDashboard();
+                }, 30000);
+            }
+
+            stopAutoRefresh() {
+                if (this.refreshInterval) {
+                    clearInterval(this.refreshInterval);
+                    this.refreshInterval = null;
+                }
+            }
+        }
+
+        // Initialize dashboard when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            window.dashboard = new PerformanceAnalyticsDashboard();
+        });
+
+        // Clean up on page unload
+        window.addEventListener('beforeunload', () => {
+            if (window.dashboard) {
+                window.dashboard.stopAutoRefresh();
+            }
+        });
+    </script>
+</body>
+</html>

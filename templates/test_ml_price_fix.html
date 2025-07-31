@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧪 ML Predictions Price Fix Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #1a1a2e;
+            color: white;
+            padding: 20px;
+            margin: 0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+        }
+        .test-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .success { color: #4CAF50; }
+        .error { color: #f44336; }
+        .warning { color: #ff9800; }
+        button {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px;
+        }
+        button:hover { transform: scale(1.05); }
+        .prediction-card {
+            background: rgba(255, 215, 0, 0.1);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+        .price-display {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #ffd700;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 ML Predictions Price Fix Test</h1>
+        <p>Testing to ensure ML predictions show <strong>USD prices</strong> instead of £0</p>
+
+        <div style="text-align: center;">
+            <button onclick="testMLPredictions()">🤖 Test ML Predictions</button>
+            <button onclick="testPriceFormatting()">💰 Test Price Formatting</button>
+            <button onclick="clearResults()">🗑️ Clear Results</button>
+        </div>
+
+        <div id="results"></div>
+    </div>
+
+    <script>
+        async function testMLPredictions() {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '<div class="test-section">🔄 Testing ML Predictions API...</div>';
+
+            try {
+                const response = await fetch('/api/ml-predictions/XAUUSD');
+                const data = await response.json();
+
+                let html = '<div class="test-section success">';
+                html += '<h3>✅ ML Predictions API Response:</h3>';
+                html += `<p><strong>Current Price:</strong> <span class="price-display">$${data.current_price}</span></p>`;
+                html += `<p><strong>Source:</strong> ${data.source || 'Unknown'}</p>`;
+                html += `<p><strong>Generated At:</strong> ${new Date(data.generated_at).toLocaleString()}</p>`;
+                
+                if (data.predictions && data.predictions.length > 0) {
+                    html += '<h4>Predictions:</h4>';
+                    data.predictions.forEach(pred => {
+                        const changeClass = pred.direction === 'bullish' ? 'success' : pred.direction === 'bearish' ? 'error' : 'warning';
+                        html += `<div class="prediction-card">`;
+                        html += `<strong>${pred.timeframe}:</strong> `;
+                        html += `<span class="price-display">$${pred.predicted_price.toFixed(2)}</span> `;
+                        html += `<span class="${changeClass}">(${pred.change_percent > 0 ? '+' : ''}${(pred.change_percent * 100).toFixed(2)}%)</span> `;
+                        html += `<small>[${Math.round(pred.confidence * 100)}% confidence]</small>`;
+                        html += `</div>`;
+                    });
+                }
+                
+                // Check for £0 issues
+                const jsonString = JSON.stringify(data);
+                if (jsonString.includes('£0') || jsonString.includes('GBP')) {
+                    html += '<div class="error">❌ FOUND £ SYMBOL OR GBP CURRENCY!</div>';
+                } else if (data.current_price && data.current_price > 3000) {
+                    html += '<div class="success">✅ NO £0 ISSUE - Showing correct USD prices</div>';
+                } else {
+                    html += '<div class="warning">⚠️ Price seems unusually low, check for formatting issues</div>';
+                }
+                
+                html += '</div>';
+                resultsDiv.innerHTML = html;
+
+            } catch (error) {
+                resultsDiv.innerHTML = `<div class="test-section error">❌ Error testing ML predictions: ${error.message}</div>`;
+            }
+        }
+
+        async function testPriceFormatting() {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '<div class="test-section">🔄 Testing Price Formatting...</div>';
+
+            // Test various price formatting scenarios
+            const testPrices = [3350.70, 2500.00, 4000.25, 0, null, undefined];
+            let html = '<div class="test-section">';
+            html += '<h3>💰 Price Formatting Tests:</h3>';
+
+            testPrices.forEach(price => {
+                try {
+                    // Test toLocaleString with USD style
+                    const usdFormat = price ? price.toLocaleString('en-US', {
+                        style: 'decimal',
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    }) : 'N/A';
+                    
+                    // Test currency formatting (this might cause the £ issue)
+                    const currencyFormat = price ? price.toLocaleString('en-US', {
+                        style: 'currency',
+                        currency: 'USD'
+                    }) : 'N/A';
+                    
+                    // Test simple formatting
+                    const simpleFormat = price ? `$${price.toFixed(2)}` : 'N/A';
+                    
+                    html += `<div class="prediction-card">`;
+                    html += `<strong>Input:</strong> ${price}<br>`;
+                    html += `<strong>Decimal Style:</strong> $${usdFormat}<br>`;
+                    html += `<strong>Currency Style:</strong> ${currencyFormat}<br>`;
+                    html += `<strong>Simple Format:</strong> ${simpleFormat}`;
+                    html += `</div>`;
+                } catch (error) {
+                    html += `<div class="prediction-card error">Error formatting ${price}: ${error.message}</div>`;
+                }
+            });
+            
+            html += '</div>';
+            resultsDiv.innerHTML = html;
+        }
+
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+        }
+
+        // Auto-test when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            testMLPredictions();
+        });
+    </script>
+</body>
+</html>

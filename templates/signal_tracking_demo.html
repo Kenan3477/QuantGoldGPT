@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎯 GoldGPT Signal Tracking Demo</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0c1426 0%, #1a2332 100%);
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(255, 215, 0, 0.1);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+        }
+        
+        .header h1 {
+            color: #FFD700;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            color: #ccc;
+            font-size: 1.1em;
+        }
+        
+        .demo-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .demo-btn {
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            color: #000;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .demo-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
+        }
+        
+        .demo-btn:active {
+            transform: translateY(0);
+        }
+        
+        .status-bar {
+            background: rgba(30, 35, 45, 0.8);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 215, 0, 0.1);
+            text-align: center;
+        }
+        
+        .status-item {
+            display: inline-block;
+            margin: 0 20px;
+            color: #FFD700;
+        }
+        
+        .status-item i {
+            margin-right: 5px;
+        }
+        
+        #dashboard-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #FFD700;
+            font-size: 1.2em;
+        }
+        
+        .error {
+            background: rgba(244, 67, 54, 0.1);
+            color: #f44336;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid rgba(244, 67, 54, 0.3);
+            text-align: center;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1><i class="fas fa-chart-line"></i> GoldGPT Signal Tracking System</h1>
+        <p>Live P&L monitoring, ML learning, and automated TP/SL tracking</p>
+    </div>
+    
+    <div class="status-bar">
+        <div class="status-item">
+            <i class="fas fa-server"></i>
+            <span id="server-status">Connecting...</span>
+        </div>
+        <div class="status-item">
+            <i class="fas fa-broadcast-tower"></i>
+            <span id="signals-count">0 Active Signals</span>
+        </div>
+        <div class="status-item">
+            <i class="fas fa-brain"></i>
+            <span id="ml-status">ML Learning: Initializing</span>
+        </div>
+        <div class="status-item">
+            <i class="fas fa-trophy"></i>
+            <span id="win-rate">Win Rate: 0%</span>
+        </div>
+    </div>
+    
+    <div class="demo-controls">
+        <button class="demo-btn" onclick="refreshData()">
+            <i class="fas fa-sync-alt"></i> Refresh Data
+        </button>
+        <button class="demo-btn" onclick="forceSignalCheck()">
+            <i class="fas fa-search"></i> Force Signal Check
+        </button>
+        <button class="demo-btn" onclick="testNotification()">
+            <i class="fas fa-bell"></i> Test Notification
+        </button>
+        <button class="demo-btn" onclick="toggleAutoRefresh()">
+            <i class="fas fa-play"></i> <span id="auto-refresh-text">Start Auto-Refresh</span>
+        </button>
+    </div>
+    
+    <div id="dashboard-container">
+        <div class="loading">
+            <i class="fas fa-spinner fa-spin"></i>
+            Loading signal tracking dashboard...
+        </div>
+    </div>
+
+    <!-- Include the signal tracking display script -->
+    <script src="/static/js/signal-tracking-display.js"></script>
+    
+    <script>
+        let autoRefreshInterval = null;
+        let autoRefreshActive = false;
+        
+        // Test if the server is running
+        async function testServerConnection() {
+            try {
+                const response = await fetch('/api/signal-tracking/status');
+                const data = await response.json();
+                
+                document.getElementById('server-status').textContent = 
+                    data.success ? 'Connected ✅' : 'Disconnected ❌';
+                
+                if (data.success) {
+                    updateStatusBar(data);
+                    return true;
+                }
+            } catch (error) {
+                document.getElementById('server-status').textContent = 'Server Offline ❌';
+                console.error('Server connection failed:', error);
+            }
+            return false;
+        }
+        
+        function updateStatusBar(data) {
+            if (data.total_active !== undefined) {
+                document.getElementById('signals-count').textContent = 
+                    `${data.total_active} Active Signals`;
+            }
+        }
+        
+        async function updateMLStatus() {
+            try {
+                const response = await fetch('/api/signal-tracking/learning-progress');
+                const data = await response.json();
+                
+                if (data.success && data.learning) {
+                    const learning = data.learning;
+                    document.getElementById('ml-status').textContent = 
+                        `ML Learning: ${learning.learning_status || 'Unknown'}`;
+                }
+            } catch (error) {
+                console.error('Error updating ML status:', error);
+            }
+        }
+        
+        async function updatePerformanceStatus() {
+            try {
+                const response = await fetch('/api/signal-tracking/performance-insights');
+                const data = await response.json();
+                
+                if (data.success && data.insights) {
+                    document.getElementById('win-rate').textContent = 
+                        `Win Rate: ${data.insights.win_rate || 0}%`;
+                }
+            } catch (error) {
+                console.error('Error updating performance status:', error);
+            }
+        }
+        
+        function refreshData() {
+            console.log('🔄 Refreshing all data...');
+            testServerConnection();
+            updateMLStatus();
+            updatePerformanceStatus();
+            
+            // If signal tracking display is loaded, refresh it
+            if (window.signalTrackingDisplay) {
+                window.signalTrackingDisplay.forceUpdate();
+            }
+        }
+        
+        async function forceSignalCheck() {
+            console.log('🔍 Forcing signal check...');
+            try {
+                const response = await fetch('/api/signal-tracking/force-check', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    showNotification('✅ Signal check completed', 'success');
+                    setTimeout(refreshData, 1000);
+                } else {
+                    showNotification('❌ Signal check failed: ' + data.error, 'error');
+                }
+            } catch (error) {
+                showNotification('❌ Error: ' + error.message, 'error');
+            }
+        }
+        
+        function testNotification() {
+            showNotification('🧪 This is a test notification!', 'info');
+        }
+        
+        function toggleAutoRefresh() {
+            const button = document.querySelector('button[onclick="toggleAutoRefresh()"]');
+            const text = document.getElementById('auto-refresh-text');
+            const icon = button.querySelector('i');
+            
+            if (autoRefreshActive) {
+                clearInterval(autoRefreshInterval);
+                autoRefreshInterval = null;
+                autoRefreshActive = false;
+                text.textContent = 'Start Auto-Refresh';
+                icon.className = 'fas fa-play';
+                showNotification('⏹️ Auto-refresh stopped', 'info');
+            } else {
+                autoRefreshInterval = setInterval(refreshData, 15000); // Every 15 seconds
+                autoRefreshActive = true;
+                text.textContent = 'Stop Auto-Refresh';
+                icon.className = 'fas fa-stop';
+                showNotification('▶️ Auto-refresh started (15s interval)', 'success');
+            }
+        }
+        
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 15px 25px;
+                border-radius: 8px;
+                color: white;
+                font-weight: bold;
+                z-index: 10000;
+                max-width: 400px;
+                animation: slideIn 0.3s ease;
+            `;
+            
+            const colors = {
+                'success': 'background: linear-gradient(135deg, #4CAF50, #45a049)',
+                'error': 'background: linear-gradient(135deg, #f44336, #da190b)',
+                'info': 'background: linear-gradient(135deg, #FFD700, #FFA500)'
+            };
+            
+            notification.style.cssText += colors[type] || colors.info;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => document.body.removeChild(notification), 300);
+            }, 5000);
+        }
+        
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', async () => {
+            console.log('🚀 Initializing GoldGPT Signal Tracking Demo');
+            
+            // Test server connection
+            const connected = await testServerConnection();
+            
+            if (connected) {
+                // Wait a bit for the signal tracking display to initialize
+                setTimeout(() => {
+                    refreshData();
+                    showNotification('✅ Signal tracking system initialized', 'success');
+                }, 2000);
+            } else {
+                // Show error message
+                document.getElementById('dashboard-container').innerHTML = 
+                    '<div class="error"><i class="fas fa-exclamation-triangle"></i> ' +
+                    'Cannot connect to GoldGPT server. Please ensure the Flask app is running on port 5000.</div>';
+            }
+        });
+        
+        // Add CSS animations
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes slideOut {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>

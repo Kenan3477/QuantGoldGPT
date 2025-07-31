@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>🐛 ML Predictions Debug Console</title>
+    <style>
+        body {
+            font-family: 'Consolas', 'Monaco', monospace;
+            background: #0a0a0a;
+            color: #00ff00;
+            padding: 20px;
+            margin: 0;
+        }
+        .debug-container {
+            background: #1a1a1a;
+            border: 2px solid #333;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 10px 0;
+        }
+        .success { border-color: #00d084; color: #00d084; }
+        .error { border-color: #ff4757; color: #ff4757; }
+        .warning { border-color: #ffa502; color: #ffa502; }
+        button {
+            background: #333;
+            color: #00ff00;
+            border: 1px solid #666;
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        button:hover { background: #555; }
+        pre { 
+            background: #000; 
+            padding: 10px; 
+            border-radius: 4px; 
+            overflow-x: auto;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <h1>🐛 ML Predictions Loading Debug Console</h1>
+    
+    <button onclick="testMLAPI()">🧪 Test ML API Direct</button>
+    <button onclick="testDashboardElements()">🔍 Check Dashboard Elements</button>
+    <button onclick="injectMLFix()">💉 Force Inject ML Update</button>
+    <button onclick="openDashboard()">🚀 Open Dashboard & Debug</button>
+    
+    <div id="debug-output"></div>
+
+    <script>
+        const output = document.getElementById('debug-output');
+        
+        function log(message, type = 'info') {
+            const div = document.createElement('div');
+            div.className = `debug-container ${type}`;
+            div.innerHTML = `<pre>${new Date().toLocaleTimeString()}: ${message}</pre>`;
+            output.appendChild(div);
+            console.log(message);
+        }
+
+        async function testMLAPI() {
+            log('🧪 Testing ML API Direct Connection...', 'info');
+            
+            try {
+                const response = await fetch('/api/ml-predictions/XAUUSD');
+                const data = await response.json();
+                
+                if (data.success && data.predictions) {
+                    log('✅ ML API SUCCESS!', 'success');
+                    log(`Current Price: $${data.current_price}`, 'success');
+                    
+                    data.predictions.forEach((pred, i) => {
+                        const timeframes = ['1H', '4H', '1D'];
+                        const tf = timeframes[i] || pred.timeframe;
+                        const change = pred.change_percent;
+                        const price = Math.round(pred.predicted_price);
+                        const conf = Math.round(pred.confidence * 100);
+                        
+                        log(`${tf}: ${change.toFixed(3)}% ($${price}) - ${conf}% confidence`, 
+                            change < 0 ? 'error' : 'success');
+                    });
+                } else {
+                    log('❌ ML API returned invalid data', 'error');
+                    log(JSON.stringify(data, null, 2), 'error');
+                }
+            } catch (error) {
+                log(`❌ ML API Error: ${error.message}`, 'error');
+            }
+        }
+
+        function testDashboardElements() {
+            log('🔍 Checking Dashboard Elements...', 'info');
+            
+            // Open dashboard in new window to test
+            const dashboard = window.open('/', 'dashboard');
+            
+            setTimeout(() => {
+                try {
+                    const mlPredictions = dashboard.document.getElementById('ml-predictions');
+                    const predictionItems = dashboard.document.querySelectorAll('.prediction-item');
+                    
+                    if (!mlPredictions) {
+                        log('❌ ML Predictions container NOT FOUND', 'error');
+                        return;
+                    }
+                    
+                    log(`✅ Found ML predictions container`, 'success');
+                    log(`✅ Found ${predictionItems.length} prediction items`, 'success');
+                    
+                    predictionItems.forEach((item, i) => {
+                        const valueSpan = item.querySelector('.prediction-value');
+                        const confSpan = item.querySelector('.confidence');
+                        
+                        if (valueSpan && confSpan) {
+                            log(`Item ${i+1}: "${valueSpan.textContent}" | "${confSpan.textContent}"`, 
+                                valueSpan.textContent.includes('Loading') ? 'warning' : 'info');
+                        }
+                    });
+                    
+                    // Check if initializeMLPredictions function exists
+                    if (typeof dashboard.initializeMLPredictions === 'function') {
+                        log('✅ initializeMLPredictions function exists', 'success');
+                    } else {
+                        log('❌ initializeMLPredictions function NOT FOUND', 'error');
+                    }
+                    
+                } catch (error) {
+                    log(`❌ Dashboard inspection error: ${error.message}`, 'error');
+                }
+            }, 2000);
+        }
+
+        function injectMLFix() {
+            log('💉 Injecting ML Fix into Dashboard...', 'warning');
+            
+            const dashboard = window.open('/', 'dashboard');
+            
+            setTimeout(() => {
+                try {
+                    const script = dashboard.document.createElement('script');
+                    script.textContent = `
+                        console.log('🔧 FORCE ML PREDICTIONS FIX INJECTED');
+                        
+                        async function forceMLUpdate() {
+                            console.log('🚀 Force updating ML predictions...');
+                            
+                            try {
+                                const response = await fetch('/api/ml-predictions/XAUUSD');
+                                const data = await response.json();
+                                
+                                console.log('📊 ML API Data:', data);
+                                
+                                if (!data.success || !data.predictions) {
+                                    throw new Error('Invalid ML API response');
+                                }
+                                
+                                const predictionItems = document.querySelectorAll('#ml-predictions .prediction-item');
+                                console.log('🔍 Found prediction items:', predictionItems.length);
+                                
+                                predictionItems.forEach((item, index) => {
+                                    const prediction = data.predictions[index];
+                                    if (!prediction) return;
+                                    
+                                    const valueSpan = item.querySelector('.prediction-value');
+                                    const confidenceSpan = item.querySelector('.confidence');
+                                    
+                                    if (valueSpan && confidenceSpan) {
+                                        const changePercent = prediction.change_percent;
+                                        const predictedPrice = prediction.predicted_price;
+                                        const confidence = Math.round(prediction.confidence * 100);
+                                        
+                                        // FIXED formatting - no Math.abs() bug
+                                        const changeText = changePercent >= 0 ? 
+                                            '+' + changePercent.toFixed(1) + '%' : 
+                                            changePercent.toFixed(1) + '%';
+                                            
+                                        const className = changePercent >= 0.5 ? 'positive' : 
+                                                        changePercent <= -0.5 ? 'negative' : 'neutral';
+                                        
+                                        valueSpan.textContent = changeText + ' ($' + Math.round(predictedPrice).toLocaleString() + ')';
+                                        valueSpan.className = 'prediction-value ' + className;
+                                        confidenceSpan.textContent = confidence + '% confidence';
+                                        
+                                        console.log(\`✅ Updated item \${index + 1}: \${changeText} (\${Math.round(predictedPrice)})\`);
+                                    }
+                                });
+                                
+                                console.log('✅ ML predictions force updated successfully!');
+                                
+                            } catch (error) {
+                                console.error('❌ Force ML update failed:', error);
+                            }
+                        }
+                        
+                        // Execute immediately
+                        forceMLUpdate();
+                        
+                        // Also set up interval
+                        setInterval(forceMLUpdate, 30000);
+                    `;
+                    
+                    dashboard.document.head.appendChild(script);
+                    log('✅ ML Fix injected successfully!', 'success');
+                    log('Check dashboard - it should now show real bearish data', 'success');
+                    
+                } catch (error) {
+                    log(`❌ Injection failed: ${error.message}`, 'error');
+                }
+            }, 2000);
+        }
+
+        function openDashboard() {
+            log('🚀 Opening Dashboard with Debug Mode...', 'info');
+            window.open('/', 'dashboard');
+            log('💡 Open browser console in dashboard to see debug logs', 'warning');
+        }
+
+        // Auto-run tests
+        setTimeout(testMLAPI, 1000);
+    </script>
+</body>
+</html>

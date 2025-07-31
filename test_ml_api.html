@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test ML API</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .prediction { border: 1px solid #ccc; margin: 10px; padding: 15px; border-radius: 5px; }
+        .bullish { border-left: 5px solid #28a745; }
+        .bearish { border-left: 5px solid #dc3545; }
+        .neutral { border-left: 5px solid #ffc107; }
+        .price { font-size: 1.2em; font-weight: bold; }
+        .confidence { color: #666; }
+    </style>
+</head>
+<body>
+    <h1>🤖 ML API Test Page</h1>
+    <button onclick="loadPredictions()">Load Fresh Predictions</button>
+    <div id="status">Click to load predictions...</div>
+    <div id="predictions"></div>
+
+    <script>
+        async function loadPredictions() {
+            const statusDiv = document.getElementById('status');
+            const predictionsDiv = document.getElementById('predictions');
+            
+            statusDiv.innerHTML = '⏳ Loading predictions...';
+            
+            try {
+                const response = await fetch('/api/advanced-ml/predictions');
+                const data = await response.json();
+                
+                console.log('🔍 Raw API Response:', data);
+                
+                if (data.success && data.predictions) {
+                    statusDiv.innerHTML = `✅ Loaded ${Object.keys(data.predictions).length} timeframes`;
+                    
+                    let html = '<h2>Market Summary</h2>';
+                    if (data.market_summary) {
+                        html += `
+                            <p><strong>Current Price:</strong> $${data.market_summary.current_price}</p>
+                            <p><strong>Trend:</strong> ${data.market_summary.trend}</p>
+                            <p><strong>Avg Confidence:</strong> ${(data.market_summary.average_confidence * 100).toFixed(1)}%</p>
+                            <p><strong>News Sentiment:</strong> ${data.market_summary.news_sentiment}</p>
+                        `;
+                    }
+                    
+                    html += '<h2>Predictions</h2>';
+                    
+                    Object.keys(data.predictions).forEach(timeframe => {
+                        if (data.predictions[timeframe] && data.predictions[timeframe].length > 0) {
+                            const pred = data.predictions[timeframe][0];
+                            const directionClass = pred.direction.toLowerCase();
+                            
+                            html += `
+                                <div class="prediction ${directionClass}">
+                                    <h3>${timeframe.toUpperCase()} - ${pred.direction}</h3>
+                                    <div class="price">Target: $${pred.target_price.toFixed(2)}</div>
+                                    <div class="confidence">Confidence: ${(pred.confidence * 100).toFixed(1)}%</div>
+                                    <p><strong>Reasoning:</strong> ${pred.reasoning}</p>
+                                    <p><strong>Features:</strong> ${pred.key_features.join(', ')}</p>
+                                    <p><strong>Created:</strong> ${new Date(pred.created_at).toLocaleString()}</p>
+                                </div>
+                            `;
+                        }
+                    });
+                    
+                    predictionsDiv.innerHTML = html;
+                } else {
+                    statusDiv.innerHTML = '❌ Failed to load valid predictions';
+                    predictionsDiv.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+                }
+            } catch (error) {
+                statusDiv.innerHTML = `❌ Error: ${error.message}`;
+                predictionsDiv.innerHTML = '';
+                console.error('Error loading predictions:', error);
+            }
+        }
+        
+        // Auto-load on page load
+        window.addEventListener('load', loadPredictions);
+    </script>
+</body>
+</html>

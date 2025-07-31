@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GoldGPT - Minimal Test</title>
+    <style>
+        body {
+            background: #0a0a0a;
+            color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-section {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .success { background: #00d084; color: white; }
+        .error { background: #ff4757; color: white; }
+        .loading { background: #ffa502; color: white; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏆 GoldGPT - Minimal Test Dashboard</h1>
+        
+        <div class="test-section">
+            <h2>🔧 System Status</h2>
+            <div id="flask-status" class="status loading">Testing Flask Connection...</div>
+            <div id="js-status" class="status loading">Testing JavaScript...</div>
+            <div id="socketio-status" class="status loading">Testing WebSocket...</div>
+        </div>
+        
+        <div class="test-section">
+            <h2>📊 Basic Gold Price</h2>
+            <div id="price-display">Loading price...</div>
+        </div>
+        
+        <div class="test-section">
+            <h2>🐛 Debug Info</h2>
+            <div id="debug-info"></div>
+        </div>
+    </div>
+
+    <!-- Load Socket.IO -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.4/socket.io.js"></script>
+    
+    <script>
+        console.log('🚀 Starting GoldGPT minimal test...');
+        
+        // Test 1: JavaScript is working
+        document.getElementById('js-status').textContent = 'JavaScript: ✅ Working';
+        document.getElementById('js-status').className = 'status success';
+        
+        // Test 2: Test Flask API
+        async function testFlask() {
+            try {
+                const response = await fetch('/api/live-gold-price');
+                const data = await response.json();
+                
+                document.getElementById('flask-status').textContent = 'Flask API: ✅ Working';
+                document.getElementById('flask-status').className = 'status success';
+                
+                if (data.success && data.data && data.data.price) {
+                    document.getElementById('price-display').innerHTML = `
+                        <h3>💰 Live Gold Price: $${data.data.price}</h3>
+                        <p>Source: ${data.data.source}</p>
+                        <p>Last Update: ${new Date(data.data.timestamp).toLocaleTimeString()}</p>
+                    `;
+                } else {
+                    document.getElementById('price-display').textContent = 'Price API error: ' + JSON.stringify(data);
+                }
+            } catch (error) {
+                console.error('Flask test failed:', error);
+                document.getElementById('flask-status').textContent = 'Flask API: ❌ Failed - ' + error.message;
+                document.getElementById('flask-status').className = 'status error';
+                document.getElementById('price-display').textContent = 'Could not connect to Flask server';
+            }
+        }
+        
+        // Test 3: Test Socket.IO
+        function testSocketIO() {
+            try {
+                const socket = io();
+                
+                socket.on('connect', () => {
+                    console.log('✅ Socket.IO connected');
+                    document.getElementById('socketio-status').textContent = 'WebSocket: ✅ Connected';
+                    document.getElementById('socketio-status').className = 'status success';
+                });
+                
+                socket.on('disconnect', () => {
+                    console.log('⚠️ Socket.IO disconnected');
+                    document.getElementById('socketio-status').textContent = 'WebSocket: ⚠️ Disconnected';
+                    document.getElementById('socketio-status').className = 'status error';
+                });
+                
+                socket.on('connect_error', (error) => {
+                    console.error('❌ Socket.IO connection error:', error);
+                    document.getElementById('socketio-status').textContent = 'WebSocket: ❌ Connection Failed';
+                    document.getElementById('socketio-status').className = 'status error';
+                });
+                
+                // Listen for price updates
+                socket.on('price_update', (data) => {
+                    console.log('💰 Live price update:', data);
+                    if (data.symbol === 'XAUUSD') {
+                        document.getElementById('price-display').innerHTML = `
+                            <h3>💰 Live Gold Price: $${data.price}</h3>
+                            <p>Source: ${data.source} (WebSocket)</p>
+                            <p>Change: ${data.change > 0 ? '+' : ''}${data.change} (${data.change_percent}%)</p>
+                            <p>Last Update: ${new Date(data.timestamp).toLocaleTimeString()}</p>
+                        `;
+                    }
+                });
+                
+            } catch (error) {
+                console.error('Socket.IO test failed:', error);
+                document.getElementById('socketio-status').textContent = 'WebSocket: ❌ Failed - ' + error.message;
+                document.getElementById('socketio-status').className = 'status error';
+            }
+        }
+        
+        // Debug info
+        function updateDebugInfo() {
+            const debugInfo = {
+                'Current URL': window.location.href,
+                'User Agent': navigator.userAgent,
+                'Screen Resolution': `${screen.width}x${screen.height}`,
+                'Window Size': `${window.innerWidth}x${window.innerHeight}`,
+                'Local Time': new Date().toLocaleString(),
+                'Console Errors': 'Check browser console for errors'
+            };
+            
+            let debugHtml = '<ul>';
+            for (const [key, value] of Object.entries(debugInfo)) {
+                debugHtml += `<li><strong>${key}:</strong> ${value}</li>`;
+            }
+            debugHtml += '</ul>';
+            
+            document.getElementById('debug-info').innerHTML = debugHtml;
+        }
+        
+        // Run tests when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('🔥 DOM loaded, running tests...');
+            updateDebugInfo();
+            testFlask();
+            testSocketIO();
+        });
+        
+        // Log any errors
+        window.addEventListener('error', (event) => {
+            console.error('❌ JavaScript Error:', event.error);
+        });
+        
+        console.log('✅ Test script loaded successfully');
+    </script>
+</body>
+</html>

@@ -1,0 +1,131 @@
+{
+  "demonstration_date": "2025-07-23T11:42:19.444298",
+  "strategies_tested": 2,
+  "walk_forward_windows": 8,
+  "strategy_1": {
+    "strategy_name": "MA_Crossover",
+    "total_return": 0.0025654468190130135,
+    "annualized_return": 0.0017705100060481094,
+    "volatility": 0.0023331476142520982,
+    "sharpe_ratio": -7.810679402645176,
+    "sortino_ratio": -10.407120151771698,
+    "calmar_ratio": 1.1756021255440912,
+    "max_drawdown": 0.0015060452576407884,
+    "var_95": -0.00020186906805851014,
+    "total_trades": 25,
+    "buy_trades": 15,
+    "sell_trades": 10,
+    "win_rate": 0.55,
+    "start_date": "2024-07-23 11:42:18.182668",
+    "end_date": "2025-07-22 11:42:18.182668",
+    "days_tested": 365
+  },
+  "strategy_2": {
+    "strategy_name": "Trend_Following",
+    "total_return": 0.0008595340291973843,
+    "annualized_return": 0.000593352786143253,
+    "volatility": 0.0022147924262646986,
+    "sharpe_ratio": -8.760523122457688,
+    "sortino_ratio": -10.402814006592207,
+    "calmar_ratio": 0.35278338591012953,
+    "max_drawdown": 0.0016819181680352935,
+    "var_95": -0.00021827560111527925,
+    "total_trades": 21,
+    "buy_trades": 12,
+    "sell_trades": 9,
+    "win_rate": 0.55,
+    "start_date": "2024-07-23 11:42:18.182668",
+    "end_date": "2025-07-22 11:42:18.182668",
+    "days_tested": 365
+  },
+  "walk_forward_results": [
+    {
+      "window_start": "2024-07-23 11:42:18.182668",
+      "window_end": "2024-12-19 11:42:18.182668",
+      "best_params": {
+        "short_window": 5,
+        "long_window": 20
+      },
+      "is_return": -9.683822360893827e-05,
+      "oos_return": 0.0,
+      "overfitting_ratio": -0.0
+    },
+    {
+      "window_start": "2024-08-22 11:42:18.182668",
+      "window_end": "2025-01-18 11:42:18.182668",
+      "best_params": {
+        "short_window": 15,
+        "long_window": 45
+      },
+      "is_return": -0.0004292787522508297,
+      "oos_return": 0.0,
+      "overfitting_ratio": -0.0
+    },
+    {
+      "window_start": "2024-09-21 11:42:18.182668",
+      "window_end": "2025-02-17 11:42:18.182668",
+      "best_params": {
+        "short_window": 10,
+        "long_window": 30
+      },
+      "is_return": 6.73005271218426e-05,
+      "oos_return": 0.0,
+      "overfitting_ratio": 0.0
+    },
+    {
+      "window_start": "2024-10-21 11:42:18.182668",
+      "window_end": "2025-03-19 11:42:18.182668",
+      "best_params": {
+        "short_window": 15,
+        "long_window": 45
+      },
+      "is_return": 1.6244197837804677e-05,
+      "oos_return": 0.0,
+      "overfitting_ratio": 0.0
+    },
+    {
+      "window_start": "2024-11-20 11:42:18.182668",
+      "window_end": "2025-04-18 11:42:18.182668",
+      "best_params": {
+        "short_window": 5,
+        "long_window": 20
+      },
+      "is_return": 0.001084571699035878,
+      "oos_return": -0.00020527287711403914,
+      "overfitting_ratio": -0.18926630419779067
+    },
+    {
+      "window_start": "2024-12-20 11:42:18.182668",
+      "window_end": "2025-05-18 11:42:18.182668",
+      "best_params": {
+        "short_window": 5,
+        "long_window": 20
+      },
+      "is_return": 0.00047192097983934217,
+      "oos_return": 4.5625465472985525e-05,
+      "overfitting_ratio": 0.0966803075559768
+    },
+    {
+      "window_start": "2025-01-19 11:42:18.182668",
+      "window_end": "2025-06-17 11:42:18.182668",
+      "best_params": {
+        "short_window": 15,
+        "long_window": 45
+      },
+      "is_return": -0.00014497050918478634,
+      "oos_return": 0.0,
+      "overfitting_ratio": -0.0
+    },
+    {
+      "window_start": "2025-02-18 11:42:18.182668",
+      "window_end": "2025-07-17 11:42:18.182668",
+      "best_params": {
+        "short_window": 10,
+        "long_window": 30
+      },
+      "is_return": 0.0008607764327428595,
+      "oos_return": 0.0,
+      "overfitting_ratio": 0.0
+    }
+  ]
+}

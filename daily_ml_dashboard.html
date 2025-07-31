@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Self-Improving ML Predictions - GoldGPT Pro</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+            color: #ffffff;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .header h1 {
+            color: #ffd700;
+            font-size: 2.5rem;
+            margin: 0;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+        }
+        
+        .subtitle {
+            color: #a0a0a0;
+            font-size: 1.1rem;
+            margin-top: 10px;
+        }
+        
+        .prediction-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .prediction-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+        
+        .prediction-date {
+            font-size: 1.2rem;
+            color: #ffd700;
+            font-weight: 600;
+        }
+        
+        .strategy-info {
+            background: rgba(0, 208, 132, 0.1);
+            color: #00d084;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            border: 1px solid rgba(0, 208, 132, 0.3);
+        }
+        
+        .predictions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+        
+        .prediction-item {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .timeframe {
+            font-size: 0.9rem;
+            color: #a0a0a0;
+            margin-bottom: 10px;
+        }
+        
+        .change-percent {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .predicted-price {
+            font-size: 1.1rem;
+            color: #ffd700;
+            margin-bottom: 8px;
+        }
+        
+        .confidence {
+            font-size: 0.85rem;
+            color: #a0a0a0;
+        }
+        
+        .positive { color: #00d084; }
+        .negative { color: #ff4757; }
+        .neutral { color: #ffa502; }
+        
+        .reasoning {
+            background: rgba(255, 255, 255, 0.02);
+            border-left: 4px solid #ffd700;
+            padding: 15px 20px;
+            margin-top: 20px;
+            border-radius: 5px;
+        }
+        
+        .reasoning h4 {
+            margin: 0 0 10px 0;
+            color: #ffd700;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            justify-content: center;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #00d084, #00a86b);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 208, 132, 0.3);
+        }
+        
+        .btn.secondary {
+            background: linear-gradient(135deg, #3742fa, #2f3542);
+        }
+        
+        .status {
+            text-align: center;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .status.loading {
+            background: rgba(255, 165, 2, 0.1);
+            border: 1px solid rgba(255, 165, 2, 0.3);
+            color: #ffa502;
+        }
+        
+        .status.success {
+            background: rgba(0, 208, 132, 0.1);
+            border: 1px solid rgba(0, 208, 132, 0.3);
+            color: #00d084;
+        }
+        
+        .next-prediction {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .countdown {
+            font-size: 1.5rem;
+            color: #ffd700;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 Daily Self-Improving ML Predictions</h1>
+            <div class="subtitle">One comprehensive prediction every 24 hours • Learning from accuracy • Evolving strategy</div>
+        </div>
+        
+        <div class="controls">
+            <button class="btn" onclick="loadPrediction()">📊 Load Today's Prediction</button>
+            <button class="btn secondary" onclick="forceNewPrediction()">🔄 Force New Prediction</button>
+            <button class="btn secondary" onclick="showPerformance()">📈 View Performance</button>
+        </div>
+        
+        <div id="status" class="status loading">
+            ⏳ Loading daily prediction...
+        </div>
+        
+        <div id="predictionCard" class="prediction-card" style="display: none;">
+            <div class="prediction-header">
+                <div class="prediction-date" id="predictionDate">Today's Prediction</div>
+                <div class="strategy-info" id="strategyInfo">Strategy Loading...</div>
+            </div>
+            
+            <div class="predictions-grid" id="predictionsGrid">
+                <!-- Predictions will be loaded here -->
+            </div>
+            
+            <div class="reasoning">
+                <h4>🧠 AI Reasoning</h4>
+                <div id="reasoningText">Loading reasoning...</div>
+            </div>
+        </div>
+        
+        <div class="next-prediction">
+            <h3>⏰ Next Prediction</h3>
+            <div class="countdown" id="countdown">Calculating...</div>
+            <div style="margin-top: 10px; color: #a0a0a0;">Predictions generated daily at 6:00 AM UTC</div>
+        </div>
+    </div>
+
+    <script>
+        let currentPrediction = null;
+
+        async function loadPrediction() {
+            const status = document.getElementById('status');
+            status.className = 'status loading';
+            status.textContent = '⏳ Loading daily prediction...';
+            
+            try {
+                const response = await fetch('/api/daily-ml-prediction/XAUUSD');
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayPrediction(data);
+                    status.className = 'status success';
+                    status.textContent = '✅ Daily prediction loaded successfully';
+                } else {
+                    throw new Error(data.error || 'Failed to load prediction');
+                }
+            } catch (error) {
+                status.className = 'status error';
+                status.textContent = `❌ Error: ${error.message}`;
+            }
+        }
+        
+        function displayPrediction(data) {
+            currentPrediction = data;
+            
+            // Show prediction card
+            document.getElementById('predictionCard').style.display = 'block';
+            
+            // Update header
+            document.getElementById('predictionDate').textContent = `📅 ${data.prediction_date}`;
+            document.getElementById('strategyInfo').textContent = `🎯 Strategy ${data.strategy_info.strategy_id}`;
+            
+            // Update predictions grid
+            const grid = document.getElementById('predictionsGrid');
+            grid.innerHTML = '';
+            
+            data.predictions.forEach(pred => {
+                const changeClass = pred.change_percent > 0 ? 'positive' : pred.change_percent < 0 ? 'negative' : 'neutral';
+                const changeSymbol = pred.change_percent > 0 ? '📈' : pred.change_percent < 0 ? '📉' : '➡️';
+                const changeText = pred.change_percent >= 0 ? `+${pred.change_percent.toFixed(1)}%` : `${pred.change_percent.toFixed(1)}%`;
+                
+                const item = document.createElement('div');
+                item.className = 'prediction-item';
+                item.innerHTML = `
+                    <div class="timeframe">${pred.timeframe} Forecast</div>
+                    <div class="change-percent ${changeClass}">${changeSymbol} ${changeText}</div>
+                    <div class="predicted-price">$${Math.round(pred.predicted_price).toLocaleString()}</div>
+                    <div class="confidence">${Math.round(pred.confidence * 100)}% confidence</div>
+                `;
+                
+                grid.appendChild(item);
+            });
+            
+            // Update reasoning
+            document.getElementById('reasoningText').textContent = data.strategy_info.reasoning;
+        }
+        
+        async function forceNewPrediction() {
+            if (!confirm('Generate a new prediction? This will override today\'s prediction.')) return;
+            
+            const status = document.getElementById('status');
+            status.className = 'status loading';
+            status.textContent = '⏳ Generating new prediction...';
+            
+            try {
+                const response = await fetch('/api/force-new-prediction', {
+                    method: 'POST'
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    status.textContent = '✅ New prediction generated! Reloading...';
+                    setTimeout(loadPrediction, 1000);
+                } else {
+                    throw new Error(data.error || 'Failed to generate prediction');
+                }
+            } catch (error) {
+                status.className = 'status error';
+                status.textContent = `❌ Error: ${error.message}`;
+            }
+        }
+        
+        async function showPerformance() {
+            try {
+                const response = await fetch('/api/ml-performance-dashboard');
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Simple alert for now - could create a modal
+                    const strategies = data.performance_report.strategies;
+                    let report = 'ML Performance Report:\n\n';
+                    
+                    strategies.forEach(strategy => {
+                        report += `${strategy.name}: ${(strategy.accuracy_rate * 100).toFixed(1)}% accuracy (${strategy.total_predictions} predictions)\n`;
+                    });
+                    
+                    alert(report);
+                } else {
+                    alert('Failed to load performance data');
+                }
+            } catch (error) {
+                alert('Error loading performance data');
+            }
+        }
+        
+        function updateCountdown() {
+            const now = new Date();
+            const nextPrediction = new Date();
+            
+            // Next prediction is at 6 AM UTC tomorrow
+            nextPrediction.setUTCDate(now.getUTCDate() + 1);
+            nextPrediction.setUTCHours(6, 0, 0, 0);
+            
+            const diff = nextPrediction - now;
+            const hours = Math.floor(diff / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+            
+            document.getElementById('countdown').textContent = `${hours}h ${minutes}m ${seconds}s`;
+        }
+        
+        // Load prediction on page load
+        loadPrediction();
+        
+        // Update countdown every second
+        setInterval(updateCountdown, 1000);
+        updateCountdown();
+    </script>
+</body>
+</html>

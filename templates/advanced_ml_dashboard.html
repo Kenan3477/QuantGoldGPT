@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GoldGPT - Advanced ML Prediction Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/advanced-ml-dashboard.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.1/socket.io.js"></script>
+</head>
+<body>
+    <!-- Header Section -->
+    <header class="dashboard-header">
+        <div class="header-container">
+            <div class="logo-section">
+                <i class="fas fa-chart-line logo-icon"></i>
+                <h1>GoldGPT ML Dashboard</h1>
+                <div class="system-status" id="systemStatus">
+                    <div class="status-indicator" id="statusIndicator"></div>
+                    <span id="statusText">Connecting...</span>
+                </div>
+            </div>
+            <div class="header-controls">
+                <button class="control-btn" id="refreshBtn">
+                    <i class="fas fa-sync-alt"></i>
+                    Refresh
+                </button>
+                <button class="control-btn" id="settingsBtn">
+                    <i class="fas fa-cog"></i>
+                    Settings
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Dashboard Content -->
+    <main class="dashboard-main dashboard-container">
+        <!-- Performance Overview Section -->
+        <section class="performance-overview">
+            <div class="overview-card">
+                <h3><i class="fas fa-trophy"></i>Overall Accuracy</h3>
+                <div class="metric-value" id="overallAccuracy">--</div>
+                <div class="metric-change" id="accuracyChange">--</div>
+            </div>
+            <div class="overview-card">
+                <h3><i class="fas fa-brain"></i>Active Strategies</h3>
+                <div class="metric-value" id="activeStrategies">--</div>
+                <div class="metric-subtext">ML Models</div>
+            </div>
+            <div class="overview-card">
+                <h3><i class="fas fa-clock"></i>Last Update</h3>
+                <div class="metric-value" id="lastUpdate">--</div>
+                <div class="metric-subtext">Real-time</div>
+            </div>
+            <div class="overview-card">
+                <h3><i class="fas fa-chart-bar"></i>Predictions Today</h3>
+                <div class="metric-value" id="predictionsToday">--</div>
+                <div class="metric-change" id="predictionsTrend">--</div>
+            </div>
+        </section>
+
+        <!-- Multi-Timeframe Predictions Grid -->
+        <section class="predictions-grid">
+            <h2><i class="fas fa-layer-group"></i>Multi-Timeframe Predictions</h2>
+            <div class="timeframe-selector">
+                <button class="timeframe-btn active" data-timeframe="all">All</button>
+                <button class="timeframe-btn" data-timeframe="15min">15M</button>
+                <button class="timeframe-btn" data-timeframe="30min">30M</button>
+                <button class="timeframe-btn" data-timeframe="1h">1H</button>
+                <button class="timeframe-btn" data-timeframe="4h">4H</button>
+                <button class="timeframe-btn" data-timeframe="24h">1D</button>
+                <button class="timeframe-btn" data-timeframe="7d">7D</button>
+            </div>
+            <div class="predictions-container" id="predictionsContainer">
+                <!-- Prediction cards will be dynamically generated here -->
+            </div>
+        </section>
+
+        <!-- Interactive Analysis Section -->
+        <section class="analysis-section">
+            <div class="analysis-left">
+                <!-- Price Chart with Predictions -->
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <h3><i class="fas fa-chart-candlestick"></i>Price Prediction Chart</h3>
+                        <div class="chart-controls">
+                            <button class="chart-control-btn" id="showSupportResistance">
+                                <i class="fas fa-layer-group"></i>S/R Levels
+                            </button>
+                            <button class="chart-control-btn" id="showConfidenceIntervals">
+                                <i class="fas fa-area-chart"></i>Confidence
+                            </button>
+                        </div>
+                    </div>
+                    <canvas id="predictionChart" class="prediction-chart"></canvas>
+                </div>
+
+                <!-- Historical Timeline -->
+                <div class="timeline-container">
+                    <h3><i class="fas fa-history"></i>Prediction Timeline</h3>
+                    <div class="timeline-slider-container">
+                        <input type="range" id="timelineSlider" min="0" max="100" value="100" class="timeline-slider">
+                        <div class="timeline-labels">
+                            <span>24h ago</span>
+                            <span>12h ago</span>
+                            <span>6h ago</span>
+                            <span>Now</span>
+                        </div>
+                    </div>
+                    <div class="timeline-info" id="timelineInfo">
+                        <div class="timeline-detail">
+                            <span class="detail-label">Time:</span>
+                            <span id="timelineTime">Live</span>
+                        </div>
+                        <div class="timeline-detail">
+                            <span class="detail-label">Price:</span>
+                            <span id="timelinePrice">$--</span>
+                        </div>
+                        <div class="timeline-detail">
+                            <span class="detail-label">Prediction:</span>
+                            <span id="timelinePrediction">--</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="analysis-right">
+                <!-- Feature Importance -->
+                <div class="feature-importance">
+                    <h3><i class="fas fa-weight-scale"></i>Feature Importance</h3>
+                    <div class="feature-list" id="featureList">
+                        <!-- Feature importance bars will be generated here -->
+                    </div>
+                </div>
+
+                <!-- Strategy Comparison -->
+                <div class="strategy-comparison">
+                    <h3><i class="fas fa-balance-scale"></i>Strategy Performance</h3>
+                    <div class="strategy-toggle">
+                        <button class="strategy-btn active" data-strategy="all">All</button>
+                        <button class="strategy-btn" data-strategy="technical">Technical</button>
+                        <button class="strategy-btn" data-strategy="sentiment">Sentiment</button>
+                        <button class="strategy-btn" data-strategy="macro">Macro</button>
+                        <button class="strategy-btn" data-strategy="pattern">Pattern</button>
+                    </div>
+                    <div class="strategy-metrics" id="strategyMetrics">
+                        <!-- Strategy performance will be displayed here -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Learning Dashboard -->
+        <section class="learning-dashboard">
+            <h2><i class="fas fa-graduation-cap"></i>Learning & Performance Analytics</h2>
+            
+            <div class="learning-grid">
+                <!-- Accuracy Trends -->
+                <div class="learning-card">
+                    <h3><i class="fas fa-trending-up"></i>Accuracy Evolution</h3>
+                    <canvas id="accuracyTrendChart" class="learning-chart"></canvas>
+                </div>
+
+                <!-- Strategy Comparison Chart -->
+                <div class="learning-card">
+                    <h3><i class="fas fa-chess"></i>Strategy Performance</h3>
+                    <canvas id="strategyComparisonChart" class="learning-chart"></canvas>
+                </div>
+
+                <!-- Feature Evolution -->
+                <div class="learning-card">
+                    <h3><i class="fas fa-dna"></i>Feature Importance Evolution</h3>
+                    <canvas id="featureEvolutionChart" class="learning-chart"></canvas>
+                </div>
+
+                <!-- Learning Examples -->
+                <div class="learning-card learning-examples">
+                    <h3><i class="fas fa-lightbulb"></i>Learning Examples</h3>
+                    <div class="examples-container">
+                        <div class="example-tabs">
+                            <button class="example-tab active" data-tab="winning">Winning Predictions</button>
+                            <button class="example-tab" data-tab="learning">Learning Cases</button>
+                        </div>
+                        <div class="examples-content" id="examplesContent">
+                            <!-- Learning examples will be displayed here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Detailed Prediction Modal -->
+        <div class="modal-overlay" id="predictionModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="modalTitle">Prediction Details</h3>
+                    <button class="modal-close" id="modalClose">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body" id="modalBody">
+                    <!-- Detailed prediction analysis will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner">
+            <div class="spinner-ring"></div>
+            <div class="loading-text">Loading ML Predictions...</div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="{{ url_for('static', filename='js/advanced-ml-api-client.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/advanced-ml-dashboard.js') }}"></script>
+</body>
+</html>

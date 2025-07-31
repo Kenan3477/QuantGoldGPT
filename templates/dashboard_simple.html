@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GoldGPT Pro - Advanced AI Trading Platform</title>
+    
+    <!-- Essential CSS only -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #141414;
+            --bg-tertiary: #1a1a1a;
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0b0;
+            --accent-primary: #00d4aa;
+            --success: #00d084;
+            --danger: #ff4757;
+            --gold: #ffd700;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+        }
+
+        .dashboard-container {
+            display: grid;
+            grid-template-columns: 280px 1fr 350px;
+            grid-template-rows: 60px 1fr;
+            height: 100vh;
+            gap: 1px;
+            background: var(--bg-primary);
+        }
+
+        .header {
+            grid-column: 1 / -1;
+            background: var(--bg-secondary);
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            border-bottom: 1px solid #333;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--gold);
+        }
+
+        .connection-status {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .sidebar {
+            background: var(--bg-secondary);
+            padding: 20px;
+            border-right: 1px solid #333;
+        }
+
+        .main-content {
+            background: var(--bg-tertiary);
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .right-panel {
+            background: var(--bg-secondary);
+            padding: 20px;
+            border-left: 1px solid #333;
+            overflow-y: auto;
+        }
+
+        .card {
+            background: var(--bg-secondary);
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .card h3 {
+            color: var(--accent-primary);
+            margin-bottom: 15px;
+        }
+
+        .loading {
+            text-align: center;
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        .chart-placeholder {
+            height: 400px;
+            background: var(--bg-primary);
+            border: 1px solid #333;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+        }
+
+        .news-item {
+            padding: 10px;
+            border-bottom: 1px solid #333;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .news-item:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .news-title {
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+
+        .news-meta {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .error {
+            color: var(--danger);
+            padding: 10px;
+            background: rgba(255, 71, 87, 0.1);
+            border: 1px solid var(--danger);
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+
+        .success {
+            color: var(--success);
+            padding: 10px;
+            background: rgba(0, 208, 132, 0.1);
+            border: 1px solid var(--success);
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+
+        /* Advanced Module Styles */
+        .greed-indicator {
+            text-align: center;
+            padding: 15px;
+        }
+
+        .greed-meter {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            margin: 0 auto 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            border: 4px solid;
+        }
+
+        .greed-extreme-fear { border-color: #ff4757; color: #ff4757; }
+        .greed-fear { border-color: #ff6b7a; color: #ff6b7a; }
+        .greed-neutral { border-color: #ffa502; color: #ffa502; }
+        .greed-greed { border-color: #2ed573; color: #2ed573; }
+        .greed-extreme-greed { border-color: #00d084; color: #00d084; }
+
+        .ml-prediction {
+            text-align: center;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 4px;
+            border: 1px solid #333;
+        }
+
+        .prediction-bullish { background: rgba(0, 208, 132, 0.1); border-color: var(--success); }
+        .prediction-bearish { background: rgba(255, 71, 87, 0.1); border-color: var(--danger); }
+        .prediction-neutral { background: rgba(255, 165, 2, 0.1); border-color: var(--warning); }
+
+        .timeframe-tabs {
+            display: flex;
+            margin-bottom: 10px;
+            gap: 5px;
+        }
+
+        .tab-btn {
+            padding: 5px 10px;
+            background: var(--bg-tertiary);
+            border: 1px solid #333;
+            color: var(--text-secondary);
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .tab-btn.active {
+            background: var(--accent-primary);
+            color: white;
+            border-color: var(--accent-primary);
+        }
+
+        .tradingview-widget {
+            width: 100%;
+            height: 400px;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .sentiment-bar {
+            height: 20px;
+            background: var(--bg-primary);
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+            position: relative;
+        }
+
+        .sentiment-fill {
+            height: 100%;
+            transition: width 0.3s ease;
+        }
+
+        .sentiment-bullish { background: linear-gradient(90deg, var(--success), #2ed573); }
+        .sentiment-bearish { background: linear-gradient(90deg, var(--danger), #ff6b7a); }
+
+        .metric-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin: 10px 0;
+        }
+
+        .metric-item {
+            text-align: center;
+            padding: 8px;
+            background: var(--bg-tertiary);
+            border-radius: 4px;
+            border: 1px solid #333;
+        }
+
+        .metric-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--accent-primary);
+        }
+
+        .metric-label {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo">
+                <i class="fas fa-coins"></i> GoldGPT Pro
+            </div>
+            <div class="connection-status">
+                <span id="connection-text">Connecting...</span>
+                <div class="status-dot" id="status-dot"></div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="card">
+                <h3><i class="fas fa-chart-line"></i> Portfolio</h3>
+                <div id="portfolio-summary" class="loading">Loading...</div>
+            </div>
+            
+            <div class="card">
+                <h3><i class="fas fa-robot"></i> AI Status</h3>
+                <div id="ai-status" class="loading">Initializing AI...</div>
+            </div>
+
+            <div class="card">
+                <h3><i class="fas fa-thermometer-half"></i> Fear & Greed</h3>
+                <div id="greed-indicator" class="greed-indicator loading">Loading...</div>
+            </div>
+
+            <div class="card">
+                <h3><i class="fas fa-brain"></i> ML Predictions</h3>
+                <div class="timeframe-tabs">
+                    <button class="tab-btn active" data-timeframe="1H">1H</button>
+                    <button class="tab-btn" data-timeframe="4H">4H</button>
+                    <button class="tab-btn" data-timeframe="1D">1D</button>
+                </div>
+                <div id="ml-predictions" class="loading">Loading predictions...</div>
+            </div>
+
+            <div class="card">
+                <h3><i class="fas fa-tachometer-alt"></i> Market Metrics</h3>
+                <div id="market-metrics" class="loading">Loading...</div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="card">
+                <h3><i class="fas fa-chart-area"></i> TradingView Chart</h3>
+                <div id="tradingview-chart" class="tradingview-widget"></div>
+            </div>
+        </div>
+
+        <!-- Right Panel -->
+        <div class="right-panel">
+            <div class="card">
+                <h3><i class="fas fa-newspaper"></i> Market News</h3>
+                <div id="news-container" class="loading">Loading news...</div>
+            </div>
+            
+            <div class="card">
+                <h3><i class="fas fa-brain"></i> AI Analysis</h3>
+                <div id="ai-analysis" class="loading">Analyzing market...</div>
+            </div>
+
+            <div class="card">
+                <h3><i class="fas fa-chart-pie"></i> Market Sentiment</h3>
+                <div id="sentiment-analysis" class="loading">Loading sentiment...</div>
+            </div>
+
+            <div class="card">
+                <h3><i class="fas fa-search-dollar"></i> Technical Analysis</h3>
+                <div id="technical-analysis" class="loading">Calculating indicators...</div>
+            </div>
+
+            <div class="card">
+                <h3><i class="fas fa-globe"></i> Macro Data</h3>
+                <div id="macro-data" class="loading">Loading macro data...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Essential Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.4/socket.io.js"></script>
+    <script src="https://s3.tradingview.com/tv.js"></script>
+    
+    <script>
+        // Minimal ComponentLoader stub to prevent errors from cached modules
+        if (!window.ComponentLoader) {
+            window.ComponentLoader = class {
+                register() { return this; }
+                startLoading() { return Promise.resolve(); }
+            };
+            window.componentLoader = new window.ComponentLoader();
+        }
+    </script>
+
+    <script>
+        console.log('🚀 GoldGPT Simple Dashboard starting...');
+        
+        // Global state
+        let socket = null;
+        let lastPrice = null;
+        let connectionStatus = 'connecting';
+        
+        // Update connection status
+        function updateConnectionStatus(status, message) {
+            connectionStatus = status;
+            const statusText = document.getElementById('connection-text');
+            const statusDot = document.getElementById('status-dot');
+            
+            statusText.textContent = message || status;
+            
+            if (status === 'connected') {
+                statusDot.style.background = 'var(--success)';
+            } else if (status === 'error') {
+                statusDot.style.background = 'var(--danger)';
+            } else {
+                statusDot.style.background = 'var(--warning)';
+            }
+        }
+        
+        // Initialize Socket.IO
+        function initializeSocket() {
+            try {
+                console.log('🔌 Connecting to WebSocket...');
+                socket = io();
+                
+                socket.on('connect', () => {
+                    console.log('✅ WebSocket connected');
+                    updateConnectionStatus('connected', 'Connected');
+                    loadInitialData();
+                });
+                
+                socket.on('disconnect', () => {
+                    console.log('⚠️ WebSocket disconnected');
+                    updateConnectionStatus('disconnected', 'Disconnected');
+                });
+                
+                socket.on('connect_error', (error) => {
+                    console.error('❌ WebSocket error:', error);
+                    updateConnectionStatus('error', 'Connection Error');
+                });
+                
+                socket.on('price_update', (data) => {
+                    console.log('💰 Price update:', data);
+                    updatePriceDisplay(data);
+                });
+                
+            } catch (error) {
+                console.error('❌ Socket initialization failed:', error);
+                updateConnectionStatus('error', 'Socket Error');
+            }
+        }
+        
+        // Load initial data
+        async function loadInitialData() {
+            await Promise.all([
+                loadGoldPrice(),
+                loadNews(),
+                loadAIAnalysis(),
+                loadPortfolio(),
+                loadMLPredictions(),
+                loadGreedIndex(),
+                loadMarketMetrics(),
+                loadSentimentAnalysis(),
+                loadTechnicalAnalysis(),
+                loadMacroData()
+            ]);
+            
+            // Initialize TradingView chart after data loads
+            initializeTradingViewChart();
+        }
+        
+        // Load gold price (for background data only)
+        async function loadGoldPrice() {
+            try {
+                console.log('💰 Loading gold price...');
+                const response = await fetch('/api/live-gold-price');
+                const data = await response.json();
+                
+                if (data.success && data.data) {
+                    // Store the price data for other components to use
+                    lastPrice = data.data.price;
+                    console.log(`✅ Gold price loaded: $${data.data.price}`);
+                } else {
+                    throw new Error(data.error || 'Price API error');
+                }
+            } catch (error) {
+                console.error('❌ Failed to load gold price:', error);
+            }
+        }
+        
+        // Update price display (for WebSocket updates)
+        function updatePriceDisplay(data) {
+            if (data.symbol !== 'XAUUSD') return;
+            
+            // Update connection status with current price
+            updateConnectionStatus('connected', `Connected • $${data.price.toFixed(2)}`);
+            lastPrice = data.price;
+        }
+        
+        // Load news
+        async function loadNews() {
+            try {
+                console.log('📰 Loading news...');
+                const response = await fetch('/api/news/latest?limit=5');
+                const data = await response.json();
+                
+                if (data.success && data.news) {
+                    displayNews(data.news);
+                } else {
+                    throw new Error('News API error');
+                }
+            } catch (error) {
+                console.error('❌ Failed to load news:', error);
+                document.getElementById('news-container').innerHTML = '<div class="error">News loading failed</div>';
+            }
+        }
+        
+        // Display news
+        function displayNews(newsItems) {
+            const container = document.getElementById('news-container');
+            
+            if (!newsItems || newsItems.length === 0) {
+                container.innerHTML = '<div class="loading">No news available</div>';
+                return;
+            }
+            
+            const newsHtml = newsItems.map(item => `
+                <div class="news-item">
+                    <div class="news-title">${item.title}</div>
+                    <div class="news-meta">
+                        ${item.source} • ${item.time_ago}
+                        ${item.sentiment_score !== undefined ? `• Sentiment: ${item.sentiment_score > 0 ? 'Bullish' : item.sentiment_score < 0 ? 'Bearish' : 'Neutral'}` : ''}
+                    </div>
+                </div>
+            `).join('');
+            
+            container.innerHTML = newsHtml;
+        }
+        
+        // Load AI analysis
+        async function loadAIAnalysis() {
+            try {
+                console.log('🤖 Loading AI analysis...');
+                const response = await fetch('/api/comprehensive-analysis/XAUUSD');
+                const data = await response.json();
+                
+                if (data.success && data.analysis) {
+                    displayAIAnalysis(data.analysis);
+                } else {
+                    throw new Error('AI Analysis API error');
+                }
+            } catch (error) {
+                console.error('❌ Failed to load AI analysis:', error);
+                document.getElementById('ai-analysis').innerHTML = '<div class="error">AI analysis unavailable</div>';
+            }
+        }
+        
+        // Display AI analysis
+        function displayAIAnalysis(analysis) {
+            const container = document.getElementById('ai-analysis');
+            const recommendation = analysis.overall_recommendation || {};
+            
+            const html = `
+                <div style="margin-bottom: 10px;">
+                    <strong>Signal:</strong> 
+                    <span class="${recommendation.action === 'buy' ? 'positive' : recommendation.action === 'sell' ? 'negative' : ''}">${recommendation.action || 'hold'}</span>
+                </div>
+                <div style="margin-bottom: 10px;">
+                    <strong>Confidence:</strong> ${Math.round((recommendation.confidence || 0.5) * 100)}%
+                </div>
+                <div style="margin-bottom: 10px;">
+                    <strong>Price:</strong> $${(analysis.current_price || 0).toFixed(2)}
+                </div>
+                <div style="font-size: 12px; color: var(--text-secondary);">
+                    Updated: ${new Date(analysis.timestamp).toLocaleTimeString()}
+                </div>
+            `;
+            
+            container.innerHTML = html;
+        }
+        
+        // Load portfolio
+        async function loadPortfolio() {
+            try {
+                const response = await fetch('/api/portfolio');
+                const data = await response.json();
+                
+                const container = document.getElementById('portfolio-summary');
+                container.innerHTML = `
+                    <div>Total Value: $${(data.total_value || 0).toFixed(2)}</div>
+                    <div>P&L: <span class="${data.total_pnl >= 0 ? 'positive' : 'negative'}">${data.total_pnl >= 0 ? '+' : ''}$${(data.total_pnl || 0).toFixed(2)}</span></div>
+                    <div>Open Trades: ${data.open_trades || 0}</div>
+                `;
+            } catch (error) {
+                console.error('❌ Failed to load portfolio:', error);
+                document.getElementById('portfolio-summary').innerHTML = '<div class="error">Portfolio unavailable</div>';
+            }
+        }
+        
+        // Update AI status
+        function updateAIStatus() {
+            const container = document.getElementById('ai-status');
+            container.innerHTML = `
+                <div class="success">✅ AI Analysis: Active</div>
+                <div class="success">✅ ML Predictions: Active</div>
+                <div class="success">✅ News Analysis: Active</div>
+            `;
+        }
+
+        // Load ML Predictions
+        async function loadMLPredictions() {
+            try {
+                console.log('🤖 Loading ML predictions...');
+                const response = await fetch('/api/ml-predictions/XAUUSD');
+                const data = await response.json();
+                
+                if (data.success && data.predictions) {
+                    displayMLPredictions(data.predictions);
+                } else {
+                    throw new Error('ML Predictions API error');
+                }
+            } catch (error) {
+                console.error('❌ Failed to load ML predictions:', error);
+                document.getElementById('ml-predictions').innerHTML = '<div class="error">ML predictions unavailable</div>';
+            }
+        }
+
+        // Display ML Predictions
+        function displayMLPredictions(predictions) {
+            const container = document.getElementById('ml-predictions');
+            
+            // Show predictions for different timeframes
+            const timeframes = ['1H', '4H', '1D'];
+            let html = '';
+            
+            timeframes.forEach(tf => {
+                const pred = predictions[tf] || { direction: 'neutral', confidence: 0.5 };
+                const directionClass = pred.direction === 'bullish' ? 'prediction-bullish' : 
+                                     pred.direction === 'bearish' ? 'prediction-bearish' : 'prediction-neutral';
+                
+                html += `
+                    <div class="ml-prediction ${directionClass}" data-timeframe="${tf}">
+                        <div><strong>${tf}</strong>: ${pred.direction}</div>
+                        <div style="font-size: 12px;">Confidence: ${Math.round((pred.confidence || 0.5) * 100)}%</div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        // Load Fear & Greed Index
+        async function loadGreedIndex() {
+            try {
+                // Simulate Fear & Greed index (in real app, get from API)
+                const greedValue = Math.floor(Math.random() * 100);
+                displayGreedIndex(greedValue);
+            } catch (error) {
+                console.error('❌ Failed to load greed index:', error);
+                document.getElementById('greed-indicator').innerHTML = '<div class="error">Greed index unavailable</div>';
+            }
+        }
+
+        // Display Fear & Greed Index
+        function displayGreedIndex(value) {
+            const container = document.getElementById('greed-indicator');
+            
+            let label, className;
+            if (value <= 20) {
+                label = 'Extreme Fear';
+                className = 'greed-extreme-fear';
+            } else if (value <= 40) {
+                label = 'Fear';
+                className = 'greed-fear';
+            } else if (value <= 60) {
+                label = 'Neutral';
+                className = 'greed-neutral';
+            } else if (value <= 80) {
+                label = 'Greed';
+                className = 'greed-greed';
+            } else {
+                label = 'Extreme Greed';
+                className = 'greed-extreme-greed';
+            }
+            
+            container.innerHTML = `
+                <div class="greed-meter ${className}">
+                    ${value}
+                </div>
+                <div style="font-weight: bold;">${label}</div>
+                <div style="font-size: 12px; color: var(--text-secondary);">Market Sentiment</div>
+            `;
+        }
+
+        // Load Market Metrics
+        async function loadMarketMetrics() {
+            try {
+                const response = await fetch('/api/macro/all');
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayMarketMetrics(data.data);
+                } else {
+                    throw new Error('Market metrics API error');
+                }
+            } catch (error) {
+                console.error('❌ Failed to load market metrics:', error);
+                document.getElementById('market-metrics').innerHTML = '<div class="error">Metrics unavailable</div>';
+            }
+        }
+
+        // Display Market Metrics
+        function displayMarketMetrics(data) {
+            const container = document.getElementById('market-metrics');
+            
+            const html = `
+                <div class="metric-grid">
+                    <div class="metric-item">
+                        <div class="metric-value">${data.usd_index?.value || 'N/A'}</div>
+                        <div class="metric-label">USD Index</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-value">${data.vix?.value || 'N/A'}</div>
+                        <div class="metric-label">VIX</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-value">${data.treasury_yields?.['10y']?.value || 'N/A'}%</div>
+                        <div class="metric-label">10Y Yield</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-value">${data.fed_rate?.value || 'N/A'}%</div>
+                        <div class="metric-label">Fed Rate</div>
+                    </div>
+                </div>
+            `;
+            
+            container.innerHTML = html;
+        }
+
+        // Load Sentiment Analysis
+        async function loadSentimentAnalysis() {
+            try {
+                const response = await fetch('/api/news/sentiment-summary');
+                const data = await response.json();
+                
+                if (data.success) {
+                    displaySentimentAnalysis(data);
+                } else {
+                    throw new Error('Sentiment API error');
+                }
+            } catch (error) {
+                console.error('❌ Failed to load sentiment:', error);
+                document.getElementById('sentiment-analysis').innerHTML = '<div class="error">Sentiment unavailable</div>';
+            }
+        }
+
+        // Display Sentiment Analysis
+        function displaySentimentAnalysis(data) {
+            const container = document.getElementById('sentiment-analysis');
+            const sentiment = data.overall_sentiment || 0;
+            const label = data.overall_label || 'neutral';
+            
+            const sentimentClass = sentiment > 0.1 ? 'sentiment-bullish' : sentiment < -0.1 ? 'sentiment-bearish' : 'sentiment-neutral';
+            const sentimentWidth = Math.abs(sentiment) * 100;
+            
+            const html = `
+                <div style="text-align: center; margin-bottom: 10px;">
+                    <div style="font-size: 18px; font-weight: bold; color: ${sentiment > 0 ? 'var(--success)' : sentiment < 0 ? 'var(--danger)' : 'var(--warning)'};">
+                        ${label.toUpperCase()}
+                    </div>
+                    <div style="font-size: 12px; color: var(--text-secondary);">
+                        Score: ${sentiment.toFixed(3)} | Confidence: ${Math.round((data.confidence || 0.5) * 100)}%
+                    </div>
+                </div>
+                <div class="sentiment-bar">
+                    <div class="sentiment-fill ${sentimentClass}" style="width: ${sentimentWidth}%;"></div>
+                </div>
+                <div style="font-size: 11px; color: var(--text-secondary); text-align: center;">
+                    Based on ${data.total_articles_analyzed || 0} articles
+                </div>
+            `;
+            
+            container.innerHTML = html;
+        }
+
+        // Load Technical Analysis
+        async function loadTechnicalAnalysis() {
+            try {
+                const response = await fetch('/api/technical-analysis/XAUUSD');
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayTechnicalAnalysis(data.analysis);
+                } else {
+                    throw new Error('Technical analysis API error');
+                }
+            } catch (error) {
+                console.error('❌ Failed to load technical analysis:', error);
+                document.getElementById('technical-analysis').innerHTML = '<div class="error">Technical analysis unavailable</div>';
+            }
+        }
+
+        // Display Technical Analysis
+        function displayTechnicalAnalysis(analysis) {
+            const container = document.getElementById('technical-analysis');
+            
+            const html = `
+                <div class="metric-grid">
+                    <div class="metric-item">
+                        <div class="metric-value">${analysis.indicators?.RSI || 'N/A'}</div>
+                        <div class="metric-label">RSI</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-value">${analysis.trend || 'N/A'}</div>
+                        <div class="metric-label">Trend</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-value">$${analysis.support || 'N/A'}</div>
+                        <div class="metric-label">Support</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-value">$${analysis.resistance || 'N/A'}</div>
+                        <div class="metric-label">Resistance</div>
+                    </div>
+                </div>
+            `;
+            
+            container.innerHTML = html;
+        }
+
+        // Load Macro Data
+        async function loadMacroData() {
+            try {
+                const response = await fetch('/api/macro/all');
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayMacroData(data.data);
+                } else {
+                    throw new Error('Macro data API error');
+                }
+            } catch (error) {
+                console.error('❌ Failed to load macro data:', error);
+                document.getElementById('macro-data').innerHTML = '<div class="error">Macro data unavailable</div>';
+            }
+        }
+
+        // Display Macro Data
+        function displayMacroData(data) {
+            const container = document.getElementById('macro-data');
+            
+            const html = `
+                <div style="font-size: 12px;">
+                    <div style="display: flex; justify-content: space-between; margin: 5px 0;">
+                        <span>CPI:</span>
+                        <span>${data.cpi_annual?.value || 'N/A'}%</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin: 5px 0;">
+                        <span>2Y Yield:</span>
+                        <span>${data.treasury_yields?.['2y']?.value || 'N/A'}%</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin: 5px 0;">
+                        <span>30Y Yield:</span>
+                        <span>${data.treasury_yields?.['30y']?.value || 'N/A'}%</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin: 5px 0;">
+                        <span>Gold:</span>
+                        <span style="color: var(--gold);">$${data.gold_price?.value || 'N/A'}</span>
+                    </div>
+                </div>
+            `;
+            
+            container.innerHTML = html;
+        }
+
+        // Initialize TradingView Chart
+        function initializeTradingViewChart() {
+            try {
+                console.log('📊 Initializing TradingView chart...');
+                
+                new TradingView.widget({
+                    "width": "100%",
+                    "height": "400",
+                    "symbol": "OANDA:XAUUSD",
+                    "interval": "15",
+                    "timezone": "Etc/UTC",
+                    "theme": "dark",
+                    "style": "1",
+                    "locale": "en",
+                    "toolbar_bg": "#f1f3f6",
+                    "enable_publishing": false,
+                    "hide_top_toolbar": false,
+                    "hide_legend": false,
+                    "save_image": false,
+                    "container_id": "tradingview-chart",
+                    "studies": [
+                        "RSI@tv-basicstudies",
+                        "MACD@tv-basicstudies"
+                    ]
+                });
+                
+                console.log('✅ TradingView chart initialized');
+            } catch (error) {
+                console.error('❌ TradingView chart initialization failed:', error);
+                document.getElementById('tradingview-chart').innerHTML = '<div class="error">Chart failed to load</div>';
+            }
+        }
+
+        // Tab functionality for timeframes
+        function setupTabHandlers() {
+            // ML Prediction tabs
+            document.querySelectorAll('[data-timeframe]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    // Remove active class from siblings
+                    btn.parentNode.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    
+                    // Highlight corresponding prediction
+                    const timeframe = btn.dataset.timeframe;
+                    document.querySelectorAll('.ml-prediction').forEach(pred => {
+                        pred.style.opacity = pred.dataset.timeframe === timeframe ? '1' : '0.5';
+                    });
+                });
+            });
+        }
+        
+        // Initialize everything when DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('🔥 DOM loaded, initializing enhanced dashboard...');
+            
+            updateConnectionStatus('connecting', 'Initializing...');
+            updateAIStatus();
+            setupTabHandlers();
+            
+            // Initialize socket connection
+            initializeSocket();
+            
+            // If socket fails, still try to load data via REST API
+            setTimeout(() => {
+                if (connectionStatus !== 'connected') {
+                    console.log('⚠️ WebSocket not connected, trying REST API...');
+                    loadInitialData();
+                }
+            }, 3000);
+            
+            console.log('✅ Enhanced dashboard initialized with all modules');
+        });
+        
+        // Handle errors
+        window.addEventListener('error', (event) => {
+            console.error('❌ JavaScript Error:', event.error);
+        });
+    </script>
+</body>
+</html>

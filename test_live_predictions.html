@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Live ML Predictions Test</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.0/socket.io.js"></script>
+</head>
+<body>
+    <h1>Live ML Predictions Debug</h1>
+    
+    <h2>API Direct Test:</h2>
+    <div id="api-results">Loading...</div>
+    
+    <h2>WebSocket Real-time Test:</h2>
+    <div id="websocket-results">Connecting...</div>
+    
+    <button onclick="testAPI()">Refresh API Test</button>
+    <button onclick="testEmergency()">Test Emergency Fix</button>
+    
+    <script>
+        // Test API directly
+        async function testAPI() {
+            try {
+                const response = await fetch('/api/ml-predictions/XAUUSD');
+                const data = await response.json();
+                document.getElementById('api-results').innerHTML = `
+                    <pre>${JSON.stringify(data.predictions, null, 2)}</pre>
+                `;
+            } catch (error) {
+                document.getElementById('api-results').innerHTML = `Error: ${error.message}`;
+            }
+        }
+        
+        // Test emergency fix function
+        function testEmergency() {
+            if (window.emergencyMLUpdate) {
+                window.emergencyMLUpdate();
+            } else {
+                alert('Emergency function not available');
+            }
+        }
+        
+        // Test WebSocket
+        const socket = io();
+        socket.on('connect', function() {
+            document.getElementById('websocket-results').innerHTML = 'Connected, waiting for ML updates...';
+        });
+        
+        socket.on('ml_predictions_update', function(data) {
+            document.getElementById('websocket-results').innerHTML = `
+                <strong>WebSocket Update:</strong><br>
+                <pre>${JSON.stringify(data.predictions, null, 2)}</pre>
+            `;
+        });
+        
+        // Run initial API test
+        testAPI();
+    </script>
+</body>
+</html>

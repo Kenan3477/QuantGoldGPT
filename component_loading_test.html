@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GoldGPT Component Loading Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #0a0a0a;
+            color: white;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .test-container {
+            background: #1a1a1a;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .status {
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+        }
+        .success { background: #27ae60; }
+        .error { background: #e74c3c; }
+        .warning { background: #f39c12; }
+        .info { background: #3498db; }
+        .test-btn {
+            background: #f39c12;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .test-btn:hover { background: #e67e22; }
+    </style>
+</head>
+<body>
+    <h1>🧪 GoldGPT Component Loading Diagnostic Test</h1>
+    
+    <div class="test-container">
+        <h2>🔧 Fixes Applied</h2>
+        <div class="status success">✅ Debug logging re-enabled in app.js</div>
+        <div class="status success">✅ Connection manager switched to fixed version</div>
+        <div class="status success">✅ Portfolio, Watchlist, and Trading managers added</div>
+        <div class="status success">✅ Component loading dependencies improved</div>
+        <div class="status success">✅ AI Analysis system error handling enhanced</div>
+        <div class="status success">✅ News system fallback support added</div>
+        <div class="status success">✅ AI Analysis status endpoint added to Flask</div>
+    </div>
+
+    <div class="test-container">
+        <h2>🧪 Component Tests</h2>
+        <button class="test-btn" onclick="testSocketIO()">Test Socket.IO</button>
+        <button class="test-btn" onclick="testComponentLoader()">Test Component Loader</button>
+        <button class="test-btn" onclick="testMarketDataManager()">Test Market Data Manager</button>
+        <button class="test-btn" onclick="testAIAnalysis()">Test AI Analysis</button>
+        <button class="test-btn" onclick="testNewsSystem()">Test News System</button>
+        <div id="test-results"></div>
+    </div>
+
+    <div class="test-container">
+        <h2>📊 Component Status</h2>
+        <div id="component-status">Loading component status...</div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.4/socket.io.js"></script>
+    <script>
+        function log(message, type = 'info') {
+            const div = document.createElement('div');
+            div.className = `status ${type}`;
+            div.textContent = message;
+            document.getElementById('test-results').appendChild(div);
+        }
+
+        function testSocketIO() {
+            log('🔌 Testing Socket.IO connection...', 'info');
+            try {
+                const socket = io();
+                socket.on('connect', () => {
+                    log('✅ Socket.IO connection successful', 'success');
+                });
+                socket.on('connect_error', (error) => {
+                    log(`❌ Socket.IO connection failed: ${error.message}`, 'error');
+                });
+                setTimeout(() => {
+                    if (!socket.connected) {
+                        log('⚠️ Socket.IO connection timeout', 'warning');
+                    }
+                }, 5000);
+            } catch (error) {
+                log(`❌ Socket.IO test failed: ${error.message}`, 'error');
+            }
+        }
+
+        function testComponentLoader() {
+            log('🔧 Testing Component Loader availability...', 'info');
+            if (typeof ComponentLoader !== 'undefined') {
+                log('✅ ComponentLoader class available', 'success');
+                try {
+                    const loader = new ComponentLoader();
+                    log('✅ ComponentLoader instantiated successfully', 'success');
+                } catch (error) {
+                    log(`❌ ComponentLoader instantiation failed: ${error.message}`, 'error');
+                }
+            } else {
+                log('❌ ComponentLoader class not found', 'error');
+            }
+        }
+
+        function testMarketDataManager() {
+            log('📊 Testing Market Data Manager...', 'info');
+            if (typeof MarketDataManager !== 'undefined') {
+                log('✅ MarketDataManager class available', 'success');
+                try {
+                    const manager = new MarketDataManager();
+                    log('✅ MarketDataManager instantiated successfully', 'success');
+                } catch (error) {
+                    log(`❌ MarketDataManager instantiation failed: ${error.message}`, 'error');
+                }
+            } else {
+                log('❌ MarketDataManager class not found', 'error');
+            }
+        }
+
+        async function testAIAnalysis() {
+            log('🤖 Testing AI Analysis endpoints...', 'info');
+            try {
+                const response = await fetch('/api/ai-analysis/status');
+                if (response.ok) {
+                    const data = await response.json();
+                    log(`✅ AI Analysis status: ${data.status}`, 'success');
+                } else {
+                    log(`⚠️ AI Analysis status endpoint returned: ${response.status}`, 'warning');
+                }
+            } catch (error) {
+                log(`❌ AI Analysis test failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function testNewsSystem() {
+            log('📰 Testing News System endpoints...', 'info');
+            const endpoints = ['/api/news/latest', '/api/news', '/api/enhanced-news'];
+            let working = false;
+            
+            for (const endpoint of endpoints) {
+                try {
+                    const response = await fetch(endpoint);
+                    if (response.ok) {
+                        log(`✅ News endpoint working: ${endpoint}`, 'success');
+                        working = true;
+                        break;
+                    }
+                } catch (error) {
+                    log(`⚠️ News endpoint failed: ${endpoint}`, 'warning');
+                }
+            }
+            
+            if (!working) {
+                log('❌ No news endpoints available', 'error');
+            }
+        }
+
+        // Auto-run component status check
+        setTimeout(() => {
+            const statusDiv = document.getElementById('component-status');
+            if (window.componentLoader) {
+                const status = window.componentLoader.getStatus();
+                statusDiv.innerHTML = `
+                    <div class="status info">Loaded: ${status.loaded || 0}</div>
+                    <div class="status info">Failed: ${status.failed || 0}</div>
+                    <div class="status info">Total: ${status.total || 0}</div>
+                `;
+            } else {
+                statusDiv.innerHTML = '<div class="status warning">Component loader not available</div>';
+            }
+        }, 2000);
+
+        log('🚀 Diagnostic test page loaded', 'success');
+    </script>
+</body>
+</html>

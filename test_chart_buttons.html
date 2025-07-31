@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>GoldGPT Chart Button Test</title>
+    <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; background: #0a0a0a; color: white; padding: 20px; }
+        .controls { margin: 20px 0; }
+        .timeframe-btn, .indicator-btn {
+            background: #2a2a2a; color: white; border: 1px solid #444;
+            padding: 8px 16px; margin: 5px; cursor: pointer; border-radius: 5px;
+        }
+        .timeframe-btn.active, .indicator-btn.active {
+            background: #00d084; border-color: #00d084;
+        }
+        #chart { width: 100%; height: 500px; background: #1a1a1a; margin: 20px 0; }
+        .status { background: #2a2a2a; padding: 10px; border-radius: 5px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>🚀 GoldGPT Chart Button Test</h1>
+    
+    <div class="status" id="status">Testing chart functionality...</div>
+    
+    <div class="controls">
+        <strong>Timeframes:</strong><br>
+        <button class="timeframe-btn" data-timeframe="1m">1M</button>
+        <button class="timeframe-btn" data-timeframe="5m">5M</button>
+        <button class="timeframe-btn" data-timeframe="15m">15M</button>
+        <button class="timeframe-btn active" data-timeframe="1h">1H</button>
+        <button class="timeframe-btn" data-timeframe="4h">4H</button>
+        <button class="timeframe-btn" data-timeframe="1d">1D</button>
+    </div>
+    
+    <div class="controls">
+        <strong>Indicators:</strong><br>
+        <button class="indicator-btn active" data-indicator="volume">Volume</button>
+        <button class="indicator-btn" data-indicator="rsi">RSI</button>
+        <button class="indicator-btn" data-indicator="macd">MACD</button>
+        <button class="indicator-btn" data-indicator="bb">Bollinger Bands</button>
+    </div>
+    
+    <div id="chart"></div>
+    
+    <script>
+        // Chart Manager Implementation
+        class ChartManager {
+            constructor() {
+                this.currentTimeframe = '1h';
+                this.activeIndicators = new Set(['volume']);
+                this.chart = null;
+                this.candlestickSeries = null;
+                this.volumeSeries = null;
+                this.indicators = {};
+                this.init();
+            }
+            
+            init() {
+                this.initChart();
+                this.setupEventListeners();
+                this.updateStatus('Chart initialized successfully!');
+            }
+            
+            initChart() {
+                const chartContainer = document.getElementById('chart');
+                
+                this.chart = LightweightCharts.createChart(chartContainer, {
+                    width: chartContainer.clientWidth,
+                    height: 500,
+                    layout: {
+                        background: { type: 'solid', color: '#1a1a1a' },
+                        textColor: '#d1d5db',
+                    },
+                    grid: {
+                        vertLines: { color: '#2a2a2a' },
+                        horzLines: { color: '#2a2a2a' },
+                    },
+                    crosshair: {
+                        mode: LightweightCharts.CrosshairMode.Normal,
+                    },
+                    rightPriceScale: {
+                        borderColor: '#2a2a2a',
+                    },
+                    timeScale: {
+                        borderColor: '#2a2a2a',
+                        timeVisible: true,
+                        secondsVisible: false,
+                    },
+                });
+                
+                // Add candlestick series
+                this.candlestickSeries = this.chart.addCandlestickSeries({
+                    upColor: '#00d084',
+                    downColor: '#ff4757',
+                    borderDownColor: '#ff4757',
+                    borderUpColor: '#00d084',
+                    wickDownColor: '#ff4757',
+                    wickUpColor: '#00d084',
+                });
+                
+                // Add volume series
+                this.volumeSeries = this.chart.addHistogramSeries({
+                    color: '#26a69a',
+                    priceFormat: {
+                        type: 'volume',
+                    },
+                    priceScaleId: '',
+                    scaleMargins: {
+                        top: 0.8,
+                        bottom: 0,
+                    },
+                });
+                
+                this.loadSampleData();
+            }
+            
+            setupEventListeners() {
+                // Timeframe buttons
+                document.querySelectorAll('.timeframe-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const timeframe = e.target.dataset.timeframe;
+                        this.changeTimeframe(timeframe);
+                    });
+                });
+                
+                // Indicator buttons
+                document.querySelectorAll('.indicator-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const indicator = e.target.dataset.indicator;
+                        this.toggleIndicator(indicator);
+                    });
+                });
+            }
+            
+            changeTimeframe(timeframe) {
+                this.updateStatus(`📊 Changing timeframe to ${timeframe.toUpperCase()}`);
+                
+                // Update UI
+                document.querySelectorAll('.timeframe-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                document.querySelector(`[data-timeframe="${timeframe}"]`).classList.add('active');
+                
+                this.currentTimeframe = timeframe;
+                this.loadSampleData();
+                
+                setTimeout(() => {
+                    this.updateStatus(`✅ Switched to ${timeframe.toUpperCase()} timeframe`);
+                }, 500);
+            }
+            
+            toggleIndicator(indicator) {
+                const btn = document.querySelector(`[data-indicator="${indicator}"]`);
+                
+                if (this.activeIndicators.has(indicator)) {
+                    this.activeIndicators.delete(indicator);
+                    btn.classList.remove('active');
+                    this.removeIndicator(indicator);
+                    this.updateStatus(`📉 ${indicator.toUpperCase()} indicator hidden`);
+                } else {
+                    this.activeIndicators.add(indicator);
+                    btn.classList.add('active');
+                    this.addIndicator(indicator);
+                    this.updateStatus(`📈 ${indicator.toUpperCase()} indicator shown`);
+                }
+            }
+            
+            addIndicator(indicator) {
+                switch(indicator) {
+                    case 'volume':
+                        if (this.volumeSeries) {
+                            this.volumeSeries.applyOptions({ visible: true });
+                        }
+                        break;
+                    case 'rsi':
+                        this.indicators.rsi = this.chart.addLineSeries({
+                            color: '#2196F3',
+                            lineWidth: 2,
+                            priceScaleId: 'rsi',
+                        });
+                        this.loadRSIData();
+                        break;
+                    case 'macd':
+                        this.indicators.macd = this.chart.addLineSeries({
+                            color: '#FF9800',
+                            lineWidth: 2,
+                            priceScaleId: 'macd',
+                        });
+                        this.loadMACDData();
+                        break;
+                    case 'bb':
+                        this.indicators.bb = [
+                            this.chart.addLineSeries({
+                                color: '#9C27B0',
+                                lineWidth: 1,
+                                lineStyle: LightweightCharts.LineStyle.Dashed,
+                            }),
+                            this.chart.addLineSeries({
+                                color: '#9C27B0',
+                                lineWidth: 1,
+                                lineStyle: LightweightCharts.LineStyle.Dashed,
+                            })
+                        ];
+                        this.loadBollingerData();
+                        break;
+                }
+            }
+            
+            removeIndicator(indicator) {
+                switch(indicator) {
+                    case 'volume':
+                        if (this.volumeSeries) {
+                            this.volumeSeries.applyOptions({ visible: false });
+                        }
+                        break;
+                    case 'rsi':
+                        if (this.indicators.rsi) {
+                            this.chart.removeSeries(this.indicators.rsi);
+                            delete this.indicators.rsi;
+                        }
+                        break;
+                    case 'macd':
+                        if (this.indicators.macd) {
+                            this.chart.removeSeries(this.indicators.macd);
+                            delete this.indicators.macd;
+                        }
+                        break;
+                    case 'bb':
+                        if (this.indicators.bb) {
+                            this.indicators.bb.forEach(series => this.chart.removeSeries(series));
+                            delete this.indicators.bb;
+                        }
+                        break;
+                }
+            }
+            
+            loadSampleData() {
+                // Generate sample OHLC data
+                const data = [];
+                const volumeData = [];
+                const now = Math.floor(Date.now() / 1000);
+                const basePrice = 3350;
+                
+                for (let i = 50; i >= 0; i--) {
+                    const time = now - (i * 3600); // 1 hour intervals
+                    const volatility = 50;
+                    const open = basePrice + (Math.random() - 0.5) * volatility;
+                    const change = (Math.random() - 0.5) * volatility * 0.5;
+                    const close = open + change;
+                    const high = Math.max(open, close) + Math.random() * 20;
+                    const low = Math.min(open, close) - Math.random() * 20;
+                    
+                    data.push({
+                        time: time,
+                        open: parseFloat(open.toFixed(2)),
+                        high: parseFloat(high.toFixed(2)),
+                        low: parseFloat(low.toFixed(2)),
+                        close: parseFloat(close.toFixed(2))
+                    });
+                    
+                    volumeData.push({
+                        time: time,
+                        value: Math.floor(Math.random() * 1000000) + 500000,
+                        color: close > open ? '#00d084' : '#ff4757'
+                    });
+                }
+                
+                this.candlestickSeries.setData(data);
+                if (this.activeIndicators.has('volume')) {
+                    this.volumeSeries.setData(volumeData);
+                }
+            }
+            
+            loadRSIData() {
+                const data = [];
+                const now = Math.floor(Date.now() / 1000);
+                
+                for (let i = 50; i >= 0; i--) {
+                    const time = now - (i * 3600);
+                    const rsi = 30 + Math.random() * 40; // RSI between 30-70
+                    
+                    data.push({
+                        time: time,
+                        value: parseFloat(rsi.toFixed(2))
+                    });
+                }
+                
+                if (this.indicators.rsi) {
+                    this.indicators.rsi.setData(data);
+                }
+            }
+            
+            loadMACDData() {
+                const data = [];
+                const now = Math.floor(Date.now() / 1000);
+                
+                for (let i = 50; i >= 0; i--) {
+                    const time = now - (i * 3600);
+                    const macd = (Math.random() - 0.5) * 20;
+                    
+                    data.push({
+                        time: time,
+                        value: parseFloat(macd.toFixed(4))
+                    });
+                }
+                
+                if (this.indicators.macd) {
+                    this.indicators.macd.setData(data);
+                }
+            }
+            
+            loadBollingerData() {
+                const upperData = [];
+                const lowerData = [];
+                const now = Math.floor(Date.now() / 1000);
+                const basePrice = 3350;
+                
+                for (let i = 50; i >= 0; i--) {
+                    const time = now - (i * 3600);
+                    const volatility = 50;
+                    
+                    upperData.push({
+                        time: time,
+                        value: basePrice + volatility + Math.random() * 20
+                    });
+                    
+                    lowerData.push({
+                        time: time,
+                        value: basePrice - volatility - Math.random() * 20
+                    });
+                }
+                
+                if (this.indicators.bb) {
+                    this.indicators.bb[0].setData(upperData);
+                    this.indicators.bb[1].setData(lowerData);
+                }
+            }
+            
+            updateStatus(message) {
+                document.getElementById('status').textContent = message;
+            }
+        }
+        
+        // Initialize the chart manager when page loads
+        window.addEventListener('load', () => {
+            new ChartManager();
+        });
+    </script>
+</body>
+</html>

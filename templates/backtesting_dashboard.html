@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📊 GoldGPT Professional Backtesting Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #0c1426 0%, #1a202c 100%);
+            color: #ffffff;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: #ffffff;
+        }
+
+        .header-subtitle {
+            color: #b0b0b0;
+            font-size: 0.95rem;
+            margin-top: 0.5rem;
+        }
+        
+        /* Validation Widget Styles */
+        .validation-widget {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(0, 212, 170, 0.3);
+            border-radius: 8px;
+            padding: 12px 16px;
+            text-align: center;
+            min-width: 120px;
+        }
+        
+        .validation-widget-header {
+            font-size: 0.75rem;
+            color: #00d4aa;
+            margin-bottom: 4px;
+            font-weight: 500;
+        }
+        
+        .validation-widget-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .validation-widget-score {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #00d4aa;
+            margin-bottom: 2px;
+        }
+        
+        .validation-widget-label {
+            font-size: 0.7rem;
+            color: #b0b0b0;
+        }
+
+        .controls {
+            display: flex;
+            gap: 1rem;
+            margin: 1.5rem 2rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .timeframe-selector {
+            display: flex;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .timeframe-btn {
+            padding: 0.6rem 1.2rem;
+            background: transparent;
+            border: none;
+            color: #ffffff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .timeframe-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .timeframe-btn.active {
+            background: #10b981;
+            color: #000000;
+            font-weight: 600;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .action-btn {
+            padding: 0.6rem 1.2rem;
+            border: 1px solid #10b981;
+            border-radius: 8px;
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            font-weight: 500;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .action-btn:hover {
+            background: #10b981;
+            color: #000000;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 1.5rem;
+            padding: 1rem 2rem 2rem;
+        }
+
+        .dashboard-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 1.5rem;
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.3);
+            border-color: rgba(16, 185, 129, 0.3);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        .card-icon {
+            font-size: 1.5rem;
+            color: #10b981;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .metric-item {
+            text-align: center;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .metric-item:hover {
+            background: rgba(16, 185, 129, 0.1);
+            border-color: rgba(16, 185, 129, 0.3);
+        }
+
+        .metric-value {
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+            color: #10b981;
+        }
+
+        .metric-label {
+            font-size: 0.8rem;
+            opacity: 0.8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #b0b0b0;
+        }
+
+        .performance-positive {
+            color: #10b981;
+        }
+
+        .performance-negative {
+            color: #ef4444;
+        }
+
+        .performance-neutral {
+            color: #f59e0b;
+        }
+
+        .chart-container {
+            height: 300px;
+            margin-top: 1rem;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+        }
+
+        .chart-placeholder {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.9rem;
+            text-align: center;
+        }
+
+        .strategy-list {
+            max-height: 350px;
+            overflow-y: auto;
+        }
+
+        .strategy-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .strategy-item:hover {
+            background: rgba(16, 185, 129, 0.1);
+            border-color: rgba(16, 185, 129, 0.3);
+        }
+
+        .strategy-name {
+            font-weight: 600;
+            flex: 1;
+            color: #ffffff;
+        }
+
+        .strategy-metrics {
+            display: flex;
+            gap: 1.5rem;
+            font-size: 0.85rem;
+        }
+
+        .strategy-metric {
+            text-align: center;
+        }
+
+        .strategy-metric-value {
+            font-weight: 600;
+            display: block;
+            color: #10b981;
+        }
+
+        .strategy-metric-label {
+            opacity: 0.7;
+            font-size: 0.75rem;
+            color: #b0b0b0;
+        }
+
+        .optimization-item {
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 0.75rem;
+        }
+
+        .optimization-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .optimization-id {
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        .degradation-factor {
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .degradation-good {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+        }
+
+        .degradation-warning {
+            background: rgba(245, 158, 11, 0.2);
+            color: #f59e0b;
+        }
+
+        .degradation-poor {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+
+        .risk-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 1rem;
+        }
+
+        .risk-metric {
+            text-align: center;
+            padding: 0.75rem;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .risk-value {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .risk-label {
+            font-size: 0.75rem;
+            opacity: 0.8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            font-size: 1rem;
+            opacity: 0.7;
+            color: #b0b0b0;
+        }
+
+        .error {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid #ef4444;
+            color: #ef4444;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 2rem;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-left: auto;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #10b981;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Enhanced animations */
+        .dashboard-card {
+            animation: fadeInUp 0.6s ease forwards;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .dashboard-card:nth-child(1) { animation-delay: 0.1s; }
+        .dashboard-card:nth-child(2) { animation-delay: 0.2s; }
+        .dashboard-card:nth-child(3) { animation-delay: 0.3s; }
+        .dashboard-card:nth-child(4) { animation-delay: 0.4s; }
+        .dashboard-card:nth-child(5) { animation-delay: 0.5s; }
+        .dashboard-card:nth-child(6) { animation-delay: 0.6s; }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 1rem;
+            }
+
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+                margin: 1rem;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+                padding: 1rem;
+            }
+
+            .metrics-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .strategy-metrics {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(16, 185, 129, 0.6);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(16, 185, 129, 0.8);
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h1>📊 Professional Backtesting Dashboard</h1>
+                <div class="header-subtitle">Advanced strategy validation and performance analysis</div>
+            </div>
+            <div style="display: flex; gap: 1rem; align-items: center;">
+                <!-- Validation Status Widget -->
+                <div class="validation-widget">
+                    <div class="validation-widget-header">🛡️ Validation Status</div>
+                    <div class="validation-widget-content">
+                        <div class="validation-widget-score" id="backtestValidationScore">--</div>
+                        <div class="validation-widget-label">System Health</div>
+                    </div>
+                </div>
+                <div class="status-indicator">
+                    <div class="status-dot"></div>
+                    <span>Live Analysis</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <div class="timeframe-selector">
+            <button class="timeframe-btn" data-timeframe="7d">7D</button>
+            <button class="timeframe-btn active" data-timeframe="30d">30D</button>
+            <button class="timeframe-btn" data-timeframe="90d">90D</button>
+        </div>
+        
+        <div class="action-buttons">
+            <button class="action-btn" id="refreshBtn">
+                🔄 Refresh Data
+            </button>
+            <button class="action-btn" id="runBacktestBtn">
+                ▶️ Run New Backtest
+            </button>
+            <button class="action-btn" id="optimizeBtn">
+                🎯 Optimize Strategy
+            </button>
+        </div>
+    </div>
+
+    <div id="errorContainer"></div>
+
+    <div class="dashboard-grid">
+        <!-- Performance Summary -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <span class="card-icon">📈</span>
+                Performance Summary
+            </div>
+            <div class="metrics-grid">
+                <div class="metric-item">
+                    <div class="metric-value" id="totalBacktests">--</div>
+                    <div class="metric-label">Total Backtests</div>
+                </div>
+                <div class="metric-item">
+                    <div class="metric-value performance-positive" id="avgReturn">--</div>
+                    <div class="metric-label">Avg Return</div>
+                </div>
+                <div class="metric-item">
+                    <div class="metric-value" id="avgSharpe">--</div>
+                    <div class="metric-label">Avg Sharpe</div>
+                </div>
+                <div class="metric-item">
+                    <div class="metric-value" id="totalTrades">--</div>
+                    <div class="metric-label">Total Trades</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Strategy Performance -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <span class="card-icon">🧠</span>
+                Strategy Performance
+            </div>
+            <div class="strategy-list" id="strategyList">
+                <div class="loading">Loading strategy performance...</div>
+            </div>
+        </div>
+
+        <!-- Walk-Forward Optimization -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <span class="card-icon">🚶</span>
+                Walk-Forward Analysis
+            </div>
+            <div id="walkForwardResults">
+                <div class="loading">Loading walk-forward results...</div>
+            </div>
+        </div>
+
+        <!-- Monte Carlo Simulation -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <span class="card-icon">🎲</span>
+                Monte Carlo Analysis
+            </div>
+            <div id="monteCarloResults">
+                <div class="loading">Loading Monte Carlo results...</div>
+            </div>
+        </div>
+
+        <!-- Risk Metrics -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <span class="card-icon">🛡️</span>
+                Risk Analysis
+            </div>
+            <div class="risk-grid" id="riskMetrics">
+                <div class="loading">Loading risk metrics...</div>
+            </div>
+        </div>
+
+        <!-- Performance Trends -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <span class="card-icon">📊</span>
+                Performance Trends
+            </div>
+            <div class="chart-container">
+                <div class="chart-placeholder">Performance trends over time</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class BacktestingDashboard {
+            constructor() {
+                this.currentTimeframe = '30d';
+                this.refreshInterval = null;
+                this.isLoading = false;
+                this.init();
+            }
+
+            init() {
+                this.setupEventListeners();
+                this.loadDashboard();
+                this.loadValidationStatus();
+                this.startAutoRefresh();
+            }
+            
+            async loadValidationStatus() {
+                try {
+                    const response = await fetch('/api/validation-status');
+                    const data = await response.json();
+                    
+                    const scoreElement = document.getElementById('backtestValidationScore');
+                    if (data.status === 'unavailable') {
+                        scoreElement.textContent = 'N/A';
+                        scoreElement.style.color = '#999';
+                        return;
+                    }
+                    
+                    const healthScore = Math.round(data.health_score || 0);
+                    scoreElement.textContent = `${healthScore}%`;
+                    
+                    // Color based on health score
+                    if (healthScore >= 80) {
+                        scoreElement.style.color = '#00d084';
+                    } else if (healthScore >= 60) {
+                        scoreElement.style.color = '#ffa502';
+                    } else {
+                        scoreElement.style.color = '#ff4757';
+                    }
+                    
+                } catch (error) {
+                    console.error('Failed to load validation status:', error);
+                    const scoreElement = document.getElementById('backtestValidationScore');
+                    scoreElement.textContent = 'ERR';
+                    scoreElement.style.color = '#ff4757';
+                }
+            }
+
+            setupEventListeners() {
+                // Timeframe selection
+                document.querySelectorAll('.timeframe-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        document.querySelectorAll('.timeframe-btn').forEach(b => b.classList.remove('active'));
+                        e.target.classList.add('active');
+                        this.currentTimeframe = e.target.dataset.timeframe;
+                        this.loadDashboard();
+                    });
+                });
+
+                // Action buttons
+                document.getElementById('refreshBtn').addEventListener('click', () => {
+                    this.loadDashboard();
+                });
+
+                document.getElementById('runBacktestBtn').addEventListener('click', () => {
+                    this.runNewBacktest();
+                });
+
+                document.getElementById('optimizeBtn').addEventListener('click', () => {
+                    this.optimizeStrategy();
+                });
+            }
+
+            async loadDashboard() {
+                if (this.isLoading) return;
+                
+                this.isLoading = true;
+                this.showLoading();
+
+                try {
+                    const response = await fetch(`/api/backtesting/dashboard?timeframe=${this.currentTimeframe}`);
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+
+                    const data = await response.json();
+                    
+                    if (data.error) {
+                        throw new Error(data.error);
+                    }
+
+                    this.updateDashboard(data);
+                    this.clearError();
+                    
+                } catch (error) {
+                    console.error('Dashboard load error:', error);
+                    this.showError(error.message);
+                } finally {
+                    this.isLoading = false;
+                }
+            }
+
+            updateDashboard(data) {
+                // Update performance summary
+                this.updateSummary(data.backtest_summary);
+                
+                // Update strategy performance
+                this.updateStrategyPerformance(data.strategy_performance);
+                
+                // Update walk-forward results
+                this.updateWalkForwardResults(data.walk_forward_results);
+                
+                // Update Monte Carlo results
+                this.updateMonteCarloResults(data.monte_carlo_results);
+                
+                // Update risk metrics
+                this.updateRiskMetrics(data.risk_metrics);
+            }
+
+            updateSummary(summary) {
+                if (!summary) return;
+
+                document.getElementById('totalBacktests').textContent = summary.total_backtests || 0;
+                document.getElementById('avgReturn').textContent = this.formatPercentage(summary.avg_return);
+                document.getElementById('avgSharpe').textContent = this.formatNumber(summary.avg_sharpe, 2);
+                document.getElementById('totalTrades').textContent = summary.total_trades || 0;
+
+                // Update return color
+                const returnElement = document.getElementById('avgReturn');
+                const returnValue = summary.avg_return || 0;
+                if (returnValue > 0.05) {
+                    returnElement.className = 'metric-value performance-positive';
+                } else if (returnValue < -0.05) {
+                    returnElement.className = 'metric-value performance-negative';
+                } else {
+                    returnElement.className = 'metric-value performance-neutral';
+                }
+            }
+
+            updateStrategyPerformance(strategies) {
+                const container = document.getElementById('strategyList');
+                
+                if (!strategies || strategies.length === 0) {
+                    container.innerHTML = '<div class="chart-placeholder">No strategy data available</div>';
+                    return;
+                }
+
+                const html = strategies.map(strategy => `
+                    <div class="strategy-item">
+                        <div class="strategy-name">${strategy.strategy_name}</div>
+                        <div class="strategy-metrics">
+                            <div class="strategy-metric">
+                                <span class="strategy-metric-value">${this.formatPercentage(strategy.avg_return)}</span>
+                                <span class="strategy-metric-label">Avg Return</span>
+                            </div>
+                            <div class="strategy-metric">
+                                <span class="strategy-metric-value">${this.formatNumber(strategy.avg_sharpe, 2)}</span>
+                                <span class="strategy-metric-label">Sharpe</span>
+                            </div>
+                            <div class="strategy-metric">
+                                <span class="strategy-metric-value">${strategy.backtest_count}</span>
+                                <span class="strategy-metric-label">Tests</span>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+
+                container.innerHTML = html;
+            }
+
+            updateWalkForwardResults(results) {
+                const container = document.getElementById('walkForwardResults');
+                
+                if (!results || !results.recent_optimizations || results.recent_optimizations.length === 0) {
+                    container.innerHTML = '<div class="chart-placeholder">No walk-forward data available</div>';
+                    return;
+                }
+
+                const html = results.recent_optimizations.map(opt => {
+                    const degradationClass = this.getDegradationClass(opt.degradation_factor);
+                    return `
+                        <div class="optimization-item">
+                            <div class="optimization-header">
+                                <div class="optimization-id">${opt.optimization_id}</div>
+                                <div class="degradation-factor ${degradationClass}">
+                                    ${this.formatNumber(opt.degradation_factor, 2)}
+                                </div>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; font-size: 0.85rem;">
+                                <span>IS: ${this.formatPercentage(opt.avg_is_return)}</span>
+                                <span>OOS: ${this.formatPercentage(opt.avg_oos_return)}</span>
+                                <span>Periods: ${opt.periods_count}</span>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                container.innerHTML = html;
+            }
+
+            updateMonteCarloResults(results) {
+                const container = document.getElementById('monteCarloResults');
+                
+                if (!results || !results.recent_simulations || results.recent_simulations.length === 0) {
+                    container.innerHTML = '<div class="chart-placeholder">No Monte Carlo data available</div>';
+                    return;
+                }
+
+                const latest = results.recent_simulations[0];
+                const percentiles = results.latest_percentiles || {};
+
+                const html = `
+                    <div class="metrics-grid">
+                        <div class="metric-item">
+                            <div class="metric-value">${this.formatPercentage(latest.expected_return)}</div>
+                            <div class="metric-label">Expected Return</div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-value">${this.formatPercentage(latest.return_volatility)}</div>
+                            <div class="metric-label">Volatility</div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-value">${this.formatPercentage(percentiles.p5)}</div>
+                            <div class="metric-label">5th Percentile</div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-value">${this.formatPercentage(results.positive_outcomes_rate)}</div>
+                            <div class="metric-label">Success Rate</div>
+                        </div>
+                    </div>
+                `;
+
+                container.innerHTML = html;
+            }
+
+            updateRiskMetrics(metrics) {
+                const container = document.getElementById('riskMetrics');
+                
+                if (!metrics) {
+                    container.innerHTML = '<div class="chart-placeholder">No risk data available</div>';
+                    return;
+                }
+
+                const html = `
+                    <div class="risk-metric">
+                        <div class="risk-value">${this.formatPercentage(metrics.avg_max_drawdown)}</div>
+                        <div class="risk-label">Max Drawdown</div>
+                    </div>
+                    <div class="risk-metric">
+                        <div class="risk-value">${this.formatPercentage(metrics.avg_var_95)}</div>
+                        <div class="risk-label">VaR 95%</div>
+                    </div>
+                    <div class="risk-metric">
+                        <div class="risk-value">${this.formatNumber(metrics.avg_sortino, 2)}</div>
+                        <div class="risk-label">Sortino Ratio</div>
+                    </div>
+                    <div class="risk-metric">
+                        <div class="risk-value">${this.formatNumber(metrics.consistency_score, 2)}</div>
+                        <div class="risk-label">Consistency</div>
+                    </div>
+                `;
+
+                container.innerHTML = html;
+            }
+
+            getDegradationClass(factor) {
+                if (factor >= 0.8) return 'degradation-good';
+                if (factor >= 0.6) return 'degradation-warning';
+                return 'degradation-poor';
+            }
+
+            formatPercentage(value) {
+                if (value === null || value === undefined || isNaN(value)) return '--';
+                return `${(value * 100).toFixed(1)}%`;
+            }
+
+            formatNumber(value, decimals = 1) {
+                if (value === null || value === undefined || isNaN(value)) return '--';
+                return value.toFixed(decimals);
+            }
+
+            showLoading() {
+                // Add loading states
+            }
+
+            showError(message) {
+                const container = document.getElementById('errorContainer');
+                container.innerHTML = `
+                    <div class="error">
+                        ⚠️ Error loading dashboard: ${message}
+                    </div>
+                `;
+            }
+
+            clearError() {
+                document.getElementById('errorContainer').innerHTML = '';
+            }
+
+            async runNewBacktest() {
+                try {
+                    const config = {
+                        strategy: 'default',
+                        timeframe: '1H',
+                        start_date: '2024-01-01',
+                        end_date: '2024-12-31'
+                    };
+
+                    const response = await fetch('/api/backtesting/run-analysis', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(config)
+                    });
+
+                    const result = await response.json();
+                    
+                    if (result.error) {
+                        throw new Error(result.error);
+                    }
+
+                    alert('Backtest started successfully!');
+                    this.loadDashboard();
+
+                } catch (error) {
+                    alert(`Failed to start backtest: ${error.message}`);
+                }
+            }
+
+            async optimizeStrategy() {
+                alert('Strategy optimization feature coming soon!');
+            }
+
+            startAutoRefresh() {
+                // Refresh every 60 seconds
+                this.refreshInterval = setInterval(() => {
+                    this.loadDashboard();
+                    this.loadValidationStatus();
+                }, 60000);
+            }
+
+            stopAutoRefresh() {
+                if (this.refreshInterval) {
+                    clearInterval(this.refreshInterval);
+                    this.refreshInterval = null;
+                }
+            }
+        }
+
+        // Initialize dashboard when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            window.backtestingDashboard = new BacktestingDashboard();
+        });
+
+        // Clean up on page unload
+        window.addEventListener('beforeunload', () => {
+            if (window.backtestingDashboard) {
+                window.backtestingDashboard.stopAutoRefresh();
+            }
+        });
+    </script>
+</body>
+</html>

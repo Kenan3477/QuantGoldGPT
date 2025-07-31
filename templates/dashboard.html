@@ -1,0 +1,1308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="GoldGPT Professional Trading Dashboard - Advanced AI-powered gold trading analysis">
+    <meta name="keywords" content="gold trading, AI analysis, technical analysis, trading dashboard">
+    <title>GoldGPT Professional Trading Dashboard</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    
+    <!-- CSS Stylesheets -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/unified-dashboard.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/chart-system.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/predictions-panel.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/market-context.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/correlation-analyzer.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/responsive-themes.css') }}">
+    
+    <!-- TradingView Lightweight Charts -->
+    <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+    
+    <!-- Socket.IO for real-time updates -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
+    
+    <!-- Chart.js for additional visualizations -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Error Handling System -->
+    <script src="{{ url_for('static', filename='js/error-handler.js') }}"></script>
+    
+    <!-- Progressive Web App -->
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+    <meta name="theme-color" content="#0a0a0b">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+</head>
+<body>
+    <!-- Skip Navigation for Accessibility -->
+    <a href="#main-content" class="skip-nav sr-only">Skip to main content</a>
+    
+    <!-- Main Dashboard Container -->
+    <div class="dashboard-container" id="dashboardContainer">
+        
+        <!-- Dashboard Header -->
+        <header class="dashboard-header" role="banner">
+            <div class="header-brand">
+                <div class="header-logo" aria-label="GoldGPT Logo">G</div>
+                <div>
+                    <h1 class="header-title">GoldGPT Professional</h1>
+                    <span class="header-subtitle">AI-Powered Trading Dashboard</span>
+                </div>
+            </div>
+            
+            <div class="header-controls">
+                <!-- Connection Status -->
+                <div class="header-status" aria-label="Connection Status">
+                    <div class="status-indicator" id="connectionStatus" aria-hidden="true"></div>
+                    <span id="statusText">Connected</span>
+                </div>
+                
+                <!-- Current Time -->
+                <div class="header-time" id="currentTime" aria-label="Current Time">
+                    --:--:-- UTC
+                </div>
+                
+                <!-- Settings Menu -->
+                <button class="chart-control-btn" id="settingsBtn" aria-label="Settings" title="Settings">
+                    ⚙️
+                </button>
+                
+                <!-- Fullscreen Toggle -->
+                <button class="chart-control-btn" id="fullscreenBtn" aria-label="Toggle Fullscreen" title="Fullscreen (F11)">
+                    ⛶
+                </button>
+            </div>
+        </header>
+        
+        <!-- Sidebar Navigation -->
+        <aside class="dashboard-sidebar" role="navigation" aria-label="Main Navigation">
+            <div class="sidebar-content">
+                
+                <!-- Portfolio Summary -->
+                <section class="sidebar-section">
+                    <h2 class="sidebar-section-title">Portfolio</h2>
+                    <div class="portfolio-summary">
+                        <div class="portfolio-value" id="portfolioValue">$10,000.00</div>
+                        <div class="portfolio-change" id="portfolioChange">
+                            <span>+$125.50</span>
+                            <span>(+1.26%)</span>
+                        </div>
+                        <div class="portfolio-metrics">
+                            <div class="portfolio-metric">
+                                <div class="portfolio-metric-value" id="dailyPnL">+2.1%</div>
+                                <div class="portfolio-metric-label">Today</div>
+                            </div>
+                            <div class="portfolio-metric">
+                                <div class="portfolio-metric-value" id="winRate">68%</div>
+                                <div class="portfolio-metric-label">Win Rate</div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- Navigation Menu -->
+                <section class="sidebar-section">
+                    <h2 class="sidebar-section-title">Analysis</h2>
+                    <nav class="sidebar-nav" role="navigation">
+                        <ul>
+                            <li class="sidebar-nav-item">
+                                <a href="#charts" class="sidebar-nav-link active" data-section="charts">
+                                    <span class="sidebar-nav-icon">📊</span>
+                                    Multi-Timeframe Charts
+                                </a>
+                            </li>
+                            <li class="sidebar-nav-item">
+                                <a href="#predictions" class="sidebar-nav-link" data-section="predictions">
+                                    <span class="sidebar-nav-icon">🤖</span>
+                                    AI Predictions
+                                </a>
+                            </li>
+                            <li class="sidebar-nav-item">
+                                <a href="#correlation" class="sidebar-nav-link" data-section="correlation">
+                                    <span class="sidebar-nav-icon">🔗</span>
+                                    Timeframe Correlation
+                                </a>
+                            </li>
+                            <li class="sidebar-nav-item">
+                                <a href="#context" class="sidebar-nav-link" data-section="context">
+                                    <span class="sidebar-nav-icon">🌍</span>
+                                    Market Context
+                                </a>
+                            </li>
+                            <li class="sidebar-nav-item">
+                                <a href="#signals" class="sidebar-nav-link" data-section="signals">
+                                    <span class="sidebar-nav-icon">📡</span>
+                                    Trading Signals
+                                </a>
+                            </li>
+                            <li class="sidebar-nav-item">
+                                <a href="#backtest" class="sidebar-nav-link" data-section="backtest">
+                                    <span class="sidebar-nav-icon">⚡</span>
+                                    Strategy Backtesting
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                </section>
+                
+                <!-- Quick Actions -->
+                <section class="sidebar-section">
+                    <h2 class="sidebar-section-title">Quick Actions</h2>
+                    <div class="d-flex flex-column gap-sm">
+                        <button class="chart-control-btn w-100" id="refreshAllBtn" title="Refresh All Data (Ctrl+R)">
+                            🔄 Refresh All
+                        </button>
+                        <button class="chart-control-btn w-100" id="generateSignalBtn" title="Generate New Signal (Ctrl+G)">
+                            ⚡ Generate Signal
+                        </button>
+                        <button class="chart-control-btn w-100" id="exportDataBtn" title="Export Data (Ctrl+E)">
+                            💾 Export Data
+                        </button>
+                    </div>
+                </section>
+                
+            </div>
+        </aside>
+        
+        <!-- Main Chart Area -->
+        <main class="dashboard-charts" id="main-content" role="main" aria-label="Trading Charts">
+            <div class="unified-chart-system" id="unifiedChartSystem">
+                
+                <!-- Chart Header -->
+                <div class="charts-header">
+                    <h2 class="charts-title">Multi-Timeframe Analysis</h2>
+                    <div class="charts-controls">
+                        
+                        <!-- Timeframe Selector -->
+                        <div class="timeframe-selector" role="tablist" aria-label="Chart Timeframes">
+                            <button class="timeframe-btn active" role="tab" data-timeframe="1h" aria-selected="true" title="1 Hour Chart (Ctrl+1)">1H</button>
+                            <button class="timeframe-btn" role="tab" data-timeframe="4h" aria-selected="false" title="4 Hour Chart (Ctrl+4)">4H</button>
+                            <button class="timeframe-btn" role="tab" data-timeframe="1d" aria-selected="false" title="Daily Chart (Ctrl+D)">1D</button>
+                            <button class="timeframe-btn" role="tab" data-timeframe="1w" aria-selected="false" title="Weekly Chart (Ctrl+W)">1W</button>
+                        </div>
+                        
+                        <!-- Chart Controls -->
+                        <div class="chart-controls">
+                            <button class="chart-control-btn" id="chartSyncBtn" aria-label="Sync Charts" title="Sync Chart Time (S)">🔗</button>
+                            <button class="chart-control-btn" id="chartLayoutBtn" aria-label="Chart Layout" title="Change Layout (L)">⊞</button>
+                            <button class="chart-control-btn" id="indicatorsBtn" aria-label="Indicators" title="Toggle Indicators (I)">📈</button>
+                            <button class="chart-control-btn" id="patternsBtn" aria-label="Patterns" title="Show Patterns (P)">🔍</button>
+                            <button class="chart-control-btn" id="annotationsBtn" aria-label="AI Annotations" title="AI Annotations (A)">🤖</button>
+                        </div>
+                        
+                    </div>
+                </div>
+                
+                <!-- Chart Toolbar -->
+                <div class="chart-toolbar">
+                    <div class="chart-toolbar-left">
+                        
+                        <!-- Symbol Selector -->
+                        <select class="chart-symbol-selector" id="symbolSelector" aria-label="Trading Symbol">
+                            <option value="XAUUSD">XAU/USD (Gold)</option>
+                            <option value="EURUSD">EUR/USD</option>
+                            <option value="GBPUSD">GBP/USD</option>
+                            <option value="USDJPY">USD/JPY</option>
+                        </select>
+                        
+                        <div class="chart-toolbar-divider"></div>
+                        
+                        <!-- Indicator Controls -->
+                        <div class="indicator-controls">
+                            <button class="indicator-btn" data-indicator="sma" title="Simple Moving Average">SMA</button>
+                            <button class="indicator-btn" data-indicator="ema" title="Exponential Moving Average">EMA</button>
+                            <button class="indicator-btn" data-indicator="bollinger" title="Bollinger Bands">BB</button>
+                            <button class="indicator-btn" data-indicator="rsi" title="RSI">RSI</button>
+                            <button class="indicator-btn" data-indicator="macd" title="MACD">MACD</button>
+                            <button class="indicator-btn" data-indicator="stoch" title="Stochastic">STOCH</button>
+                        </div>
+                        
+                    </div>
+                    
+                    <div class="chart-toolbar-right">
+                        <!-- Chart View Options -->
+                        <div class="chart-controls">
+                            <button class="chart-control-btn" data-view="single" title="Single Chart View">⊡</button>
+                            <button class="chart-control-btn active" data-view="split" title="Split Chart View">⊞</button>
+                            <button class="chart-control-btn" data-view="triple" title="Triple Chart View">⊟</button>
+                            <button class="chart-control-btn" data-view="quad" title="Quad Chart View">⊠</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Chart Grid -->
+                <div class="chart-grid split-view" id="chartGrid">
+                    
+                    <!-- Primary Chart Panel -->
+                    <div class="chart-panel active" data-timeframe="1h" tabindex="0" role="img" aria-label="1 Hour Gold Price Chart">
+                        <div class="chart-panel-header">
+                            <span class="chart-panel-title">XAU/USD - 1H</span>
+                            <div class="chart-panel-controls">
+                                <button class="chart-panel-control" data-action="maximize" title="Maximize Chart">⛶</button>
+                                <button class="chart-panel-control" data-action="settings" title="Chart Settings">⚙</button>
+                            </div>
+                        </div>
+                        <div class="chart-panel-content" id="chart1h"></div>
+                    </div>
+                    
+                    <!-- Secondary Chart Panel -->
+                    <div class="chart-panel" data-timeframe="4h" tabindex="0" role="img" aria-label="4 Hour Gold Price Chart">
+                        <div class="chart-panel-header">
+                            <span class="chart-panel-title">XAU/USD - 4H</span>
+                            <div class="chart-panel-controls">
+                                <button class="chart-panel-control" data-action="maximize" title="Maximize Chart">⛶</button>
+                                <button class="chart-panel-control" data-action="settings" title="Chart Settings">⚙</button>
+                            </div>
+                        </div>
+                        <div class="chart-panel-content" id="chart4h"></div>
+                    </div>
+                    
+                    <!-- Daily Chart Panel (Hidden by default) -->
+                    <div class="chart-panel d-none" data-timeframe="1d" tabindex="0" role="img" aria-label="Daily Gold Price Chart">
+                        <div class="chart-panel-header">
+                            <span class="chart-panel-title">XAU/USD - 1D</span>
+                            <div class="chart-panel-controls">
+                                <button class="chart-panel-control" data-action="maximize" title="Maximize Chart">⛶</button>
+                                <button class="chart-panel-control" data-action="settings" title="Chart Settings">⚙</button>
+                            </div>
+                        </div>
+                        <div class="chart-panel-content" id="chart1d"></div>
+                    </div>
+                    
+                    <!-- Weekly Chart Panel (Hidden by default) -->
+                    <div class="chart-panel d-none" data-timeframe="1w" tabindex="0" role="img" aria-label="Weekly Gold Price Chart">
+                        <div class="chart-panel-header">
+                            <span class="chart-panel-title">XAU/USD - 1W</span>
+                            <div class="chart-panel-controls">
+                                <button class="chart-panel-control" data-action="maximize" title="Maximize Chart">⛶</button>
+                                <button class="chart-panel-control" data-action="settings" title="Chart Settings">⚙</button>
+                            </div>
+                        </div>
+                        <div class="chart-panel-content" id="chart1w"></div>
+                    </div>
+                    
+                </div>
+                
+                <!-- Chart Status Bar -->
+                <div class="chart-status-bar">
+                    <div class="chart-status-left">
+                        <div class="status-item">
+                            <span class="status-label">Price:</span>
+                            <span class="status-value" id="currentPrice">$2,054.32</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="status-label">Change:</span>
+                            <span class="status-value" id="priceChange">+$12.45 (+0.61%)</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="status-label">Volume:</span>
+                            <span class="status-value" id="currentVolume">1.2M</span>
+                        </div>
+                    </div>
+                    <div class="chart-status-right">
+                        <div class="chart-sync-indicator">
+                            <div class="sync-icon" id="syncStatus"></div>
+                            <span>Charts Synced</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="status-label">Last Update:</span>
+                            <span class="status-value" id="lastUpdate">--:--:--</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Chart Loading Overlay -->
+                <div class="chart-loading-overlay d-none" id="chartLoading">
+                    <div class="chart-loading-spinner"></div>
+                    <div class="chart-loading-text">Loading chart data...</div>
+                </div>
+                
+                <!-- Chart Error Overlay -->
+                <div class="chart-error-overlay d-none" id="chartError">
+                    <div class="chart-error-icon">⚠</div>
+                    <div class="chart-error-title">Chart Error</div>
+                    <div class="chart-error-message">Unable to load chart data. Please check your connection and try again.</div>
+                    <button class="chart-error-retry" id="chartRetryBtn">Retry</button>
+                </div>
+                
+                <!-- Keyboard Shortcuts Modal -->
+                <div class="chart-shortcuts" id="shortcutsModal">
+                    <div class="shortcuts-title">Keyboard Shortcuts</div>
+                    <div class="shortcut-item">
+                        <div class="shortcut-keys">
+                            <span class="shortcut-key">Ctrl</span>
+                            <span class="shortcut-key">1</span>
+                        </div>
+                        <span class="shortcut-description">1 Hour Chart</span>
+                    </div>
+                    <div class="shortcut-item">
+                        <div class="shortcut-keys">
+                            <span class="shortcut-key">Ctrl</span>
+                            <span class="shortcut-key">4</span>
+                        </div>
+                        <span class="shortcut-description">4 Hour Chart</span>
+                    </div>
+                    <div class="shortcut-item">
+                        <div class="shortcut-keys">
+                            <span class="shortcut-key">Ctrl</span>
+                            <span class="shortcut-key">D</span>
+                        </div>
+                        <span class="shortcut-description">Daily Chart</span>
+                    </div>
+                    <div class="shortcut-item">
+                        <div class="shortcut-keys"><span class="shortcut-key">S</span></div>
+                        <span class="shortcut-description">Sync Charts</span>
+                    </div>
+                    <div class="shortcut-item">
+                        <div class="shortcut-keys"><span class="shortcut-key">L</span></div>
+                        <span class="shortcut-description">Change Layout</span>
+                    </div>
+                    <div class="shortcut-item">
+                        <div class="shortcut-keys"><span class="shortcut-key">I</span></div>
+                        <span class="shortcut-description">Toggle Indicators</span>
+                    </div>
+                    <div class="shortcut-item">
+                        <div class="shortcut-keys"><span class="shortcut-key">?</span></div>
+                        <span class="shortcut-description">Show This Help</span>
+                    </div>
+                </div>
+                
+            </div>
+        </main>
+        
+        <!-- Predictions Panel -->
+        <section class="dashboard-predictions" role="region" aria-label="AI Predictions">
+            <div class="advanced-predictions-panel" id="advancedPredictionsPanel">
+                
+                <!-- Predictions Header -->
+                <div class="predictions-header">
+                    <h2 class="predictions-title">AI Predictions</h2>
+                    <button class="predictions-refresh" id="predictionsRefreshBtn" aria-label="Refresh Predictions" title="Refresh Predictions (Ctrl+P)">
+                        🔄
+                    </button>
+                </div>
+                
+                <!-- Predictions Filter Bar -->
+                <div class="predictions-filter-bar">
+                    <div class="filter-group">
+                        <label class="filter-label" for="timeframeFilter">Timeframe:</label>
+                        <select class="filter-select" id="timeframeFilter">
+                            <option value="all">All Timeframes</option>
+                            <option value="1h">1 Hour</option>
+                            <option value="4h">4 Hour</option>
+                            <option value="1d">Daily</option>
+                            <option value="1w">Weekly</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label" for="strategyFilter">Strategy:</label>
+                        <select class="filter-select" id="strategyFilter">
+                            <option value="all">All Strategies</option>
+                            <option value="ml_momentum">ML Momentum</option>
+                            <option value="conservative">Conservative</option>
+                            <option value="aggressive">Aggressive</option>
+                        </select>
+                    </div>
+                    <div class="confidence-filter">
+                        <label class="filter-label" for="confidenceSlider">Min Confidence:</label>
+                        <input type="range" class="confidence-slider" id="confidenceSlider" min="0" max="100" value="50">
+                        <span class="confidence-value" id="confidenceValue">50%</span>
+                    </div>
+                </div>
+                
+                <!-- Predictions Summary -->
+                <div class="predictions-summary">
+                    <div class="summary-stats">
+                        <div class="summary-stat">
+                            <div class="summary-stat-value" id="totalPredictions">12</div>
+                            <div class="summary-stat-label">Total Predictions</div>
+                        </div>
+                        <div class="summary-stat">
+                            <div class="summary-stat-value" id="bullishCount">8</div>
+                            <div class="summary-stat-label">Bullish</div>
+                        </div>
+                        <div class="summary-stat">
+                            <div class="summary-stat-value" id="avgConfidence">73%</div>
+                            <div class="summary-stat-label">Avg Confidence</div>
+                        </div>
+                    </div>
+                    <div class="predictions-trend">
+                        <div class="trend-arrow up" id="trendArrow">▲</div>
+                        <div class="trend-label" id="trendLabel">Bullish Consensus</div>
+                    </div>
+                </div>
+                
+                <!-- Predictions List -->
+                <div class="predictions-content">
+                    <div class="predictions-list" id="predictionsList">
+                        <!-- Prediction cards will be dynamically generated -->
+                    </div>
+                </div>
+                
+                <!-- Predictions Loading -->
+                <div class="predictions-loading d-none" id="predictionsLoading">
+                    <div class="predictions-loading-spinner"></div>
+                    <div>Loading predictions...</div>
+                </div>
+                
+                <!-- Empty State -->
+                <div class="predictions-empty d-none" id="predictionsEmpty">
+                    <div class="empty-icon">🤖</div>
+                    <div class="empty-title">No Predictions Available</div>
+                    <div class="empty-description">Generate new predictions to see AI analysis for different timeframes.</div>
+                </div>
+                
+            </div>
+        </section>
+        
+        <!-- Market Context Panel -->
+        <section class="dashboard-context" role="region" aria-label="Market Context">
+            <div class="real-time-market-context" id="realTimeMarketContext">
+                
+                <!-- Context Header -->
+                <div class="context-header">
+                    <h2 class="context-title">Market Context</h2>
+                </div>
+                
+                <!-- Quick Stats -->
+                <div class="context-quick-stats">
+                    <div class="quick-stat">
+                        <div class="quick-stat-value bullish" id="volatilityIndex">23.4</div>
+                        <div class="quick-stat-label">Volatility</div>
+                        <div class="quick-stat-change">+2.1%</div>
+                    </div>
+                    <div class="quick-stat">
+                        <div class="quick-stat-value neutral" id="sentimentScore">0.62</div>
+                        <div class="quick-stat-label">Sentiment</div>
+                        <div class="quick-stat-change">+0.05</div>
+                    </div>
+                </div>
+                
+                <!-- Market Context Content -->
+                <div class="context-content">
+                    
+                    <!-- Market Regime Section -->
+                    <section class="market-regime-section context-section">
+                        <h3 class="context-section-title">
+                            <span class="section-icon">📊</span>
+                            Market Regime
+                        </h3>
+                        <div class="regime-display bullish" id="regimeDisplay">
+                            <div class="regime-indicator bullish" id="regimeIndicator">📈</div>
+                            <div class="regime-name" id="regimeName">Bullish Trending</div>
+                            <div class="regime-confidence" id="regimeConfidence">Confidence: 87%</div>
+                            <div class="regime-description" id="regimeDescription">
+                                Strong upward momentum with sustained buying pressure. 
+                                Expect continued bullish movement in the near term.
+                            </div>
+                            <div class="regime-metrics">
+                                <div class="regime-metric">
+                                    <div class="regime-metric-value" id="trendStrength">0.78</div>
+                                    <div class="regime-metric-label">Trend Strength</div>
+                                </div>
+                                <div class="regime-metric">
+                                    <div class="regime-metric-value" id="momentum">+0.34</div>
+                                    <div class="regime-metric-label">Momentum</div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                    
+                    <!-- Support & Resistance Levels -->
+                    <section class="levels-section context-section">
+                        <div class="levels-header">
+                            <h3 class="levels-title">
+                                <span class="levels-icon">🎯</span>
+                                Key Levels
+                            </h3>
+                            <button class="levels-refresh" id="levelsRefreshBtn" aria-label="Refresh Levels">🔄</button>
+                        </div>
+                        <ul class="levels-list" id="levelsList">
+                            <!-- Dynamic level items will be added here -->
+                        </ul>
+                    </section>
+                    
+                    <!-- Economic Events -->
+                    <section class="events-section context-section">
+                        <div class="events-header">
+                            <h3 class="events-title">
+                                <span class="section-icon">📅</span>
+                                Economic Events
+                            </h3>
+                            <div class="events-filter">
+                                <button class="impact-filter active" data-impact="all">All</button>
+                                <button class="impact-filter" data-impact="high">High</button>
+                                <button class="impact-filter" data-impact="medium">Med</button>
+                                <button class="impact-filter" data-impact="low">Low</button>
+                            </div>
+                        </div>
+                        <ul class="events-list" id="eventsList">
+                            <!-- Dynamic event items will be added here -->
+                        </ul>
+                    </section>
+                    
+                    <!-- Trading Implications -->
+                    <section class="implications-section context-section">
+                        <h3 class="implications-title">
+                            <span class="section-icon">💡</span>
+                            Trading Implications
+                        </h3>
+                        <ul class="implications-list" id="implicationsList">
+                            <!-- Dynamic implication items will be added here -->
+                        </ul>
+                    </section>
+                    
+                </div>
+                
+            </div>
+        </section>
+        
+        <!-- Analysis Panel (Correlation Analyzer) -->
+        <section class="dashboard-analysis" role="region" aria-label="Timeframe Analysis">
+            <div class="timeframe-correlation-analyzer" id="timeframeCorrelationAnalyzer">
+                
+                <!-- Analyzer Controls -->
+                <div class="analyzer-controls">
+                    <div class="controls-left">
+                        <div class="timeframe-selector-group">
+                            <label class="selector-label" for="primaryTimeframe">Primary:</label>
+                            <div class="timeframe-multi-select" id="primaryTimeframe">
+                                <button class="multi-select-option primary selected" data-timeframe="1h">1H</button>
+                                <button class="multi-select-option" data-timeframe="4h">4H</button>
+                                <button class="multi-select-option" data-timeframe="1d">1D</button>
+                                <button class="multi-select-option" data-timeframe="1w">1W</button>
+                            </div>
+                        </div>
+                        <div class="timeframe-selector-group">
+                            <label class="selector-label" for="compareTimeframes">Compare:</label>
+                            <div class="timeframe-multi-select" id="compareTimeframes">
+                                <button class="multi-select-option" data-timeframe="1h">1H</button>
+                                <button class="multi-select-option selected" data-timeframe="4h">4H</button>
+                                <button class="multi-select-option selected" data-timeframe="1d">1D</button>
+                                <button class="multi-select-option" data-timeframe="1w">1W</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="controls-right">
+                        <div class="analysis-mode-toggle">
+                            <button class="mode-toggle-btn active" data-mode="correlation">Correlation</button>
+                            <button class="mode-toggle-btn" data-mode="divergence">Divergence</button>
+                            <button class="mode-toggle-btn" data-mode="confidence">Confidence</button>
+                        </div>
+                        <div class="refresh-controls">
+                            <div class="auto-refresh-toggle" id="autoRefreshToggle">
+                                <div class="toggle-switch" id="autoRefreshSwitch">
+                                    <div class="toggle-slider"></div>
+                                </div>
+                                <span class="toggle-label">Auto</span>
+                            </div>
+                            <button class="manual-refresh" id="correlationRefreshBtn" aria-label="Refresh Analysis">🔄</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Analysis Content -->
+                <div class="analysis-content">
+                    
+                    <!-- Correlation Overview -->
+                    <div class="correlation-overview">
+                        <div class="overview-stats">
+                            <div class="overview-stat">
+                                <div class="overview-stat-value high" id="overallCorrelation">0.87</div>
+                                <div class="overview-stat-label">Overall Correlation</div>
+                            </div>
+                            <div class="overview-stat">
+                                <div class="overview-stat-value medium" id="divergenceCount">2</div>
+                                <div class="overview-stat-label">Divergences</div>
+                            </div>
+                            <div class="overview-stat">
+                                <div class="overview-stat-value high" id="alignmentScore">8.4</div>
+                                <div class="overview-stat-label">Alignment Score</div>
+                            </div>
+                            <div class="overview-stat">
+                                <div class="overview-stat-value high" id="tradeConfidence">82%</div>
+                                <div class="overview-stat-label">Trade Confidence</div>
+                            </div>
+                        </div>
+                        <div class="correlation-strength-indicator">
+                            <div class="strength-gauge">
+                                <div class="strength-needle" style="transform: rotate(135deg);"></div>
+                            </div>
+                            <div class="strength-details">
+                                <div class="strength-value" id="strengthValue">Strong</div>
+                                <div class="strength-label">Correlation Strength</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Correlation Matrix -->
+                    <div class="correlation-matrix-section">
+                        <div class="matrix-header">
+                            <h3 class="matrix-title">
+                                <span class="matrix-icon">🔗</span>
+                                Timeframe Correlation Matrix
+                            </h3>
+                            <div class="matrix-controls">
+                                <div class="matrix-view-toggle">
+                                    <button class="view-toggle-btn active" data-view="heat">Heat</button>
+                                    <button class="view-toggle-btn" data-view="numeric">Numeric</button>
+                                    <button class="view-toggle-btn" data-view="visual">Visual</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="correlation-matrix">
+                            <div class="matrix-title">Prediction Alignment</div>
+                            <div class="matrix-grid grid-3x3" id="correlationMatrixGrid">
+                                <!-- Matrix cells will be dynamically generated -->
+                            </div>
+                            <div class="matrix-legend">
+                                <div class="legend-item">
+                                    <div class="legend-color" style="background: var(--bull-color);"></div>
+                                    <span class="legend-label">Strong Positive</span>
+                                </div>
+                                <div class="legend-item">
+                                    <div class="legend-color" style="background: #4ecdc4;"></div>
+                                    <span class="legend-label">Weak Positive</span>
+                                </div>
+                                <div class="legend-item">
+                                    <div class="legend-color" style="background: var(--text-secondary);"></div>
+                                    <span class="legend-label">Neutral</span>
+                                </div>
+                                <div class="legend-item">
+                                    <div class="legend-color" style="background: #ffb347;"></div>
+                                    <span class="legend-label">Weak Negative</span>
+                                </div>
+                                <div class="legend-item">
+                                    <div class="legend-color" style="background: var(--bear-color);"></div>
+                                    <span class="legend-label">Strong Negative</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Divergence Analysis -->
+                    <div class="divergence-analysis">
+                        <div class="divergence-header">
+                            <h3 class="divergence-title">
+                                <span class="section-icon">⚠️</span>
+                                Divergence Alerts
+                            </h3>
+                        </div>
+                        <ul class="divergence-alerts" id="divergenceAlerts">
+                            <!-- Dynamic divergence alerts will be added here -->
+                        </ul>
+                    </div>
+                    
+                    <!-- Trade Confidence -->
+                    <div class="trade-confidence">
+                        <div class="confidence-header">
+                            <h3 class="confidence-title">Trade Confidence Calculation</h3>
+                            <div class="confidence-score high" id="confidenceScore">82</div>
+                        </div>
+                        <div class="confidence-breakdown" id="confidenceBreakdown">
+                            <!-- Dynamic confidence factors will be added here -->
+                        </div>
+                    </div>
+                    
+                </div>
+                
+                <!-- Correlation Loading -->
+                <div class="correlation-loading d-none" id="correlationLoading">
+                    <div class="correlation-loading-spinner"></div>
+                    <div>Analyzing timeframe correlations...</div>
+                </div>
+                
+            </div>
+        </section>
+        
+    </div>
+    
+    <!-- Modal Container -->
+    <div class="prediction-modal" id="predictionModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalTitle">Prediction Details</h3>
+                <button class="modal-close" id="modalCloseBtn" aria-label="Close Modal">×</button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Modal content will be dynamically populated -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- Toast Notifications -->
+    <div class="toast-container" id="toastContainer"></div>
+    
+    <!-- JavaScript Modules -->
+    <script type="module" src="{{ url_for('static', filename='js/unified-chart-system.js') }}"></script>
+    <script type="module" src="{{ url_for('static', filename='js/advanced-predictions-panel.js') }}"></script>
+    <script type="module" src="{{ url_for('static', filename='js/timeframe-correlation-analyzer.js') }}"></script>
+    <script type="module" src="{{ url_for('static', filename='js/real-time-market-context.js') }}"></script>
+    
+    <!-- Main Dashboard Controller -->
+    <script type="module">
+        import { UnifiedChartSystem } from './static/js/unified-chart-system.js';
+        import { AdvancedPredictionsPanel } from './static/js/advanced-predictions-panel.js';
+        import { TimeframeCorrelationAnalyzer } from './static/js/timeframe-correlation-analyzer.js';
+        import { RealTimeMarketContext } from './static/js/real-time-market-context.js';
+        
+        // Dashboard Controller Class
+        class GoldGPTDashboard {
+            constructor() {
+                this.components = {};
+                this.socket = null;
+                this.settings = {
+                    theme: 'dark',
+                    autoRefresh: true,
+                    refreshInterval: 30000,
+                    notifications: true
+                };
+                
+                this.init();
+            }
+            
+            async init() {
+                try {
+                    console.log('🚀 Initializing GoldGPT Professional Dashboard...');
+                    
+                    // Initialize Socket.IO connection
+                    this.initSocket();
+                    
+                    // Initialize all dashboard components
+                    await this.initComponents();
+                    
+                    // Setup event listeners
+                    this.setupEventListeners();
+                    
+                    // Setup keyboard shortcuts
+                    this.setupKeyboardShortcuts();
+                    
+                    // Start real-time updates
+                    this.startRealTimeUpdates();
+                    
+                    // Update time display
+                    this.updateTimeDisplay();
+                    
+                    console.log('✅ Dashboard initialized successfully');
+                    
+                } catch (error) {
+                    console.error('❌ Dashboard initialization error:', error);
+                    this.showError('Failed to initialize dashboard');
+                }
+            }
+            
+            initSocket() {
+                this.socket = io();
+                
+                this.socket.on('connect', () => {
+                    console.log('🔗 Connected to server');
+                    this.updateConnectionStatus(true);
+                });
+                
+                this.socket.on('disconnect', () => {
+                    console.log('🔌 Disconnected from server');
+                    this.updateConnectionStatus(false);
+                });
+                
+                this.socket.on('price_update', (data) => {
+                    this.handlePriceUpdate(data);
+                });
+                
+                this.socket.on('prediction_update', (data) => {
+                    this.handlePredictionUpdate(data);
+                });
+                
+                this.socket.on('signal_update', (data) => {
+                    this.handleSignalUpdate(data);
+                });
+            }
+            
+            async initComponents() {
+                // Initialize Chart System
+                this.components.chartSystem = new UnifiedChartSystem('unifiedChartSystem', {
+                    socket: this.socket,
+                    symbol: 'XAUUSD',
+                    timeframes: ['1h', '4h', '1d', '1w']
+                });
+                
+                // Initialize Predictions Panel
+                this.components.predictionsPanel = new AdvancedPredictionsPanel('advancedPredictionsPanel', {
+                    socket: this.socket,
+                    apiEndpoint: '/api/predictions'
+                });
+                
+                // Initialize Correlation Analyzer
+                this.components.correlationAnalyzer = new TimeframeCorrelationAnalyzer('timeframeCorrelationAnalyzer', {
+                    socket: this.socket,
+                    apiEndpoint: '/api/correlation'
+                });
+                
+                // Initialize Market Context
+                this.components.marketContext = new RealTimeMarketContext('realTimeMarketContext', {
+                    socket: this.socket,
+                    apiEndpoint: '/api/market-context'
+                });
+                
+                // Initialize all components
+                await Promise.all([
+                    this.components.chartSystem.init(),
+                    this.components.predictionsPanel.init(),
+                    this.components.correlationAnalyzer.init(),
+                    this.components.marketContext.init()
+                ]);
+            }
+            
+            setupEventListeners() {
+                // Navigation
+                document.querySelectorAll('.sidebar-nav-link').forEach(link => {
+                    link.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        this.handleNavigation(e.target.dataset.section);
+                    });
+                });
+                
+                // Header controls
+                document.getElementById('settingsBtn').addEventListener('click', () => {
+                    this.showSettings();
+                });
+                
+                document.getElementById('fullscreenBtn').addEventListener('click', () => {
+                    this.toggleFullscreen();
+                });
+                
+                // Quick actions
+                document.getElementById('refreshAllBtn').addEventListener('click', () => {
+                    this.refreshAllData();
+                });
+                
+                document.getElementById('generateSignalBtn').addEventListener('click', () => {
+                    this.generateSignal();
+                });
+                
+                document.getElementById('exportDataBtn').addEventListener('click', () => {
+                    this.exportData();
+                });
+                
+                // Modal handling
+                document.getElementById('modalCloseBtn').addEventListener('click', () => {
+                    this.closeModal();
+                });
+                
+                // Resize handler
+                window.addEventListener('resize', () => {
+                    this.handleResize();
+                });
+                
+                // Visibility change handler
+                document.addEventListener('visibilitychange', () => {
+                    this.handleVisibilityChange();
+                });
+            }
+            
+            setupKeyboardShortcuts() {
+                document.addEventListener('keydown', (e) => {
+                    // Only handle shortcuts when not typing in input fields
+                    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+                        return;
+                    }
+                    
+                    // Ctrl + shortcuts
+                    if (e.ctrlKey) {
+                        switch (e.key) {
+                            case '1':
+                                e.preventDefault();
+                                this.components.chartSystem.switchTimeframe('1h');
+                                break;
+                            case '4':
+                                e.preventDefault();
+                                this.components.chartSystem.switchTimeframe('4h');
+                                break;
+                            case 'd':
+                            case 'D':
+                                e.preventDefault();
+                                this.components.chartSystem.switchTimeframe('1d');
+                                break;
+                            case 'r':
+                            case 'R':
+                                e.preventDefault();
+                                this.refreshAllData();
+                                break;
+                            case 'g':
+                            case 'G':
+                                e.preventDefault();
+                                this.generateSignal();
+                                break;
+                            case 'p':
+                            case 'P':
+                                e.preventDefault();
+                                this.components.predictionsPanel.refresh();
+                                break;
+                            case 'e':
+                            case 'E':
+                                e.preventDefault();
+                                this.exportData();
+                                break;
+                        }
+                    } else {
+                        // Single key shortcuts
+                        switch (e.key) {
+                            case 's':
+                            case 'S':
+                                e.preventDefault();
+                                this.components.chartSystem.toggleSync();
+                                break;
+                            case 'l':
+                            case 'L':
+                                e.preventDefault();
+                                this.components.chartSystem.cycleLayout();
+                                break;
+                            case 'i':
+                            case 'I':
+                                e.preventDefault();
+                                this.components.chartSystem.toggleIndicators();
+                                break;
+                            case 'a':
+                            case 'A':
+                                e.preventDefault();
+                                this.components.chartSystem.toggleAnnotations();
+                                break;
+                            case '?':
+                                e.preventDefault();
+                                this.showKeyboardShortcuts();
+                                break;
+                            case 'Escape':
+                                this.closeModal();
+                                this.hideKeyboardShortcuts();
+                                break;
+                        }
+                    }
+                });
+            }
+            
+            startRealTimeUpdates() {
+                // Update current time every second
+                setInterval(() => {
+                    this.updateTimeDisplay();
+                }, 1000);
+                
+                // Auto-refresh data based on settings
+                if (this.settings.autoRefresh) {
+                    setInterval(() => {
+                        this.refreshAllData();
+                    }, this.settings.refreshInterval);
+                }
+            }
+            
+            updateTimeDisplay() {
+                const now = new Date();
+                const timeString = now.toLocaleTimeString('en-US', {
+                    timeZone: 'UTC',
+                    hour12: false
+                }) + ' UTC';
+                document.getElementById('currentTime').textContent = timeString;
+            }
+            
+            updateConnectionStatus(connected) {
+                const statusIndicator = document.getElementById('connectionStatus');
+                const statusText = document.getElementById('statusText');
+                
+                if (connected) {
+                    statusIndicator.className = 'status-indicator';
+                    statusText.textContent = 'Connected';
+                } else {
+                    statusIndicator.className = 'status-indicator disconnected';
+                    statusText.textContent = 'Disconnected';
+                }
+            }
+            
+            handlePriceUpdate(data) {
+                // Update price displays
+                if (data.symbol === 'XAUUSD') {
+                    document.getElementById('currentPrice').textContent = `$${data.price.toFixed(2)}`;
+                    
+                    const change = data.change || 0;
+                    const changePercent = data.changePercent || 0;
+                    const changeElement = document.getElementById('priceChange');
+                    
+                    changeElement.textContent = `${change >= 0 ? '+' : ''}$${change.toFixed(2)} (${change >= 0 ? '+' : ''}${changePercent.toFixed(2)}%)`;
+                    changeElement.className = change >= 0 ? 'status-value positive' : 'status-value negative';
+                }
+                
+                // Update last update time
+                document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString();
+                
+                // Notify components
+                Object.values(this.components).forEach(component => {
+                    if (component.onPriceUpdate) {
+                        component.onPriceUpdate(data);
+                    }
+                });
+            }
+            
+            handlePredictionUpdate(data) {
+                if (this.components.predictionsPanel) {
+                    this.components.predictionsPanel.onPredictionUpdate(data);
+                }
+                
+                if (this.components.correlationAnalyzer) {
+                    this.components.correlationAnalyzer.onPredictionUpdate(data);
+                }
+            }
+            
+            handleSignalUpdate(data) {
+                // Show notification for new signals
+                if (this.settings.notifications) {
+                    this.showNotification(`New ${data.signal_type} signal generated`, 'info');
+                }
+                
+                // Update relevant components
+                Object.values(this.components).forEach(component => {
+                    if (component.onSignalUpdate) {
+                        component.onSignalUpdate(data);
+                    }
+                });
+            }
+            
+            async refreshAllData() {
+                try {
+                    console.log('🔄 Refreshing all dashboard data...');
+                    
+                    // Refresh all components
+                    const refreshPromises = Object.values(this.components).map(component => {
+                        if (component.refresh) {
+                            return component.refresh();
+                        }
+                        return Promise.resolve();
+                    });
+                    
+                    await Promise.all(refreshPromises);
+                    
+                    this.showNotification('Dashboard data refreshed', 'success');
+                    
+                } catch (error) {
+                    console.error('❌ Error refreshing data:', error);
+                    this.showNotification('Error refreshing data', 'error');
+                }
+            }
+            
+            async generateSignal() {
+                try {
+                    console.log('⚡ Generating new trading signal...');
+                    
+                    const response = await fetch('/api/generate-signal', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            symbol: 'XAUUSD',
+                            timeframe: '1h'
+                        })
+                    });
+                    
+                    if (response.ok) {
+                        const signal = await response.json();
+                        this.showNotification(`New ${signal.signal_type} signal generated`, 'success');
+                        
+                        // Refresh predictions panel
+                        if (this.components.predictionsPanel) {
+                            this.components.predictionsPanel.refresh();
+                        }
+                    } else {
+                        throw new Error('Failed to generate signal');
+                    }
+                    
+                } catch (error) {
+                    console.error('❌ Error generating signal:', error);
+                    this.showNotification('Error generating signal', 'error');
+                }
+            }
+            
+            exportData() {
+                try {
+                    console.log('💾 Exporting dashboard data...');
+                    
+                    const data = {
+                        timestamp: new Date().toISOString(),
+                        settings: this.settings,
+                        charts: this.components.chartSystem ? this.components.chartSystem.exportData() : null,
+                        predictions: this.components.predictionsPanel ? this.components.predictionsPanel.exportData() : null,
+                        correlation: this.components.correlationAnalyzer ? this.components.correlationAnalyzer.exportData() : null,
+                        context: this.components.marketContext ? this.components.marketContext.exportData() : null
+                    };
+                    
+                    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `goldgpt-dashboard-${new Date().toISOString().split('T')[0]}.json`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                    
+                    this.showNotification('Dashboard data exported', 'success');
+                    
+                } catch (error) {
+                    console.error('❌ Error exporting data:', error);
+                    this.showNotification('Error exporting data', 'error');
+                }
+            }
+            
+            toggleFullscreen() {
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen();
+                } else {
+                    document.exitFullscreen();
+                }
+            }
+            
+            showKeyboardShortcuts() {
+                document.getElementById('shortcutsModal').classList.add('visible');
+            }
+            
+            hideKeyboardShortcuts() {
+                document.getElementById('shortcutsModal').classList.remove('visible');
+            }
+            
+            closeModal() {
+                document.getElementById('predictionModal').classList.remove('visible');
+            }
+            
+            showNotification(message, type = 'info') {
+                const container = document.getElementById('toastContainer');
+                const toast = document.createElement('div');
+                toast.className = `toast toast-${type}`;
+                toast.textContent = message;
+                
+                container.appendChild(toast);
+                
+                // Auto-remove after 3 seconds
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.parentNode.removeChild(toast);
+                    }
+                }, 3000);
+            }
+            
+            showError(message) {
+                this.showNotification(message, 'error');
+            }
+            
+            handleResize() {
+                // Notify components of resize
+                Object.values(this.components).forEach(component => {
+                    if (component.onResize) {
+                        component.onResize();
+                    }
+                });
+            }
+            
+            handleVisibilityChange() {
+                if (document.hidden) {
+                    // Pause updates when tab is not visible
+                    Object.values(this.components).forEach(component => {
+                        if (component.pause) {
+                            component.pause();
+                        }
+                    });
+                } else {
+                    // Resume updates when tab becomes visible
+                    Object.values(this.components).forEach(component => {
+                        if (component.resume) {
+                            component.resume();
+                        }
+                    });
+                }
+            }
+            
+            handleNavigation(section) {
+                // Update active nav link
+                document.querySelectorAll('.sidebar-nav-link').forEach(link => {
+                    link.classList.remove('active');
+                });
+                document.querySelector(`[data-section="${section}"]`).classList.add('active');
+                
+                // Show/hide sections based on screen size
+                if (window.innerWidth <= 768) {
+                    // On mobile, you might want to implement section switching
+                    console.log(`Navigate to section: ${section}`);
+                }
+            }
+        }
+        
+        // Initialize dashboard when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            window.goldgptDashboard = new GoldGPTDashboard();
+        });
+        
+        // Service Worker for PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/static/sw.js')
+                    .then((registration) => {
+                        console.log('SW registered: ', registration);
+                    })
+                    .catch((registrationError) => {
+                        console.log('SW registration failed: ', registrationError);
+                    });
+            });
+        }
+    </script>
+    
+    <!-- Toast Notification Styles -->
+    <style>
+        .toast-container {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .toast {
+            padding: 12px 16px;
+            border-radius: 8px;
+            color: white;
+            font-size: 14px;
+            max-width: 300px;
+            animation: slideIn 0.3s ease-out;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        }
+        
+        .toast-success { background: var(--bull-color); }
+        .toast-error { background: var(--bear-color); }
+        .toast-warning { background: var(--neutral-color); }
+        .toast-info { background: var(--accent-blue); }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .toast-container {
+                right: 10px;
+                left: 10px;
+                top: 70px;
+            }
+            
+            .toast {
+                max-width: none;
+            }
+        }
+    </style>
+    
+</body>
+</html>
