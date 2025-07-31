@@ -781,11 +781,17 @@
 
                     console.log('✅ TradingView library detected');
 
-                    // Create chart container
-                    const chartContainer = this.container.querySelector('#chart-container') || 
-                                         this.createChartContainer();
+                    // Find the appropriate chart container
+                    let chartContainer = this.container.querySelector('.chart-panel.active .chart-panel-content');
+                    if (!chartContainer) {
+                        chartContainer = this.container.querySelector('#chart1h');
+                    }
+                    if (!chartContainer) {
+                        chartContainer = this.createChartContainer();
+                    }
 
                     console.log('📊 Creating chart with container:', chartContainer);
+                    console.log('📊 Container dimensions:', chartContainer.clientWidth, 'x', chartContainer.clientHeight);
                     console.log('📊 LightweightCharts object:', LightweightCharts);
                     console.log('📊 Available methods:', Object.keys(LightweightCharts));
 
@@ -872,24 +878,33 @@
             }
 
             createChartContainer() {
-                const chartGrid = this.container.querySelector('.charts-grid');
-                if (!chartGrid) {
-                    const newGrid = document.createElement('div');
-                    newGrid.className = 'charts-grid';
-                    newGrid.innerHTML = '<div id="chart-container" style="width: 100%; height: 400px;"></div>';
-                    this.container.appendChild(newGrid);
-                    return newGrid.querySelector('#chart-container');
+                // Find the active chart panel and use its content div
+                const activePanel = this.container.querySelector('.chart-panel.active');
+                if (activePanel) {
+                    const chartContent = activePanel.querySelector('.chart-panel-content');
+                    if (chartContent) {
+                        console.log('📊 Found active chart panel:', chartContent.id);
+                        return chartContent;
+                    }
                 }
                 
-                let chartContainer = chartGrid.querySelector('#chart-container');
-                if (!chartContainer) {
-                    chartContainer = document.createElement('div');
-                    chartContainer.id = 'chart-container';
-                    chartContainer.style.width = '100%';
-                    chartContainer.style.height = '400px';
-                    chartGrid.appendChild(chartContainer);
+                // Fallback: look for chart1h (default 1H timeframe)
+                let chartContainer = this.container.querySelector('#chart1h');
+                if (chartContainer) {
+                    console.log('📊 Using chart1h container');
+                    return chartContainer;
                 }
-                return chartContainer;
+                
+                // Last resort: create a new container
+                const chartGrid = this.container.querySelector('.chart-grid') || this.container;
+                const newContainer = document.createElement('div');
+                newContainer.id = 'chart-container-fallback';
+                newContainer.style.width = '100%';
+                newContainer.style.height = '400px';
+                newContainer.style.background = '#1e1e1e';
+                chartGrid.appendChild(newContainer);
+                console.log('📊 Created fallback chart container');
+                return newContainer;
             }
 
             setupTimeframeButtons() {
@@ -906,6 +921,8 @@
 
             async switchTimeframe(timeframe) {
                 try {
+                    console.log('🔄 Switching to timeframe:', timeframe);
+                    
                     // Update active button
                     document.querySelectorAll('.timeframe-btn').forEach(btn => {
                         btn.classList.remove('active');
@@ -914,30 +931,109 @@
                         }
                     });
 
+                    // Update active chart panel
+                    document.querySelectorAll('.chart-panel').forEach(panel => {
+                        panel.classList.remove('active');
+                        if (panel.dataset.timeframe === timeframe) {
+                            panel.classList.add('active');
+                        }
+                    });
+
                     this.currentTimeframe = timeframe;
+                    
+                    // If we need to create a new chart for this timeframe
+                    const targetContainer = this.container.querySelector(`[data-timeframe="${timeframe}"] .chart-panel-content`);
+                    if (targetContainer && !targetContainer.hasChildNodes()) {
+                        console.log('📊 Creating new chart for timeframe:', timeframe);
+                        // Recreate chart in the new container
+                        await this.createChartInContainer(targetContainer, timeframe);
+                    }
+                    
                     await this.loadChartData(timeframe);
                 } catch (error) {
                     console.error('Error switching timeframe:', error);
                 }
             }
 
+            async createChartInContainer(container, timeframe) {
+                try {
+                    const newChart = LightweightCharts.createChart(container, {
+                        width: container.clientWidth || 600,
+                        height: 300,
+                        layout: {
+                            backgroundColor: '#1e1e1e',
+                            textColor: '#d1d4dc',
+                            fontSize: 12,
+                            fontFamily: 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif'
+                        },
+                        grid: {
+                            vertLines: { color: '#2a2a2a' },
+                            horzLines: { color: '#2a2a2a' }
+                        },
+                        crosshair: {
+                            mode: LightweightCharts.CrosshairMode ? LightweightCharts.CrosshairMode.Normal : 0,
+                        },
+                        rightPriceScale: {
+                            borderColor: '#485c7b',
+                        },
+                        timeScale: {
+                            borderColor: '#485c7b',
+                            timeVisible: true,
+                            secondsVisible: false,
+                        },
+                    });
+
+                    const series = newChart.addCandlestickSeries({
+                        upColor: '#4caf50',
+                        downColor: '#f44336',
+                        borderVisible: false,
+                        wickUpColor: '#4caf50',
+                        wickDownColor: '#f44336',
+                    });
+
+                    // Store chart and series for this timeframe
+                    if (!this.charts) this.charts = {};
+                    this.charts[timeframe] = { chart: newChart, series: series };
+
+                    console.log('✅ Chart created for timeframe:', timeframe);
+                } catch (error) {
+                    console.error('❌ Error creating chart for timeframe:', timeframe, error);
+                }
+            }
+
             async loadChartData(timeframe) {
                 try {
+                    console.log('📊 Loading chart data for timeframe:', timeframe);
                     const response = await fetch(`/api/chart-data?timeframe=${timeframe}`);
                     if (!response.ok) {
                         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                     }
 
                     const data = await response.json();
+                    console.log('📊 Received chart data:', data);
+                    
                     if (data.data && Array.isArray(data.data)) {
-                        this.candlestickSeries.setData(data.data);
-                        this.hideError();
+                        // Use the appropriate series for the timeframe
+                        let targetSeries = this.candlestickSeries;
+                        
+                        // If we have multiple charts, use the correct one
+                        if (this.charts && this.charts[timeframe]) {
+                            targetSeries = this.charts[timeframe].series;
+                        }
+                        
+                        if (targetSeries) {
+                            targetSeries.setData(data.data);
+                            console.log('✅ Chart data loaded successfully for', timeframe);
+                            this.hideError();
+                        } else {
+                            console.warn('⚠️ No series available for timeframe:', timeframe);
+                        }
                     } else {
                         throw new Error('Invalid chart data format');
                     }
                 } catch (error) {
-                    console.error('Error loading chart data:', error);
-                    this.showError('Unable to load chart data');
+                    console.error('❌ Error loading chart data:', error);
+                    this.showError(`Unable to load chart data: ${error.message}`);
                 }
             }
 
