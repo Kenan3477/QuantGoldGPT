@@ -1,67 +1,75 @@
-# Railway Ignore File - Exclude files not needed for web deployment
+# Railway Ignore File - Include only essential files for minimal deployment
 
-# Telegram bot files
-telegram_bot.py
-bot_chart_access_example.py
+# Use minimal app instead of full app
+app.py
+ai_analysis_api.py
+news_aggregator.py
+price_storage_manager.py
+fixed_ml_prediction_engine.py
+ml_prediction_api.py
+real_time_data_engine.py
+learning_system_integration.py
+enhanced_flask_integration.py
+data_pipeline_web_integration.py
+enhanced_ml_data_provider.py
+resource_governor.py
+emergency_cache_fix.py
+dashboard_routes.py
 
-# Test and debug files
-test_*.py
-debug_*.py
-verify_*.py
-check_*.py
-simple_*.py
-quick_*.py
-demo_*.py
+# All other Python files except minimal app and essential modules
+*.py
+!app_minimal.py
+!error_handling_system.py
+!database_config.py
+!requirements-production.txt
 
-# Development and backup files
-*_backup.py
-*_backup*.py
-*_test.py
-*_debug.py
-*_fix.py
-*_clean.py
+# Keep only essential templates and static files
+templates/*
+!templates/dashboard.html
+!templates/ml_predictions_dashboard.html
+static/*
+!static/css/style.css
+!static/js/app.js
 
-# JSON test and backup files
+# Documentation and config files
+*.md
+!README.md
 *.json
-!ml_api_config.json
+!railway.json
+*.txt
+!requirements-production.txt
+!Procfile
 
-# HTML test files
-test_*.html
-debug_*.html
-minimal_*.html
-
-# Log files
-*.log
-
-# Database files (use Railway PostgreSQL)
-*.db
-*.sqlite
-*.sqlite3
+# Development files
+test_*
+debug_*
+verify_*
+check_*
+simple_*
+quick_*
+demo_*
+*_backup*
+*_test*
+*_debug*
+*_fix*
+*_clean*
 
 # Cache and temp files
 __pycache__/
 *.pyc
+*.pyo
 temp/
 cache/
+logs/
+*.log
 
-# Documentation (keep essential ones)
-*.md
-!README.md
-!RAILWAY_DEPLOYMENT_GUIDE.md
+# Database files
+*.db
+*.sqlite
+*.sqlite3
 
-# Batch and shell files
-*.bat
-*.sh
-*.ps1
-
-# IDE files
+# Environment and IDE files
+.env*
 .vscode/
 .idea/
-
-# Environment files (Railway provides these)
-.env
-.env.*
-
-# Git files
 .git/
-.gitignore
