@@ -341,9 +341,14 @@ def generate_chart_data(timeframe='1H', count=100):
 # Routes for the Advanced Dashboard
 @app.route('/')
 def dashboard():
-    """Main advanced dashboard"""
+    """Main advanced dashboard - temporarily redirecting to simple dashboard"""
     try:
-        return render_template('dashboard.html')
+        # Temporarily redirect to working simple dashboard
+        from flask import redirect, url_for
+        return redirect(url_for('simple_dashboard'))
+        
+        # Original code (disabled temporarily):
+        # return render_template('dashboard.html')
     except Exception as e:
         logger.error(f"Error loading dashboard template: {e}")
         # Fallback with advanced features preview
@@ -520,6 +525,7 @@ def ml_predictions_dashboard():
         """
 
 @app.route('/simple-dashboard')
+@app.route('/simple')  # Add simple alias
 def simple_dashboard():
     """Simple dashboard with working charts"""
     try:
@@ -527,6 +533,15 @@ def simple_dashboard():
     except Exception as e:
         logger.error(f"Error loading simple dashboard template: {e}")
         return "Simple dashboard template not found", 404
+
+@app.route('/advanced-dashboard')
+def advanced_dashboard():
+    """Advanced dashboard (direct access for testing)"""
+    try:
+        return render_template('dashboard.html')
+    except Exception as e:
+        logger.error(f"Error loading advanced dashboard template: {e}")
+        return "Advanced dashboard template not found", 404
 
 # API Endpoints
 @app.route('/api/health')
