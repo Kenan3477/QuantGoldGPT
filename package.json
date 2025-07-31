@@ -1,0 +1,15 @@
+{
+  "name": "goldgpt-dashboard",
+  "version": "2.0.0",
+  "description": "GoldGPT Advanced Trading Dashboard - Railway Deployment",
+  "main": "app.py",
+  "scripts": {
+    "start": "python app.py",
+    "dev": "python app.py"
+  },
+  "engines": {
+    "python": ">=3.8"
+  },
+  "keywords": ["trading", "gold", "ai", "ml", "dashboard"],
+  "private": true
+}
