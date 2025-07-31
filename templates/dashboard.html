@@ -736,18 +736,331 @@
     <!-- Toast Notifications -->
     <div class="toast-container" id="toastContainer"></div>
     
-    <!-- JavaScript Modules -->
-    <script type="module" src="{{ url_for('static', filename='js/unified-chart-system.js') }}"></script>
-    <script type="module" src="{{ url_for('static', filename='js/advanced-predictions-panel.js') }}"></script>
-    <script type="module" src="{{ url_for('static', filename='js/timeframe-correlation-analyzer.js') }}"></script>
-    <script type="module" src="{{ url_for('static', filename='js/real-time-market-context.js') }}"></script>
-    
-    <!-- Main Dashboard Controller -->
-    <script type="module">
-        import { UnifiedChartSystem } from './static/js/unified-chart-system.js';
-        import { AdvancedPredictionsPanel } from './static/js/advanced-predictions-panel.js';
-        import { TimeframeCorrelationAnalyzer } from './static/js/timeframe-correlation-analyzer.js';
-        import { RealTimeMarketContext } from './static/js/real-time-market-context.js';
+    <!-- Main Dashboard JavaScript (Self-contained for Railway deployment) -->
+    <script>
+        // UnifiedChartSystem Implementation
+        class UnifiedChartSystem {
+            constructor(containerId, options = {}) {
+                this.containerId = containerId;
+                this.container = document.getElementById(containerId);
+                this.socket = options.socket;
+                this.symbol = options.symbol || 'XAUUSD';
+                this.timeframes = options.timeframes || ['1h', '4h', '1d', '1w'];
+                this.chart = null;
+                this.candlestickSeries = null;
+                this.currentTimeframe = '1h';
+                this.isInitialized = false;
+            }
+
+            async init() {
+                try {
+                    console.log('Initializing UnifiedChartSystem...');
+                    if (!this.container) {
+                        throw new Error(`Container ${this.containerId} not found`);
+                    }
+
+                    // Create chart container
+                    const chartContainer = this.container.querySelector('#chart-container') || 
+                                         this.createChartContainer();
+
+                    // Initialize TradingView Lightweight Charts
+                    this.chart = LightweightCharts.createChart(chartContainer, {
+                        width: chartContainer.clientWidth,
+                        height: 400,
+                        layout: {
+                            backgroundColor: '#1e1e1e',
+                            textColor: '#d1d4dc',
+                            fontSize: 12,
+                            fontFamily: 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif'
+                        },
+                        grid: {
+                            vertLines: { color: '#2a2a2a' },
+                            horzLines: { color: '#2a2a2a' }
+                        },
+                        crosshair: {
+                            mode: LightweightCharts.CrosshairMode.Normal,
+                        },
+                        rightPriceScale: {
+                            borderColor: '#485c7b',
+                        },
+                        timeScale: {
+                            borderColor: '#485c7b',
+                            timeVisible: true,
+                            secondsVisible: false,
+                        },
+                    });
+
+                    // Add candlestick series
+                    this.candlestickSeries = this.chart.addCandlestickSeries({
+                        upColor: '#4caf50',
+                        downColor: '#f44336',
+                        borderVisible: false,
+                        wickUpColor: '#4caf50',
+                        wickDownColor: '#f44336',
+                    });
+
+                    // Setup timeframe buttons
+                    this.setupTimeframeButtons();
+
+                    // Load initial data
+                    await this.loadChartData(this.currentTimeframe);
+
+                    // Handle resize
+                    window.addEventListener('resize', () => {
+                        this.chart.applyOptions({ 
+                            width: chartContainer.clientWidth 
+                        });
+                    });
+
+                    this.isInitialized = true;
+                    console.log('✅ UnifiedChartSystem initialized successfully');
+
+                } catch (error) {
+                    console.error('❌ Error initializing UnifiedChartSystem:', error);
+                    this.showError('Failed to initialize chart system');
+                }
+            }
+
+            createChartContainer() {
+                const chartGrid = this.container.querySelector('.charts-grid');
+                if (!chartGrid) {
+                    const newGrid = document.createElement('div');
+                    newGrid.className = 'charts-grid';
+                    newGrid.innerHTML = '<div id="chart-container" style="width: 100%; height: 400px;"></div>';
+                    this.container.appendChild(newGrid);
+                    return newGrid.querySelector('#chart-container');
+                }
+                
+                let chartContainer = chartGrid.querySelector('#chart-container');
+                if (!chartContainer) {
+                    chartContainer = document.createElement('div');
+                    chartContainer.id = 'chart-container';
+                    chartContainer.style.width = '100%';
+                    chartContainer.style.height = '400px';
+                    chartGrid.appendChild(chartContainer);
+                }
+                return chartContainer;
+            }
+
+            setupTimeframeButtons() {
+                const timeframeButtons = document.querySelectorAll('.timeframe-btn');
+                timeframeButtons.forEach(btn => {
+                    btn.addEventListener('click', async (e) => {
+                        const timeframe = e.target.dataset.timeframe;
+                        if (timeframe && timeframe !== this.currentTimeframe) {
+                            await this.switchTimeframe(timeframe);
+                        }
+                    });
+                });
+            }
+
+            async switchTimeframe(timeframe) {
+                try {
+                    // Update active button
+                    document.querySelectorAll('.timeframe-btn').forEach(btn => {
+                        btn.classList.remove('active');
+                        if (btn.dataset.timeframe === timeframe) {
+                            btn.classList.add('active');
+                        }
+                    });
+
+                    this.currentTimeframe = timeframe;
+                    await this.loadChartData(timeframe);
+                } catch (error) {
+                    console.error('Error switching timeframe:', error);
+                }
+            }
+
+            async loadChartData(timeframe) {
+                try {
+                    const response = await fetch(`/api/chart-data?timeframe=${timeframe}`);
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+
+                    const data = await response.json();
+                    if (data.data && Array.isArray(data.data)) {
+                        this.candlestickSeries.setData(data.data);
+                        this.hideError();
+                    } else {
+                        throw new Error('Invalid chart data format');
+                    }
+                } catch (error) {
+                    console.error('Error loading chart data:', error);
+                    this.showError('Unable to load chart data');
+                }
+            }
+
+            showError(message) {
+                const errorOverlay = this.container.querySelector('.chart-error-overlay');
+                if (errorOverlay) {
+                    errorOverlay.style.display = 'flex';
+                    const errorMessage = errorOverlay.querySelector('.chart-error-message');
+                    if (errorMessage) {
+                        errorMessage.textContent = message;
+                    }
+                }
+            }
+
+            hideError() {
+                const errorOverlay = this.container.querySelector('.chart-error-overlay');
+                if (errorOverlay) {
+                    errorOverlay.style.display = 'none';
+                }
+            }
+        }
+
+        // AdvancedPredictionsPanel Implementation
+        class AdvancedPredictionsPanel {
+            constructor(containerId, options = {}) {
+                this.containerId = containerId;
+                this.container = document.getElementById(containerId);
+                this.socket = options.socket;
+                this.apiEndpoint = options.apiEndpoint || '/api/predictions';
+                this.isInitialized = false;
+            }
+
+            async init() {
+                try {
+                    console.log('Initializing AdvancedPredictionsPanel...');
+                    if (!this.container) {
+                        console.warn(`Container ${this.containerId} not found, skipping predictions panel`);
+                        return;
+                    }
+
+                    await this.loadPredictions();
+                    this.setupEventListeners();
+                    this.isInitialized = true;
+                    console.log('✅ AdvancedPredictionsPanel initialized successfully');
+                } catch (error) {
+                    console.error('❌ Error initializing AdvancedPredictionsPanel:', error);
+                }
+            }
+
+            async loadPredictions() {
+                try {
+                    const response = await fetch(this.apiEndpoint);
+                    if (response.ok) {
+                        const data = await response.json();
+                        this.updatePredictionsDisplay(data);
+                    }
+                } catch (error) {
+                    console.error('Error loading predictions:', error);
+                }
+            }
+
+            updatePredictionsDisplay(data) {
+                // Update predictions display if container exists
+                if (this.container) {
+                    const predictionText = this.container.querySelector('.prediction-text');
+                    if (predictionText && data.predictions) {
+                        predictionText.textContent = data.predictions[0]?.direction || 'Neutral';
+                    }
+                }
+            }
+
+            setupEventListeners() {
+                // Add any specific event listeners for predictions panel
+                if (this.socket) {
+                    this.socket.on('prediction_update', (data) => {
+                        this.updatePredictionsDisplay(data);
+                    });
+                }
+            }
+        }
+
+        // TimeframeCorrelationAnalyzer Implementation
+        class TimeframeCorrelationAnalyzer {
+            constructor(containerId, options = {}) {
+                this.containerId = containerId;
+                this.container = document.getElementById(containerId);
+                this.socket = options.socket;
+                this.apiEndpoint = options.apiEndpoint || '/api/correlation';
+                this.isInitialized = false;
+            }
+
+            async init() {
+                try {
+                    console.log('Initializing TimeframeCorrelationAnalyzer...');
+                    if (!this.container) {
+                        console.warn(`Container ${this.containerId} not found, skipping correlation analyzer`);
+                        return;
+                    }
+
+                    await this.loadCorrelationData();
+                    this.isInitialized = true;
+                    console.log('✅ TimeframeCorrelationAnalyzer initialized successfully');
+                } catch (error) {
+                    console.error('❌ Error initializing TimeframeCorrelationAnalyzer:', error);
+                }
+            }
+
+            async loadCorrelationData() {
+                try {
+                    const response = await fetch(this.apiEndpoint);
+                    if (response.ok) {
+                        const data = await response.json();
+                        this.updateCorrelationDisplay(data);
+                    }
+                } catch (error) {
+                    console.error('Error loading correlation data:', error);
+                }
+            }
+
+            updateCorrelationDisplay(data) {
+                // Update correlation display if container exists
+                if (this.container && data) {
+                    // Implementation for correlation display
+                    console.log('Correlation data updated:', data);
+                }
+            }
+        }
+
+        // RealTimeMarketContext Implementation
+        class RealTimeMarketContext {
+            constructor(containerId, options = {}) {
+                this.containerId = containerId;
+                this.container = document.getElementById(containerId);
+                this.socket = options.socket;
+                this.apiEndpoint = options.apiEndpoint || '/api/market-context';
+                this.isInitialized = false;
+            }
+
+            async init() {
+                try {
+                    console.log('Initializing RealTimeMarketContext...');
+                    if (!this.container) {
+                        console.warn(`Container ${this.containerId} not found, skipping market context`);
+                        return;
+                    }
+
+                    await this.loadMarketContext();
+                    this.isInitialized = true;
+                    console.log('✅ RealTimeMarketContext initialized successfully');
+                } catch (error) {
+                    console.error('❌ Error initializing RealTimeMarketContext:', error);
+                }
+            }
+
+            async loadMarketContext() {
+                try {
+                    const response = await fetch(this.apiEndpoint);
+                    if (response.ok) {
+                        const data = await response.json();
+                        this.updateMarketContextDisplay(data);
+                    }
+                } catch (error) {
+                    console.error('Error loading market context:', error);
+                }
+            }
+
+            updateMarketContextDisplay(data) {
+                // Update market context display if container exists
+                if (this.container && data) {
+                    console.log('Market context updated:', data);
+                }
+            }
+        }
         
         // Dashboard Controller Class
         class GoldGPTDashboard {

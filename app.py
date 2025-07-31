@@ -341,14 +341,9 @@ def generate_chart_data(timeframe='1H', count=100):
 # Routes for the Advanced Dashboard
 @app.route('/')
 def dashboard():
-    """Main advanced dashboard - temporarily redirecting to simple dashboard"""
+    """Main advanced dashboard"""
     try:
-        # Temporarily redirect to working simple dashboard
-        from flask import redirect, url_for
-        return redirect(url_for('simple_dashboard'))
-        
-        # Original code (disabled temporarily):
-        # return render_template('dashboard.html')
+        return render_template('dashboard.html')
     except Exception as e:
         logger.error(f"Error loading dashboard template: {e}")
         # Fallback with advanced features preview
