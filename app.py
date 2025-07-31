@@ -796,6 +796,19 @@ if __name__ == '__main__':
     logger.info(f"🌍 Environment: {os.environ.get('RAILWAY_ENVIRONMENT', 'production')}")
     logger.info(f"✨ Features: Advanced Dashboard, ML Predictions, AI Analysis, Real-time Updates")
     
+    print(f"🔍 DEBUG: Starting GoldGPT Advanced Dashboard")
+    print(f"🔍 DEBUG: Current working directory: {os.getcwd()}")
+    print(f"🔍 DEBUG: Current file: {__file__}")
+    print(f"🔍 DEBUG: Available Python files: {[f for f in os.listdir('.') if f.endswith('.py')]}")
+    print(f"🔍 DEBUG: Railway environment: {os.environ.get('RAILWAY_ENVIRONMENT', 'production')}")
+    print(f"🔍 DEBUG: Port: {port}")
+    print(f"🔍 DEBUG: Available API endpoints:")
+    print(f"🔍 DEBUG: - /api/health")
+    print(f"🔍 DEBUG: - /api/gold-price") 
+    print(f"🔍 DEBUG: - /api/chart-data")
+    print(f"🔍 DEBUG: - /api/market-data")
+    print(f"🔍 DEBUG: - /simple-dashboard (chart fallback)")
+    
     # Run the application
     socketio.run(
         app, 
