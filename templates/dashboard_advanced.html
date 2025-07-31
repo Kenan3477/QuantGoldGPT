@@ -2495,10 +2495,10 @@
             <!-- AI Tools -->
             <nav class="nav-section">
                 <div class="nav-section-title">AI Tools</div>
-                <a href="/ai-analysis" class="nav-item nav-link" data-section="ai-analysis">
+                <button class="nav-item" data-section="ai-analysis">
                     <i class="fas fa-brain"></i>
                     <span>AI Analysis</span>
-                </a>
+                </button>
                 <button class="nav-item" data-section="signals">
                     <i class="fas fa-satellite-dish"></i>
                     <span>Signals</span>
@@ -9928,8 +9928,49 @@
         }
         
         function showDashboardSection() {
-            // Reload the main dashboard content
-            location.reload();
+            // Show the default dashboard content without page reload
+            const content = document.querySelector('.content');
+            content.innerHTML = `
+                <div class="dashboard-content">
+                    <!-- Main dashboard content will be loaded here -->
+                    <div class="section-header">
+                        <h2><i class="fas fa-tachometer-alt"></i> Trading Dashboard</h2>
+                        <p>Real-time gold trading dashboard with AI-powered insights</p>
+                    </div>
+                    
+                    <div class="dashboard-grid">
+                        <div class="dashboard-card">
+                            <h3><i class="fas fa-coins"></i> Current Price</h3>
+                            <div id="current-price-widget">
+                                <div class="loading-state">
+                                    <i class="fas fa-spinner fa-spin"></i> Loading price data...
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="dashboard-card">
+                            <h3><i class="fas fa-chart-line"></i> Live Chart</h3>
+                            <div id="main-chart-widget">
+                                <div class="loading-state">
+                                    <i class="fas fa-spinner fa-spin"></i> Loading chart...
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="dashboard-card">
+                            <h3><i class="fas fa-brain"></i> AI Insights</h3>
+                            <div id="ai-insights-widget">
+                                <div class="loading-state">
+                                    <i class="fas fa-spinner fa-spin"></i> Loading AI insights...
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Load dashboard data
+            loadDashboardData();
         }
         
         // Data loading functions
@@ -10136,6 +10177,59 @@
                 .catch(error => {
                     console.error('Error loading analysis data:', error);
                 });
+        }
+        
+        // Dashboard data loading function
+        function loadDashboardData() {
+            // Load current price
+            fetch('/api/gold-price')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById('current-price-widget').innerHTML = `
+                            <div class="price-display">
+                                <div class="current-price">$${data.price}</div>
+                                <div class="price-change ${data.change >= 0 ? 'positive' : 'negative'}">
+                                    ${data.change >= 0 ? '+' : ''}${data.change.toFixed(2)} (${data.change_percent >= 0 ? '+' : ''}${data.change_percent.toFixed(2)}%)
+                                </div>
+                                <div class="price-details">
+                                    <span>High: $${data.high}</span>
+                                    <span>Low: $${data.low}</span>
+                                    <span>Volume: ${data.volume?.toLocaleString() || 'N/A'}</span>
+                                </div>
+                            </div>
+                        `;
+                    }
+                })
+                .catch(error => console.error('Error loading price data:', error));
+            
+            // Load AI insights
+            fetch('/api/ai-signals')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById('ai-insights-widget').innerHTML = `
+                            <div class="ai-summary">
+                                <div class="signal-summary">
+                                    <span class="signal-badge ${data.signal.toLowerCase()}">${data.signal}</span>
+                                    <span class="confidence">${(data.confidence * 100).toFixed(1)}% confidence</span>
+                                </div>
+                                <div class="insight-text">${data.analysis}</div>
+                                <div class="risk-indicator">Risk Level: <span class="risk-${data.risk_level.toLowerCase()}">${data.risk_level}</span></div>
+                            </div>
+                        `;
+                    }
+                })
+                .catch(error => console.error('Error loading AI insights:', error));
+            
+            // Initialize main chart placeholder
+            document.getElementById('main-chart-widget').innerHTML = `
+                <div class="chart-placeholder">
+                    <i class="fas fa-chart-candlestick" style="font-size: 48px; color: #00d4aa; opacity: 0.5;"></i>
+                    <p>TradingView Chart Integration</p>
+                    <p style="font-size: 12px; opacity: 0.7;">Live XAUUSD chart will be loaded here</p>
+                </div>
+            `;
         }
         
         // Initialize navigation on page load

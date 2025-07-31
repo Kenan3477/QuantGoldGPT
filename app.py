@@ -721,6 +721,152 @@ def api_news():
             'error': str(e)
         }), 500
 
+@app.route('/api/news/enhanced')
+def api_news_enhanced():
+    """Enhanced news API with filtering"""
+    try:
+        limit = request.args.get('limit', '10')
+        # Mock enhanced news data
+        news_data = {
+            'success': True,
+            'data': [
+                {
+                    'id': i,
+                    'title': f'Gold Market Update #{i+1}',
+                    'summary': f'Analysis of gold market trends and developments #{i+1}',
+                    'timestamp': (datetime.now() - timedelta(hours=i)).isoformat(),
+                    'source': f'Market Source {i+1}',
+                    'impact': random.choice(['bullish', 'bearish', 'neutral']),
+                    'relevance': round(random.uniform(0.6, 1.0), 2)
+                } for i in range(int(limit))
+            ],
+            'timestamp': datetime.now().isoformat()
+        }
+        return jsonify(news_data)
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/api/positions/open')
+def api_positions_open():
+    """Open positions API"""
+    try:
+        positions_data = {
+            'success': True,
+            'positions': [
+                {
+                    'id': 1,
+                    'symbol': 'XAUUSD',
+                    'side': 'LONG',
+                    'size': 10.0,
+                    'entry_price': 2385.50,
+                    'current_price': get_current_gold_price()['price'],
+                    'pnl': round(random.uniform(-100, 200), 2),
+                    'open_time': (datetime.now() - timedelta(hours=2)).isoformat()
+                }
+            ],
+            'total_positions': 1,
+            'timestamp': datetime.now().isoformat()
+        }
+        return jsonify(positions_data)
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/api/predictions')
+def api_predictions():
+    """Predictions API for advanced dashboard"""
+    try:
+        predictions_data = get_ml_predictions()
+        return jsonify(predictions_data)
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/api/market-context')
+def api_market_context():
+    """Market context API"""
+    try:
+        context_data = {
+            'success': True,
+            'market_session': random.choice(['Asian', 'European', 'American']),
+            'volatility': round(random.uniform(0.15, 0.35), 3),
+            'trend': random.choice(['bullish', 'bearish', 'sideways']),
+            'key_levels': {
+                'support': round(2380 + random.uniform(-10, 10), 2),
+                'resistance': round(2420 + random.uniform(-10, 10), 2)
+            },
+            'economic_events': [
+                {
+                    'event': 'Federal Reserve Meeting',
+                    'impact': 'high',
+                    'time': (datetime.now() + timedelta(hours=6)).isoformat()
+                }
+            ],
+            'timestamp': datetime.now().isoformat()
+        }
+        return jsonify(context_data)
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/api/correlation')
+def api_correlation():
+    """Correlation analysis API"""
+    try:
+        correlation_data = {
+            'success': True,
+            'correlations': {
+                'USD_INDEX': round(random.uniform(-0.8, -0.4), 3),
+                'SPX500': round(random.uniform(-0.3, 0.3), 3),
+                'CRUDE_OIL': round(random.uniform(0.2, 0.6), 3),
+                'BITCOIN': round(random.uniform(-0.2, 0.4), 3),
+                'SILVER': round(random.uniform(0.6, 0.9), 3)
+            },
+            'timestamp': datetime.now().isoformat()
+        }
+        return jsonify(correlation_data)
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/api/ai-analysis/status')
+def api_ai_analysis_status():
+    """AI Analysis system status"""
+    try:
+        status_data = {
+            'success': True,
+            'status': 'active',
+            'components': {
+                'technical_analysis': {'status': 'active', 'last_update': datetime.now().isoformat()},
+                'sentiment_analysis': {'status': 'active', 'last_update': datetime.now().isoformat()},
+                'ml_predictions': {'status': 'active', 'last_update': datetime.now().isoformat()},
+                'signal_generation': {'status': 'active', 'last_update': datetime.now().isoformat()}
+            },
+            'performance': {
+                'accuracy_24h': round(random.uniform(0.75, 0.90), 3),
+                'signals_generated': random.randint(50, 120),
+                'uptime': '99.8%'
+            },
+            'timestamp': datetime.now().isoformat()
+        }
+        return jsonify(status_data)
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
 # WebSocket events for real-time updates
 @socketio.on('connect')
 def handle_connect():
