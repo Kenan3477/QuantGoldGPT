@@ -2137,6 +2137,119 @@
         .text-muted {
             color: var(--text-muted) !important;
         }
+        
+        /* 🧭 NAVIGATION SECTION STYLES */
+        .section-header {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            border: 1px solid var(--border-primary);
+            text-align: center;
+        }
+        
+        .section-header h2 {
+            margin: 0 0 8px 0;
+            color: var(--text-primary);
+            font-size: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+        
+        .section-header p {
+            margin: 0;
+            color: var(--text-secondary);
+            font-size: 16px;
+        }
+        
+        /* Grid layouts for different sections */
+        .ai-analysis-grid,
+        .ml-predictions-grid,
+        .portfolio-grid,
+        .signals-grid,
+        .analysis-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 24px;
+        }
+        
+        .analysis-card,
+        .prediction-card,
+        .portfolio-card,
+        .signals-card {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            border: 1px solid var(--border-primary);
+            overflow: hidden;
+            transition: var(--transition);
+        }
+        
+        .analysis-card:hover,
+        .prediction-card:hover,
+        .portfolio-card:hover,
+        .signals-card:hover {
+            border-color: var(--accent-primary);
+            box-shadow: 0 8px 32px rgba(0, 212, 170, 0.1);
+        }
+        
+        .ai-result,
+        .sentiment-result,
+        .signals-result {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .signal-badge.buy {
+            background: rgba(0, 208, 132, 0.2);
+            color: var(--success);
+            border: 1px solid var(--success);
+        }
+        
+        .signal-badge.sell {
+            background: rgba(255, 71, 87, 0.2);
+            color: var(--danger);
+            border: 1px solid var(--danger);
+        }
+        
+        .signal-badge.hold {
+            background: rgba(255, 165, 2, 0.2);
+            color: var(--warning);
+            border: 1px solid var(--warning);
+        }
+        
+        .direction-bullish { color: var(--success); font-weight: 700; }
+        .direction-bearish { color: var(--danger); font-weight: 700; }
+        .direction-neutral { color: var(--warning); font-weight: 700; }
+        
+        .predictions-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 16px;
+        }
+        
+        .prediction-item {
+            background: var(--bg-tertiary);
+            padding: 12px;
+            border-radius: 8px;
+            border-left: 4px solid var(--accent-primary);
+        }
+        
+        .amount.positive { color: var(--success); }
+        .amount.negative { color: var(--danger); }
+        .pnl.positive { color: var(--success); }
+        .pnl.negative { color: var(--danger); }
+        
+        .trend-bullish { color: var(--success); }
+        .trend-bearish { color: var(--danger); }
+        .trend-sideways { color: var(--warning); }
+        
+        .risk-low { color: var(--success); }
+        .risk-medium { color: var(--warning); }
+        .risk-high { color: var(--danger); }
     </style>
     
     <script>
@@ -9558,6 +9671,443 @@
         });
 
         console.log('🎯 Professional Trading 212 Components script loaded');
+        
+        // 🧭 NAVIGATION SYSTEM - Handle section switching
+        function initializeNavigation() {
+            console.log('🧭 Initializing navigation system...');
+            
+            // Get all navigation items
+            const navItems = document.querySelectorAll('[data-section]');
+            const sections = document.querySelectorAll('.content > *');
+            
+            console.log(`🧭 Found ${navItems.length} navigation items`);
+            
+            navItems.forEach(item => {
+                item.addEventListener('click', function(e) {
+                    const targetSection = this.getAttribute('data-section');
+                    console.log(`🧭 Navigation clicked: ${targetSection}`);
+                    
+                    // Don't prevent default for links that have href attributes
+                    if (this.tagName === 'BUTTON' || (this.tagName === 'A' && !this.href.startsWith('http'))) {
+                        e.preventDefault();
+                    }
+                    
+                    // Handle special sections
+                    if (targetSection === 'ai-analysis') {
+                        console.log('🤖 Showing AI Analysis section');
+                        showAIAnalysisSection();
+                    } else if (targetSection === 'signals') {
+                        console.log('📡 Showing Signals section');
+                        showSignalsSection();
+                    } else if (targetSection === 'ml-predictions' || targetSection === 'backtest') {
+                        console.log('🧠 Showing ML Predictions section');
+                        showMLPredictionsSection();
+                    } else if (targetSection === 'portfolio' || targetSection === 'positions') {
+                        console.log('💼 Showing Portfolio section');
+                        showPortfolioSection();
+                    } else if (targetSection === 'analysis') {
+                        console.log('📊 Showing Analysis section');
+                        showAnalysisSection();
+                    } else {
+                        console.log(`📋 Showing default dashboard for: ${targetSection}`);
+                        showDashboardSection();
+                    }
+                    
+                    // Update active states
+                    navItems.forEach(nav => nav.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+        }
+        
+        // Section display functions
+        function showAIAnalysisSection() {
+            const content = document.querySelector('.content');
+            content.innerHTML = `
+                <div class="section-header">
+                    <h2><i class="fas fa-brain"></i> AI Analysis Center</h2>
+                    <p>Real-time artificial intelligence analysis for gold trading</p>
+                </div>
+                
+                <div class="ai-analysis-grid">
+                    <div class="analysis-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-chart-line"></i> Technical Analysis</h3>
+                        </div>
+                        <div class="card-content" id="technical-analysis-content">
+                            <div class="loading-state">
+                                <i class="fas fa-spinner fa-spin"></i> Loading AI technical analysis...
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="analysis-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-newspaper"></i> Sentiment Analysis</h3>
+                        </div>
+                        <div class="card-content" id="sentiment-analysis-content">
+                            <div class="loading-state">
+                                <i class="fas fa-spinner fa-spin"></i> Loading sentiment analysis...
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="analysis-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-bullseye"></i> Trading Signals</h3>
+                        </div>
+                        <div class="card-content" id="signals-content">
+                            <div class="loading-state">
+                                <i class="fas fa-spinner fa-spin"></i> Loading AI signals...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Load AI analysis data
+            loadAIAnalysisData();
+        }
+        
+        function showMLPredictionsSection() {
+            const content = document.querySelector('.content');
+            content.innerHTML = `
+                <div class="section-header">
+                    <h2><i class="fas fa-robot"></i> ML Predictions Center</h2>
+                    <p>Advanced machine learning predictions and forecasting</p>
+                </div>
+                
+                <div class="ml-predictions-grid">
+                    <div class="prediction-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-brain"></i> Ensemble Models</h3>
+                        </div>
+                        <div class="card-content" id="ensemble-predictions-content">
+                            <div class="loading-state">
+                                <i class="fas fa-spinner fa-spin"></i> Loading ML predictions...
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="prediction-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-chart-bar"></i> Model Performance</h3>
+                        </div>
+                        <div class="card-content" id="model-performance-content">
+                            <div class="loading-state">
+                                <i class="fas fa-spinner fa-spin"></i> Loading performance metrics...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Load ML predictions data
+            loadMLPredictionsData();
+        }
+        
+        function showPortfolioSection() {
+            const content = document.querySelector('.content');
+            content.innerHTML = `
+                <div class="section-header">
+                    <h2><i class="fas fa-wallet"></i> Portfolio Management</h2>
+                    <p>Your trading positions and portfolio performance</p>
+                </div>
+                
+                <div class="portfolio-grid">
+                    <div class="portfolio-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-chart-pie"></i> Portfolio Overview</h3>
+                        </div>
+                        <div class="card-content" id="portfolio-overview-content">
+                            <div class="loading-state">
+                                <i class="fas fa-spinner fa-spin"></i> Loading portfolio data...
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="portfolio-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-list"></i> Open Positions</h3>
+                        </div>
+                        <div class="card-content" id="positions-content">
+                            <div class="loading-state">
+                                <i class="fas fa-spinner fa-spin"></i> Loading positions...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Load portfolio data
+            loadPortfolioData();
+        }
+        
+        function showSignalsSection() {
+            const content = document.querySelector('.content');
+            content.innerHTML = `
+                <div class="section-header">
+                    <h2><i class="fas fa-satellite-dish"></i> Trading Signals</h2>
+                    <p>Real-time trading signals and alerts</p>
+                </div>
+                
+                <div class="signals-grid">
+                    <div class="signals-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-bell"></i> Active Signals</h3>
+                        </div>
+                        <div class="card-content" id="active-signals-content">
+                            <div class="loading-state">
+                                <i class="fas fa-spinner fa-spin"></i> Loading signals...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Load signals data
+            loadSignalsData();
+        }
+        
+        function showAnalysisSection() {
+            const content = document.querySelector('.content');
+            content.innerHTML = `
+                <div class="section-header">
+                    <h2><i class="fas fa-chart-area"></i> Market Analysis</h2>
+                    <p>Comprehensive market analysis and insights</p>
+                </div>
+                
+                <div class="analysis-grid">
+                    <div class="analysis-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-chart-line"></i> Technical Indicators</h3>
+                        </div>
+                        <div class="card-content" id="technical-indicators-content">
+                            <div class="loading-state">
+                                <i class="fas fa-spinner fa-spin"></i> Loading analysis...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Load analysis data
+            loadAnalysisData();
+        }
+        
+        function showDashboardSection() {
+            // Reload the main dashboard content
+            location.reload();
+        }
+        
+        // Data loading functions
+        function loadAIAnalysisData() {
+            fetch('/api/ai-signals')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById('technical-analysis-content').innerHTML = `
+                            <div class="ai-result">
+                                <h4>Signal: <span class="signal-badge ${data.signal.toLowerCase()}">${data.signal}</span></h4>
+                                <p>Confidence: <strong>${(data.confidence * 100).toFixed(1)}%</strong></p>
+                                <p>Technical Score: ${(data.technical_score * 100).toFixed(1)}%</p>
+                                <p>Analysis: ${data.analysis}</p>
+                            </div>
+                        `;
+                        
+                        document.getElementById('sentiment-analysis-content').innerHTML = `
+                            <div class="sentiment-result">
+                                <h4>Sentiment Score: ${(data.sentiment_score * 100).toFixed(1)}%</h4>
+                                <p>News Sentiment: ${(data.sentiment_data.news_sentiment * 100).toFixed(1)}%</p>
+                                <p>Social Sentiment: ${(data.sentiment_data.social_sentiment * 100).toFixed(1)}%</p>
+                                <p>Fear & Greed Index: ${data.sentiment_data.fear_greed_index}</p>
+                            </div>
+                        `;
+                        
+                        document.getElementById('signals-content').innerHTML = `
+                            <div class="signals-result">
+                                <div class="signal-item">
+                                    <span class="signal-badge ${data.signal.toLowerCase()}">${data.signal}</span>
+                                    <span class="confidence">${(data.confidence * 100).toFixed(1)}%</span>
+                                </div>
+                                <p>Risk Level: <span class="risk-${data.risk_level.toLowerCase()}">${data.risk_level}</span></p>
+                                <p>${data.prediction}</p>
+                            </div>
+                        `;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading AI analysis:', error);
+                });
+        }
+        
+        function loadMLPredictionsData() {
+            fetch('/api/advanced-ml/predictions')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById('ensemble-predictions-content').innerHTML = `
+                            <div class="ensemble-result">
+                                <h4>Ensemble Prediction: <span class="direction-${data.ensemble.direction}">${data.ensemble.direction.toUpperCase()}</span></h4>
+                                <p>Confidence: <strong>${(data.ensemble.confidence * 100).toFixed(1)}%</strong></p>
+                                <p>${data.ensemble.consensus}</p>
+                                <div class="predictions-list">
+                                    ${data.predictions.map(p => `
+                                        <div class="prediction-item">
+                                            <strong>${p.timeframe}</strong> (${p.model}): ${p.direction} - $${p.target_price} (${p.change_percent > 0 ? '+' : ''}${p.change_percent}%)
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        `;
+                        
+                        document.getElementById('model-performance-content').innerHTML = `
+                            <div class="performance-metrics">
+                                <div class="metric">
+                                    <label>24h Accuracy:</label>
+                                    <span>${(data.accuracy_metrics.last_24h_accuracy * 100).toFixed(1)}%</span>
+                                </div>
+                                <div class="metric">
+                                    <label>Weekly Accuracy:</label>
+                                    <span>${(data.accuracy_metrics.last_week_accuracy * 100).toFixed(1)}%</span>
+                                </div>
+                                <div class="metric">
+                                    <label>Sharpe Ratio:</label>
+                                    <span>${data.accuracy_metrics.sharpe_ratio}</span>
+                                </div>
+                            </div>
+                        `;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading ML predictions:', error);
+                });
+        }
+        
+        function loadPortfolioData() {
+            fetch('/api/portfolio')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById('portfolio-overview-content').innerHTML = `
+                            <div class="portfolio-summary">
+                                <div class="balance-row">
+                                    <label>Balance:</label>
+                                    <span class="amount">$${data.balance.toLocaleString()}</span>
+                                </div>
+                                <div class="balance-row">
+                                    <label>Equity:</label>
+                                    <span class="amount">$${data.equity.toLocaleString()}</span>
+                                </div>
+                                <div class="balance-row">
+                                    <label>Total P&L:</label>
+                                    <span class="amount ${data.total_pnl >= 0 ? 'positive' : 'negative'}">
+                                        ${data.total_pnl >= 0 ? '+' : ''}$${data.total_pnl.toFixed(2)}
+                                    </span>
+                                </div>
+                                <div class="balance-row">
+                                    <label>Win Rate:</label>
+                                    <span class="percentage">${(data.win_rate * 100).toFixed(1)}%</span>
+                                </div>
+                            </div>
+                        `;
+                        
+                        document.getElementById('positions-content').innerHTML = `
+                            <div class="positions-list">
+                                ${data.positions.map(pos => `
+                                    <div class="position-item">
+                                        <div class="position-header">
+                                            <span class="symbol">${pos.symbol}</span>
+                                            <span class="type ${pos.type.toLowerCase()}">${pos.type}</span>
+                                        </div>
+                                        <div class="position-details">
+                                            <span>Entry: $${pos.entry_price}</span>
+                                            <span>Current: $${pos.current_price}</span>
+                                            <span class="pnl ${pos.pnl >= 0 ? 'positive' : 'negative'}">
+                                                ${pos.pnl >= 0 ? '+' : ''}$${pos.pnl.toFixed(2)}
+                                            </span>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        `;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading portfolio data:', error);
+                });
+        }
+        
+        function loadSignalsData() {
+            fetch('/api/ai-signals')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById('active-signals-content').innerHTML = `
+                            <div class="signals-list">
+                                <div class="signal-card">
+                                    <div class="signal-header">
+                                        <span class="signal-badge ${data.signal.toLowerCase()}">${data.signal}</span>
+                                        <span class="timestamp">${new Date(data.timestamp).toLocaleTimeString()}</span>
+                                    </div>
+                                    <div class="signal-body">
+                                        <p><strong>Confidence:</strong> ${(data.confidence * 100).toFixed(1)}%</p>
+                                        <p><strong>Technical Score:</strong> ${(data.technical_score * 100).toFixed(1)}%</p>
+                                        <p><strong>Risk Level:</strong> ${data.risk_level}</p>
+                                        <p>${data.analysis}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading signals data:', error);
+                });
+        }
+        
+        function loadAnalysisData() {
+            fetch('/api/ai-signals')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById('technical-indicators-content').innerHTML = `
+                            <div class="indicators-grid">
+                                <div class="indicator-item">
+                                    <label>RSI:</label>
+                                    <span>${data.technical_indicators.rsi}</span>
+                                </div>
+                                <div class="indicator-item">
+                                    <label>MACD:</label>
+                                    <span>${data.technical_indicators.macd}</span>
+                                </div>
+                                <div class="indicator-item">
+                                    <label>Bollinger Position:</label>
+                                    <span>${data.technical_indicators.bollinger_position}</span>
+                                </div>
+                                <div class="indicator-item">
+                                    <label>Support Level:</label>
+                                    <span>$${data.technical_indicators.support_level}</span>
+                                </div>
+                                <div class="indicator-item">
+                                    <label>Resistance Level:</label>
+                                    <span>$${data.technical_indicators.resistance_level}</span>
+                                </div>
+                                <div class="indicator-item">
+                                    <label>Trend:</label>
+                                    <span class="trend-${data.technical_indicators.trend}">${data.technical_indicators.trend}</span>
+                                </div>
+                            </div>
+                        `;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading analysis data:', error);
+                });
+        }
+        
+        // Initialize navigation on page load
+        initializeNavigation();
         
         // FORCE REAL DATA REFRESH EVERY 30 SECONDS
         setInterval(() => {
