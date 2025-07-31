@@ -1,53 +1,10 @@
-# Railway Ignore File - Include only essential files for minimal deployment
+# Railway Ignore File - Simplified for better deployment
 
-# Use minimal app instead of full app
-app.py
-ai_analysis_api.py
-news_aggregator.py
-price_storage_manager.py
-fixed_ml_prediction_engine.py
-ml_prediction_api.py
-real_time_data_engine.py
-learning_system_integration.py
-enhanced_flask_integration.py
-data_pipeline_web_integration.py
-enhanced_ml_data_provider.py
-resource_governor.py
-emergency_cache_fix.py
-dashboard_routes.py
-
-# All other Python files except minimal app and essential modules
-*.py
-!app_minimal.py
-!error_handling_system.py
-!database_config.py
-!requirements-production.txt
-
-# Keep only essential templates and static files
-templates/*
-!templates/dashboard.html
-!templates/ml_predictions_dashboard.html
-static/*
-!static/css/style.css
-!static/js/app.js
-
-# Documentation and config files
-*.md
-!README.md
-*.json
-!railway.json
-*.txt
-!requirements-production.txt
-!Procfile
-
-# Development files
+# Exclude large/unnecessary files
 test_*
 debug_*
 verify_*
 check_*
-simple_*
-quick_*
-demo_*
 *_backup*
 *_test*
 *_debug*
@@ -63,12 +20,12 @@ cache/
 logs/
 *.log
 
-# Database files
+# Database files (use Railway PostgreSQL)
 *.db
 *.sqlite
 *.sqlite3
 
-# Environment and IDE files
+# Development files
 .env*
 .vscode/
 .idea/
