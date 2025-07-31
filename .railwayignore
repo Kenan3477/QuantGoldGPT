@@ -1,0 +1,67 @@
+# Railway Ignore File - Exclude files not needed for web deployment
+
+# Telegram bot files
+telegram_bot.py
+bot_chart_access_example.py
+
+# Test and debug files
+test_*.py
+debug_*.py
+verify_*.py
+check_*.py
+simple_*.py
+quick_*.py
+demo_*.py
+
+# Development and backup files
+*_backup.py
+*_backup*.py
+*_test.py
+*_debug.py
+*_fix.py
+*_clean.py
+
+# JSON test and backup files
+*.json
+!ml_api_config.json
+
+# HTML test files
+test_*.html
+debug_*.html
+minimal_*.html
+
+# Log files
+*.log
+
+# Database files (use Railway PostgreSQL)
+*.db
+*.sqlite
+*.sqlite3
+
+# Cache and temp files
+__pycache__/
+*.pyc
+temp/
+cache/
+
+# Documentation (keep essential ones)
+*.md
+!README.md
+!RAILWAY_DEPLOYMENT_GUIDE.md
+
+# Batch and shell files
+*.bat
+*.sh
+*.ps1
+
+# IDE files
+.vscode/
+.idea/
+
+# Environment files (Railway provides these)
+.env
+.env.*
+
+# Git files
+.git/
+.gitignore

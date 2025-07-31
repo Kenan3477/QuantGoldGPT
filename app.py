@@ -6000,5 +6000,14 @@ if __name__ == '__main__':
     # Start ML predictions updates (legacy system)
     start_ml_predictions_updates()
     
-    # Run the app
-    socketio.run(app, host='0.0.0.0', port=int(os.environ.get('PORT', 5000)), debug=True)
+    # Run the app with Railway-compatible settings
+    port = int(os.environ.get('PORT', 5000))
+    debug_mode = os.environ.get('RAILWAY_ENVIRONMENT') != 'production'
+    
+    socketio.run(
+        app, 
+        host='0.0.0.0', 
+        port=port, 
+        debug=debug_mode,
+        allow_unsafe_werkzeug=True
+    )

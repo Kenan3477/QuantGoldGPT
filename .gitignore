@@ -94,3 +94,6 @@ processed_files.log
 
 # Railway
 .railway/
+
+# Telegram bot (not needed for web deployment)
+telegram_bot.py
