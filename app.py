@@ -787,8 +787,21 @@ if __name__ == '__main__':
     # Start background tasks
     start_background_updates()
     
-    # Railway configuration
-    port = int(os.environ.get('PORT', 5000))
+    # Railway configuration with robust port handling
+    try:
+        port_env = os.environ.get('PORT', '5000')
+        print(f"🔍 DEBUG: Raw PORT environment variable: '{port_env}'")
+        
+        # Handle cases where PORT might be '$PORT' or other invalid values
+        if port_env.startswith('$') or not port_env.strip().isdigit():
+            print(f"⚠️  Invalid PORT environment variable: {port_env}")
+            port = 5000  # Default fallback
+        else:
+            port = int(port_env.strip())
+    except (ValueError, TypeError) as e:
+        print(f"⚠️  Error parsing PORT environment variable: {e}")
+        port = 5000  # Default fallback
+    
     debug_mode = os.environ.get('RAILWAY_ENVIRONMENT', 'production') != 'production'
     
     logger.info(f"🚀 Starting GoldGPT Advanced Dashboard on port {port}")
@@ -808,12 +821,28 @@ if __name__ == '__main__':
     print(f"🔍 DEBUG: - /api/chart-data")
     print(f"🔍 DEBUG: - /api/market-data")
     print(f"🔍 DEBUG: - /simple-dashboard (chart fallback)")
+    print(f"🔍 DEBUG: Resolved port: {port}")
     
-    # Run the application
-    socketio.run(
-        app, 
-        host='0.0.0.0', 
-        port=port, 
-        debug=debug_mode,
-        allow_unsafe_werkzeug=True
-    )
+    # Run the application with error handling
+    try:
+        print(f"🚀 Starting SocketIO server on 0.0.0.0:{port}")
+        socketio.run(
+            app, 
+            host='0.0.0.0', 
+            port=port, 
+            debug=debug_mode,
+            allow_unsafe_werkzeug=True
+        )
+    except Exception as e:
+        print(f"❌ Error starting SocketIO application: {e}")
+        # Try with basic Flask if SocketIO fails
+        print("🔄 Falling back to basic Flask server...")
+        try:
+            app.run(
+                host='0.0.0.0',
+                port=port,
+                debug=debug_mode
+            )
+        except Exception as flask_error:
+            print(f"❌ Flask fallback also failed: {flask_error}")
+            print("💡 Check if port is already in use or if there are permission issues")
