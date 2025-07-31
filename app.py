@@ -9,7 +9,7 @@ import json
 import logging
 import sqlite3
 from datetime import datetime, timezone, timedelta
-from flask import Flask, render_template, request, jsonify, session
+from flask import Flask, render_template, request, jsonify, session, redirect, url_for
 from flask_socketio import SocketIO, emit
 import requests
 from typing import Dict, List, Optional
@@ -435,6 +435,7 @@ def dashboard():
         """
 
 @app.route('/ml-predictions-dashboard')
+@app.route('/advanced-ml-dashboard')  # Add route for advanced ML dashboard
 def ml_predictions_dashboard():
     """Advanced ML predictions dashboard"""
     try:
@@ -518,6 +519,24 @@ def ml_predictions_dashboard():
         </body>
         </html>
         """
+
+@app.route('/ai-analysis')
+def ai_analysis():
+    """AI Analysis page"""
+    try:
+        return render_template('dashboard_advanced.html')
+    except Exception as e:
+        logger.error(f"Error loading AI analysis template: {e}")
+        return redirect(url_for('dashboard'))
+
+@app.route('/ml-predictions')
+def ml_predictions():
+    """ML Predictions page"""
+    try:
+        return render_template('dashboard_advanced.html')
+    except Exception as e:
+        logger.error(f"Error loading ML predictions template: {e}")
+        return redirect(url_for('dashboard'))
 
 @app.route('/simple-dashboard')
 @app.route('/simple')  # Add simple alias
