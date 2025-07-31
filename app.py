@@ -564,6 +564,7 @@ def health_check():
     })
 
 @app.route('/api/gold-price')
+@app.route('/api/gold/price')  # Add alternate endpoint for advanced dashboard
 def api_gold_price():
     """Enhanced gold price API"""
     try:
@@ -592,7 +593,9 @@ def api_ai_signals():
         }), 500
 
 @app.route('/api/ml-predictions/<symbol>')
-def api_ml_predictions(symbol):
+@app.route('/api/advanced-ml/predictions')  # Add endpoint for advanced dashboard
+@app.route('/api/ml/prediction/detailed')   # Add detailed endpoint
+def api_ml_predictions(symbol='XAUUSD'):
     """Enhanced ML predictions API"""
     try:
         predictions = get_ml_predictions()
@@ -618,9 +621,14 @@ def api_portfolio():
 @app.route('/api/chart-data')
 @app.route('/api/chart-data/<timeframe>')
 @app.route('/api/chart-data/<timeframe>/<int:count>')
+@app.route('/api/chart/data/XAUUSD')  # Add specific endpoint for advanced dashboard
 def api_chart_data(timeframe='1H', count=100):
     """Chart data API for TradingView integration"""
     try:
+        # Get timeframe from query params if not in URL
+        if not timeframe or timeframe == 'XAUUSD':
+            timeframe = request.args.get('timeframe', '1h')
+        
         chart_data = generate_chart_data(timeframe, count)
         return jsonify({
             'success': True,
@@ -653,6 +661,41 @@ def api_market_data():
             'portfolio': portfolio_data,
             'timestamp': datetime.now().isoformat()
         })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/api/news/latest')
+@app.route('/api/news/load-now', methods=['GET', 'POST'])
+def api_news():
+    """Market news API for advanced dashboard"""
+    try:
+        # Mock news data for now
+        news_data = {
+            'success': True,
+            'data': [
+                {
+                    'id': 1,
+                    'title': 'Gold prices surge amid global uncertainty',
+                    'summary': 'Gold futures climb as investors seek safe-haven assets',
+                    'timestamp': datetime.now().isoformat(),
+                    'source': 'Market News',
+                    'impact': 'bullish'
+                },
+                {
+                    'id': 2,
+                    'title': 'Federal Reserve signals potential rate changes',
+                    'summary': 'Central bank policy could affect precious metals markets',
+                    'timestamp': (datetime.now() - timedelta(hours=2)).isoformat(),
+                    'source': 'Fed Watch',
+                    'impact': 'neutral'
+                }
+            ],
+            'timestamp': datetime.now().isoformat()
+        }
+        return jsonify(news_data)
     except Exception as e:
         return jsonify({
             'success': False,
