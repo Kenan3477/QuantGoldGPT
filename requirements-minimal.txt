@@ -1,0 +1,21 @@
+# Minimal requirements for Railway deployment
+# Core Flask framework
+Flask==3.0.0
+Flask-SocketIO==5.3.6
+gunicorn==21.2.0
+
+# Database support
+SQLAlchemy==2.0.21
+psycopg2-binary==2.9.7
+
+# Essential data processing
+numpy==1.24.3
+pandas==2.0.3
+requests==2.31.0
+
+# Real-time features
+python-socketio==5.10.0
+eventlet==0.36.1
+
+# Configuration
+python-dotenv==1.0.0
