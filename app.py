@@ -47,6 +47,9 @@ from error_handling_system import (
     error_handler_decorator
 )
 
+# Import database configuration
+from database_config import init_database, get_database_connection, execute_query
+
 # Import price management functions
 try:
     from price_storage_manager import get_current_gold_price, PriceStorageManager
@@ -161,6 +164,13 @@ app_logger = logging.getLogger(__name__)
 # Initialize Flask app
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'goldgpt-secret-key-2025')
+
+# Initialize database
+try:
+    init_database()
+    print("✅ Database initialized successfully")
+except Exception as e:
+    print(f"⚠️ Database initialization failed: {e}")
 
 # Initialize error handler for this component
 error_handler = ErrorHandler('flask_app')
