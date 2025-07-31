@@ -759,13 +759,23 @@
                         throw new Error(`Container ${this.containerId} not found`);
                     }
 
+                    // Check if TradingView library is loaded
+                    if (typeof LightweightCharts === 'undefined') {
+                        console.error('❌ TradingView LightweightCharts library not loaded');
+                        throw new Error('TradingView library not available');
+                    }
+
+                    console.log('✅ TradingView library detected');
+
                     // Create chart container
                     const chartContainer = this.container.querySelector('#chart-container') || 
                                          this.createChartContainer();
 
+                    console.log('📊 Creating chart with container:', chartContainer);
+
                     // Initialize TradingView Lightweight Charts
                     this.chart = LightweightCharts.createChart(chartContainer, {
-                        width: chartContainer.clientWidth,
+                        width: chartContainer.clientWidth || 800,
                         height: 400,
                         layout: {
                             backgroundColor: '#1e1e1e',
@@ -790,6 +800,8 @@
                         },
                     });
 
+                    console.log('✅ Chart created successfully');
+
                     // Add candlestick series
                     this.candlestickSeries = this.chart.addCandlestickSeries({
                         upColor: '#4caf50',
@@ -799,6 +811,8 @@
                         wickDownColor: '#f44336',
                     });
 
+                    console.log('✅ Candlestick series added');
+
                     // Setup timeframe buttons
                     this.setupTimeframeButtons();
 
@@ -806,18 +820,24 @@
                     await this.loadChartData(this.currentTimeframe);
 
                     // Handle resize
-                    window.addEventListener('resize', () => {
-                        this.chart.applyOptions({ 
-                            width: chartContainer.clientWidth 
-                        });
-                    });
+                    const resizeHandler = () => {
+                        if (this.chart && chartContainer) {
+                            this.chart.applyOptions({ 
+                                width: chartContainer.clientWidth 
+                            });
+                        }
+                    };
+                    window.addEventListener('resize', resizeHandler);
 
                     this.isInitialized = true;
                     console.log('✅ UnifiedChartSystem initialized successfully');
 
                 } catch (error) {
                     console.error('❌ Error initializing UnifiedChartSystem:', error);
-                    this.showError('Failed to initialize chart system');
+                    this.showError(`Failed to initialize chart: ${error.message}`);
+                    
+                    // Try fallback chart implementation
+                    this.initFallbackChart();
                 }
             }
 
@@ -892,6 +912,7 @@
             }
 
             showError(message) {
+                console.log('📋 Showing chart error:', message);
                 const errorOverlay = this.container.querySelector('.chart-error-overlay');
                 if (errorOverlay) {
                     errorOverlay.style.display = 'flex';
@@ -899,6 +920,85 @@
                     if (errorMessage) {
                         errorMessage.textContent = message;
                     }
+                } else {
+                    // Create error overlay if it doesn't exist
+                    this.createErrorOverlay(message);
+                }
+            }
+
+            createErrorOverlay(message) {
+                const overlay = document.createElement('div');
+                overlay.className = 'chart-error-overlay';
+                overlay.style.cssText = `
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: rgba(0, 0, 0, 0.8);
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    color: white;
+                    z-index: 1000;
+                `;
+                
+                overlay.innerHTML = `
+                    <div style="text-align: center;">
+                        <div style="font-size: 2rem; margin-bottom: 1rem;">⚠️</div>
+                        <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">Chart Error</div>
+                        <div style="font-size: 1rem; margin-bottom: 1rem;">${message}</div>
+                        <button onclick="location.reload()" style="
+                            background: #4caf50;
+                            color: white;
+                            border: none;
+                            padding: 10px 20px;
+                            border-radius: 5px;
+                            cursor: pointer;
+                        ">Retry</button>
+                    </div>
+                `;
+                
+                this.container.style.position = 'relative';
+                this.container.appendChild(overlay);
+            }
+
+            initFallbackChart() {
+                console.log('🔄 Initializing fallback chart...');
+                try {
+                    const chartContainer = this.container.querySelector('#chart-container') || 
+                                         this.createChartContainer();
+                    
+                    // Create a simple fallback chart using HTML5 Canvas or redirect to simple dashboard
+                    chartContainer.innerHTML = `
+                        <div style="
+                            width: 100%;
+                            height: 400px;
+                            background: #1e1e1e;
+                            display: flex;
+                            flex-direction: column;
+                            align-items: center;
+                            justify-content: center;
+                            color: white;
+                            border: 1px solid #333;
+                        ">
+                            <div style="font-size: 1.5rem; margin-bottom: 1rem;">📊 Chart Loading...</div>
+                            <div style="margin-bottom: 1rem;">Advanced chart system unavailable</div>
+                            <button onclick="window.location.href='/simple'" style="
+                                background: #2196F3;
+                                color: white;
+                                border: none;
+                                padding: 10px 20px;
+                                border-radius: 5px;
+                                cursor: pointer;
+                            ">Switch to Simple Charts</button>
+                        </div>
+                    `;
+                    
+                    console.log('✅ Fallback chart initialized');
+                } catch (error) {
+                    console.error('❌ Even fallback chart failed:', error);
                 }
             }
 
@@ -1547,9 +1647,73 @@
             }
         }
         
-        // Initialize dashboard when DOM is loaded
-        document.addEventListener('DOMContentLoaded', () => {
-            window.goldgptDashboard = new GoldGPTDashboard();
+        // Wait for all libraries to load before initializing dashboard
+        function waitForLibraries() {
+            return new Promise((resolve) => {
+                const checkLibraries = () => {
+                    if (typeof LightweightCharts !== 'undefined' && 
+                        typeof io !== 'undefined') {
+                        console.log('✅ All required libraries loaded');
+                        resolve();
+                    } else {
+                        console.log('⏳ Waiting for libraries...', {
+                            LightweightCharts: typeof LightweightCharts !== 'undefined',
+                            io: typeof io !== 'undefined'
+                        });
+                        setTimeout(checkLibraries, 100);
+                    }
+                };
+                checkLibraries();
+            });
+        }
+
+        // Initialize dashboard when DOM and libraries are loaded
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                console.log('🚀 DOM loaded, waiting for libraries...');
+                await waitForLibraries();
+                console.log('🎯 Initializing GoldGPT Dashboard...');
+                window.goldgptDashboard = new GoldGPTDashboard();
+            } catch (error) {
+                console.error('❌ Failed to initialize dashboard:', error);
+                // Show fallback message
+                document.body.innerHTML = `
+                    <div style="
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        justify-content: center;
+                        height: 100vh;
+                        background: #1e1e1e;
+                        color: white;
+                        font-family: Arial, sans-serif;
+                        text-align: center;
+                    ">
+                        <h1>⚠️ Dashboard Loading Error</h1>
+                        <p>Unable to load advanced dashboard components</p>
+                        <button onclick="window.location.href='/simple'" style="
+                            background: #2196F3;
+                            color: white;
+                            border: none;
+                            padding: 15px 30px;
+                            font-size: 16px;
+                            border-radius: 5px;
+                            cursor: pointer;
+                            margin: 10px;
+                        ">Switch to Simple Dashboard</button>
+                        <button onclick="location.reload()" style="
+                            background: #4caf50;
+                            color: white;
+                            border: none;
+                            padding: 15px 30px;
+                            font-size: 16px;
+                            border-radius: 5px;
+                            cursor: pointer;
+                            margin: 10px;
+                        ">Retry</button>
+                    </div>
+                `;
+            }
         });
         
         // Service Worker for PWA
