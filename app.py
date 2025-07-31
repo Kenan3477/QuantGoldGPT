@@ -483,12 +483,17 @@ def ml_predictions_dashboard():
 @app.route('/api/health')
 def health_check():
     """Comprehensive health check"""
+    import sys
     return jsonify({
         'success': True,
         'status': 'healthy',
         'timestamp': datetime.now().isoformat(),
         'version': '2.0.0',
         'environment': os.environ.get('RAILWAY_ENVIRONMENT', 'development'),
+        'python_version': sys.version,
+        'app_file': __file__,
+        'working_directory': os.getcwd(),
+        'available_files': [f for f in os.listdir('.') if f.endswith('.py')],
         'features': {
             'advanced_dashboard': True,
             'ml_predictions': True,
@@ -670,6 +675,14 @@ def internal_error(error):
     return jsonify({'success': False, 'error': 'Internal server error'}), 500
 
 if __name__ == '__main__':
+    # Debug info for Railway
+    print("🔍 DEBUG: Starting GoldGPT Advanced Dashboard")
+    print(f"🔍 DEBUG: Current working directory: {os.getcwd()}")
+    print(f"🔍 DEBUG: Current file: {__file__}")
+    print(f"🔍 DEBUG: Available Python files: {[f for f in os.listdir('.') if f.endswith('.py')]}")
+    print(f"🔍 DEBUG: Railway environment: {os.environ.get('RAILWAY_ENVIRONMENT', 'Not set')}")
+    print(f"🔍 DEBUG: Port: {os.environ.get('PORT', 'Not set')}")
+    
     # Start background tasks
     start_background_updates()
     
