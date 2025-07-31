@@ -97,3 +97,6 @@ processed_files.log
 
 # Telegram bot (not needed for web deployment)
 telegram_bot.py
+
+# Minimal app (replaced by main app.py)
+app_minimal.py
