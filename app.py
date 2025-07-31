@@ -298,6 +298,46 @@ def get_portfolio_data():
         'timestamp': datetime.now().isoformat()
     }
 
+# Chart data generation
+def generate_chart_data(timeframe='1H', count=100):
+    """Generate realistic OHLCV chart data for TradingView"""
+    base_price = get_current_gold_price()['price']
+    data = []
+    current_time = datetime.now()
+    
+    # Timeframe intervals in minutes
+    intervals = {'1m': 1, '5m': 5, '15m': 15, '1H': 60, '4H': 240, '1D': 1440}
+    interval_minutes = intervals.get(timeframe, 60)
+    
+    for i in range(count):
+        # Calculate timestamp
+        timestamp = current_time - timedelta(minutes=(count - i) * interval_minutes)
+        
+        # Generate realistic price movement
+        volatility = random.uniform(0.002, 0.008)  # 0.2% to 0.8% volatility
+        change = random.gauss(0, volatility)
+        
+        if i == 0:
+            open_price = base_price
+        else:
+            open_price = data[i-1]['close']
+        
+        close_price = round(open_price * (1 + change), 2)
+        high_price = round(max(open_price, close_price) * (1 + random.uniform(0, 0.003)), 2)
+        low_price = round(min(open_price, close_price) * (1 - random.uniform(0, 0.003)), 2)
+        volume = round(random.uniform(50000, 200000), 0)
+        
+        data.append({
+            'time': int(timestamp.timestamp()),
+            'open': open_price,
+            'high': high_price,
+            'low': low_price,
+            'close': close_price,
+            'volume': volume
+        })
+    
+    return data
+
 # Routes for the Advanced Dashboard
 @app.route('/')
 def dashboard():
@@ -479,6 +519,15 @@ def ml_predictions_dashboard():
         </html>
         """
 
+@app.route('/simple-dashboard')
+def simple_dashboard():
+    """Simple dashboard with working charts"""
+    try:
+        return render_template('simple_dashboard.html')
+    except Exception as e:
+        logger.error(f"Error loading simple dashboard template: {e}")
+        return "Simple dashboard template not found", 404
+
 # API Endpoints
 @app.route('/api/health')
 def health_check():
@@ -550,6 +599,50 @@ def api_portfolio():
     try:
         portfolio = get_portfolio_data()
         return jsonify(portfolio)
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/api/chart-data')
+@app.route('/api/chart-data/<timeframe>')
+@app.route('/api/chart-data/<timeframe>/<int:count>')
+def api_chart_data(timeframe='1H', count=100):
+    """Chart data API for TradingView integration"""
+    try:
+        chart_data = generate_chart_data(timeframe, count)
+        return jsonify({
+            'success': True,
+            'symbol': 'XAUUSD',
+            'timeframe': timeframe,
+            'count': len(chart_data),
+            'data': chart_data,
+            'timestamp': datetime.now().isoformat()
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/api/market-data')
+def api_market_data():
+    """Complete market data for dashboard"""
+    try:
+        gold_data = get_current_gold_price()
+        ai_data = get_ai_analysis()
+        ml_data = get_ml_predictions()
+        portfolio_data = get_portfolio_data()
+        
+        return jsonify({
+            'success': True,
+            'gold_price': gold_data,
+            'ai_analysis': ai_data,
+            'ml_predictions': ml_data,
+            'portfolio': portfolio_data,
+            'timestamp': datetime.now().isoformat()
+        })
     except Exception as e:
         return jsonify({
             'success': False,
@@ -673,6 +766,14 @@ def not_found(error):
 @app.errorhandler(500)
 def internal_error(error):
     return jsonify({'success': False, 'error': 'Internal server error'}), 500
+
+# Add CORS headers to all responses
+@app.after_request
+def after_request(response):
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+    return response
 
 if __name__ == '__main__':
     # Debug info for Railway

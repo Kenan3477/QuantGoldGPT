@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GoldGPT - Simple Chart Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        
+        .dashboard {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            font-size: 3rem;
+            margin: 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .chart-container {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .timeframe-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .timeframe-btn {
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .timeframe-btn:hover,
+        .timeframe-btn.active {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        #chartContainer {
+            height: 500px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 10px;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .info-card {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .info-card h3 {
+            margin-top: 0;
+            color: #64B5F6;
+        }
+        
+        .price {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #4CAF50;
+        }
+        
+        .signal {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        
+        .signal.BUY { color: #4CAF50; }
+        .signal.SELL { color: #f44336; }
+        .signal.HOLD { color: #FF9800; }
+        
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 500px;
+            font-size: 1.2rem;
+        }
+        
+        .error {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 500px;
+            font-size: 1.2rem;
+            color: #f44336;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <div class="header">
+            <h1><i class="fas fa-chart-line"></i> GoldGPT Trading Dashboard</h1>
+            <p>Real-time Gold Trading Analysis with AI & ML</p>
+        </div>
+        
+        <div class="chart-container">
+            <div class="chart-header">
+                <h3><i class="fas fa-coins"></i> XAUUSD Live Chart</h3>
+                <div class="timeframe-buttons">
+                    <button class="timeframe-btn active" data-timeframe="1H">1H</button>
+                    <button class="timeframe-btn" data-timeframe="4H">4H</button>
+                    <button class="timeframe-btn" data-timeframe="1D">1D</button>
+                </div>
+            </div>
+            <div id="chartContainer">
+                <div class="loading">
+                    <i class="fas fa-spinner fa-spin"></i> Loading chart data...
+                </div>
+            </div>
+        </div>
+        
+        <div class="info-grid">
+            <div class="info-card" id="priceCard">
+                <h3><i class="fas fa-coins"></i> Current Price</h3>
+                <div class="price" id="currentPrice">Loading...</div>
+                <p id="priceChange">Change: --</p>
+                <p id="priceRange">High: -- | Low: --</p>
+            </div>
+            
+            <div class="info-card" id="aiCard">
+                <h3><i class="fas fa-brain"></i> AI Analysis</h3>
+                <div class="signal" id="aiSignal">--</div>
+                <p id="aiConfidence">Confidence: --%</p>
+                <p id="aiTechnical">Technical: --%</p>
+            </div>
+            
+            <div class="info-card" id="mlCard">
+                <h3><i class="fas fa-robot"></i> ML Predictions</h3>
+                <p id="mlEnsemble">Ensemble: --</p>
+                <p id="mlConfidence">Confidence: --%</p>
+                <p id="mlAccuracy">24h Accuracy: --%</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let chart = null;
+        let currentTimeframe = '1H';
+        let socket = null;
+        
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeChart();
+            initializeSocket();
+            loadMarketData();
+            setupTimeframeButtons();
+            
+            // Auto-refresh every 30 seconds
+            setInterval(loadMarketData, 30000);
+        });
+        
+        function initializeChart() {
+            try {
+                const chartContainer = document.getElementById('chartContainer');
+                chartContainer.innerHTML = '';
+                
+                chart = LightweightCharts.createChart(chartContainer, {
+                    width: chartContainer.clientWidth,
+                    height: 500,
+                    layout: {
+                        backgroundColor: 'transparent',
+                        textColor: 'white',
+                    },
+                    grid: {
+                        vertLines: {
+                            color: 'rgba(255, 255, 255, 0.1)',
+                        },
+                        horzLines: {
+                            color: 'rgba(255, 255, 255, 0.1)',
+                        },
+                    },
+                    crosshair: {
+                        mode: LightweightCharts.CrosshairMode.Normal,
+                    },
+                    rightPriceScale: {
+                        borderColor: 'rgba(255, 255, 255, 0.3)',
+                    },
+                    timeScale: {
+                        borderColor: 'rgba(255, 255, 255, 0.3)',
+                    },
+                });
+                
+                const candlestickSeries = chart.addCandlestickSeries({
+                    upColor: '#4CAF50',
+                    downColor: '#f44336',
+                    borderUpColor: '#4CAF50',
+                    borderDownColor: '#f44336',
+                    wickUpColor: '#4CAF50',
+                    wickDownColor: '#f44336',
+                });
+                
+                loadChartData(currentTimeframe);
+                
+            } catch (error) {
+                console.error('Chart initialization error:', error);
+                document.getElementById('chartContainer').innerHTML = 
+                    '<div class="error"><i class="fas fa-exclamation-triangle"></i> Chart loading failed. Using fallback display.</div>';
+            }
+        }
+        
+        function initializeSocket() {
+            try {
+                socket = io();
+                
+                socket.on('connect', function() {
+                    console.log('Connected to GoldGPT');
+                });
+                
+                socket.on('price_update', function(data) {
+                    updatePriceDisplay(data);
+                });
+                
+                socket.on('ai_update', function(data) {
+                    updateAIDisplay(data);
+                });
+                
+                socket.on('ml_update', function(data) {
+                    updateMLDisplay(data);
+                });
+                
+            } catch (error) {
+                console.error('Socket initialization error:', error);
+            }
+        }
+        
+        async function loadChartData(timeframe) {
+            try {
+                const response = await fetch(`/api/chart-data/${timeframe}/100`);
+                const data = await response.json();
+                
+                if (data.success && chart) {
+                    const series = chart.addCandlestickSeries();
+                    series.setData(data.data);
+                }
+            } catch (error) {
+                console.error('Chart data loading error:', error);
+            }
+        }
+        
+        async function loadMarketData() {
+            try {
+                const response = await fetch('/api/market-data');
+                const data = await response.json();
+                
+                if (data.success) {
+                    updatePriceDisplay(data.gold_price);
+                    updateAIDisplay(data.ai_analysis);
+                    updateMLDisplay(data.ml_predictions);
+                }
+            } catch (error) {
+                console.error('Market data loading error:', error);
+            }
+        }
+        
+        function updatePriceDisplay(data) {
+            document.getElementById('currentPrice').textContent = `$${data.price}`;
+            document.getElementById('priceChange').textContent = 
+                `Change: ${data.change > 0 ? '+' : ''}${data.change} (${data.change_percent > 0 ? '+' : ''}${data.change_percent}%)`;
+            document.getElementById('priceRange').textContent = 
+                `High: $${data.high} | Low: $${data.low}`;
+        }
+        
+        function updateAIDisplay(data) {
+            const signalElement = document.getElementById('aiSignal');
+            signalElement.textContent = data.signal;
+            signalElement.className = `signal ${data.signal}`;
+            
+            document.getElementById('aiConfidence').textContent = 
+                `Confidence: ${(data.confidence * 100).toFixed(1)}%`;
+            document.getElementById('aiTechnical').textContent = 
+                `Technical: ${(data.technical_score * 100).toFixed(1)}%`;
+        }
+        
+        function updateMLDisplay(data) {
+            document.getElementById('mlEnsemble').textContent = 
+                `Ensemble: ${data.ensemble.direction}`;
+            document.getElementById('mlConfidence').textContent = 
+                `Confidence: ${(data.ensemble.confidence * 100).toFixed(1)}%`;
+            document.getElementById('mlAccuracy').textContent = 
+                `24h Accuracy: ${(data.accuracy_metrics.last_24h_accuracy * 100).toFixed(1)}%`;
+        }
+        
+        function setupTimeframeButtons() {
+            const buttons = document.querySelectorAll('.timeframe-btn');
+            buttons.forEach(button => {
+                button.addEventListener('click', function() {
+                    buttons.forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    currentTimeframe = this.dataset.timeframe;
+                    loadChartData(currentTimeframe);
+                });
+            });
+        }
+        
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            if (chart) {
+                chart.applyOptions({
+                    width: document.getElementById('chartContainer').clientWidth
+                });
+            }
+        });
+    </script>
+</body>
+</html>
