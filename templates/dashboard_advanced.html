@@ -8956,6 +8956,21 @@
             
             // Initialize navigation handlers
             initializeNavigation();
+            
+            // Check if we should show AI Analysis section directly (for /ai-analysis route)
+            const activeSection = '{{ active_section }}';
+            if (activeSection === 'ai-analysis') {
+                console.log('🤖 Auto-showing AI Analysis section from route parameter');
+                setTimeout(() => {
+                    showAIAnalysisSection();
+                    // Update navigation state
+                    document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+                    const aiAnalysisNav = document.querySelector('.nav-item[data-section="ai-analysis"]');
+                    if (aiAnalysisNav) {
+                        aiAnalysisNav.classList.add('active');
+                    }
+                }, 100);
+            }
         });
         
         // Navigation Handler System - FIXED VERSION
@@ -9022,6 +9037,7 @@
                         // Dynamic content loading for header navigation
                         switch(section) {
                             case 'ai-analysis':
+                                console.log('🤖 Showing AI Analysis section');
                                 showAIAnalysisSection();
                                 break;
                             case 'ml-predictions':

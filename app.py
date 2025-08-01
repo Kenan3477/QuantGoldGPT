@@ -932,9 +932,10 @@ def ml_predictions_dashboard():
 
 @app.route('/ai-analysis')
 def ai_analysis():
-    """AI Analysis page"""
+    """AI Analysis page - Dedicated AI Analysis Dashboard"""
     try:
-        return render_template('dashboard_advanced.html')
+        # Return the advanced dashboard with AI Analysis active
+        return render_template('dashboard_advanced.html', active_section='ai-analysis')
     except Exception as e:
         logger.error(f"Error loading AI analysis template: {e}")
         return redirect(url_for('dashboard'))
