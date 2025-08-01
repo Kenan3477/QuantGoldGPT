@@ -27,8 +27,8 @@ def test_local_navigation():
             else:
                 print("   ❌ showAIAnalysisSection function NOT found")
                 
-            # Check if the System Hub link has the correct onclick handler
-            if 'onclick="showAIAnalysisSection(); return false;"' in response.text:
+            # Check if the System Hub link has the correct href for route-based navigation
+            if 'href="/ai-analysis"' in response.text and 'class="system-link"' in response.text:
                 print("   ✅ System Hub AI Analysis Center link properly configured")
             else:
                 print("   ❌ System Hub link configuration issue")
