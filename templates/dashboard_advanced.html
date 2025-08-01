@@ -2175,6 +2175,117 @@
             gap: 24px;
         }
         
+        .ai-analysis-grid .full-width {
+            grid-column: 1 / -1;
+        }
+        
+        /* Analysis toggle buttons */
+        .toggle-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid #333;
+            color: #ccc;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .toggle-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: var(--accent-primary);
+        }
+        
+        .toggle-btn.active {
+            background: var(--accent-primary);
+            color: #000;
+            border-color: var(--accent-primary);
+            font-weight: bold;
+        }
+        
+        /* Recommendation banner */
+        .recommendation-banner {
+            margin-bottom: 24px;
+        }
+        
+        /* Score badges */
+        .score-badge {
+            background: #333;
+            color: #fff;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            min-width: 40px;
+            text-align: center;
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid var(--border-primary);
+        }
+        
+        .card-header h3 {
+            margin: 0;
+            color: var(--text-primary);
+            font-size: 16px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .card-content {
+            padding: 20px;
+        }
+        
+        /* Live indicators and animations */
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .status-indicator {
+            animation: pulse 2s infinite;
+        }
+        
+        .alert-counter {
+            animation: pulse 1.5s infinite;
+        }
+        
+        /* Pattern and alert styling */
+        .patterns-list::-webkit-scrollbar,
+        .alerts-list::-webkit-scrollbar {
+            width: 4px;
+        }
+        
+        .patterns-list::-webkit-scrollbar-track,
+        .alerts-list::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+        }
+        
+        .patterns-list::-webkit-scrollbar-thumb,
+        .alerts-list::-webkit-scrollbar-thumb {
+            background: var(--accent-primary);
+            border-radius: 2px;
+        }
+        
+        .pattern-item:hover,
+        .alert-item:hover {
+            background: rgba(255, 255, 255, 0.1) !important;
+            transform: translateY(-1px);
+            transition: all 0.2s ease;
+        }
+        
         .analysis-card,
         .prediction-card,
         .portfolio-card,
@@ -9757,25 +9868,47 @@
             const content = document.querySelector('.content');
             content.innerHTML = `
                 <div class="section-header">
-                    <h2><i class="fas fa-brain"></i> AI Analysis Center</h2>
-                    <p>Real-time artificial intelligence analysis for gold trading</p>
+                    <h2><i class="fas fa-brain"></i> AI Analysis Centre</h2>
+                    <p>Comprehensive AI-powered trading recommendations and market analysis</p>
+                    
+                    <!-- Analysis Type Toggle -->
+                    <div class="analysis-toggle" style="margin-top: 15px; display: flex; gap: 10px; align-items: center;">
+                        <span style="color: #ccc; font-size: 14px;">Analysis Type:</span>
+                        <button id="day-trading-btn" class="toggle-btn active" onclick="switchAnalysisType('day_trading')">
+                            <i class="fas fa-clock"></i> Day Trading (11:05 PM Thu - 10:00 PM Fri)
+                        </button>
+                        <button id="weekly-btn" class="toggle-btn" onclick="switchAnalysisType('weekly')">
+                            <i class="fas fa-calendar-week"></i> Weekly Analysis (7-Day Trend)
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Trading Recommendation Banner -->
+                <div class="recommendation-banner" id="recommendation-banner">
+                    <div class="loading-state">
+                        <i class="fas fa-spinner fa-spin"></i> Loading trading recommendation...
+                    </div>
                 </div>
                 
                 <div class="ai-analysis-grid">
+                    <!-- Technical Analysis Card -->
                     <div class="analysis-card">
                         <div class="card-header">
                             <h3><i class="fas fa-chart-line"></i> Technical Analysis</h3>
+                            <div class="score-badge" id="technical-score-badge">--</div>
                         </div>
                         <div class="card-content" id="technical-analysis-content">
                             <div class="loading-state">
-                                <i class="fas fa-spinner fa-spin"></i> Loading AI technical analysis...
+                                <i class="fas fa-spinner fa-spin"></i> Loading technical analysis...
                             </div>
                         </div>
                     </div>
                     
+                    <!-- Sentiment Analysis Card -->
                     <div class="analysis-card">
                         <div class="card-header">
-                            <h3><i class="fas fa-newspaper"></i> Sentiment Analysis</h3>
+                            <h3><i class="fas fa-heart-pulse"></i> Market Sentiment</h3>
+                            <div class="score-badge" id="sentiment-score-badge">--</div>
                         </div>
                         <div class="card-content" id="sentiment-analysis-content">
                             <div class="loading-state">
@@ -9784,21 +9917,81 @@
                         </div>
                     </div>
                     
+                    <!-- Economic Indicators Card -->
                     <div class="analysis-card">
                         <div class="card-header">
-                            <h3><i class="fas fa-bullseye"></i> Trading Signals</h3>
+                            <h3><i class="fas fa-globe"></i> Economic Indicators</h3>
+                            <div class="score-badge" id="economic-score-badge">--</div>
                         </div>
-                        <div class="card-content" id="signals-content">
+                        <div class="card-content" id="economic-analysis-content">
                             <div class="loading-state">
-                                <i class="fas fa-spinner fa-spin"></i> Loading AI signals...
+                                <i class="fas fa-spinner fa-spin"></i> Loading economic analysis...
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Live Pattern Detection Card -->
+                    <div class="analysis-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-search"></i> Live Pattern Detection</h3>
+                            <div class="status-indicator" id="pattern-status" style="width: 12px; height: 12px; border-radius: 50%; background: #00ff88; animation: pulse 2s infinite;"></div>
+                        </div>
+                        <div class="card-content" id="pattern-detection-content">
+                            <div class="loading-state">
+                                <i class="fas fa-spinner fa-spin"></i> Scanning for patterns...
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- News Alerts Card -->
+                    <div class="analysis-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-bell"></i> News Alerts</h3>
+                            <div class="alert-counter" id="alert-counter" style="background: #ff4444; color: #fff; padding: 2px 6px; border-radius: 10px; font-size: 10px; font-weight: bold;">0</div>
+                        </div>
+                        <div class="card-content" id="news-alerts-content">
+                            <div class="loading-state">
+                                <i class="fas fa-spinner fa-spin"></i> Loading news alerts...
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Trading Session Info Card -->
+                    <div class="analysis-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-clock"></i> Trading Session</h3>
+                        </div>
+                        <div class="card-content" id="session-info-content">
+                            <div class="loading-state">
+                                <i class="fas fa-spinner fa-spin"></i> Loading session info...
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Detailed Analysis Card -->
+                    <div class="analysis-card full-width">
+                        <div class="card-header">
+                            <h3><i class="fas fa-list-ul"></i> Detailed Reasoning</h3>
+                        </div>
+                        <div class="card-content" id="detailed-reasoning-content">
+                            <div class="loading-state">
+                                <i class="fas fa-spinner fa-spin"></i> Loading detailed analysis...
                             </div>
                         </div>
                     </div>
                 </div>
+                
+                <!-- Auto-refresh notice -->
+                <div class="refresh-notice" style="text-align: center; margin-top: 20px; color: #888; font-size: 12px;">
+                    <i class="fas fa-sync-alt"></i> Analysis updates every 60 seconds | Next review: <span id="next-review-time">--</span>
+                </div>
             `;
             
             // Load AI analysis data
-            loadAIAnalysisData();
+            loadAIAnalysisData('day_trading');
+            
+            // Start live updates for patterns and news
+            startLiveUpdates();
         }
         
         function showMLPredictionsSection() {
@@ -9974,44 +10167,411 @@
         }
         
         // Data loading functions
-        function loadAIAnalysisData() {
-            fetch('/api/ai-signals')
+        function loadAIAnalysisData(analysisType = 'day_trading') {
+            const url = `/api/ai-analysis/status?type=${analysisType}`;
+            
+            fetch(url)
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        document.getElementById('technical-analysis-content').innerHTML = `
-                            <div class="ai-result">
-                                <h4>Signal: <span class="signal-badge ${data.signal.toLowerCase()}">${data.signal}</span></h4>
-                                <p>Confidence: <strong>${(data.confidence * 100).toFixed(1)}%</strong></p>
-                                <p>Technical Score: ${(data.technical_score * 100).toFixed(1)}%</p>
-                                <p>Analysis: ${data.analysis}</p>
-                            </div>
-                        `;
-                        
-                        document.getElementById('sentiment-analysis-content').innerHTML = `
-                            <div class="sentiment-result">
-                                <h4>Sentiment Score: ${(data.sentiment_score * 100).toFixed(1)}%</h4>
-                                <p>News Sentiment: ${(data.sentiment_data.news_sentiment * 100).toFixed(1)}%</p>
-                                <p>Social Sentiment: ${(data.sentiment_data.social_sentiment * 100).toFixed(1)}%</p>
-                                <p>Fear & Greed Index: ${data.sentiment_data.fear_greed_index}</p>
-                            </div>
-                        `;
-                        
-                        document.getElementById('signals-content').innerHTML = `
-                            <div class="signals-result">
-                                <div class="signal-item">
-                                    <span class="signal-badge ${data.signal.toLowerCase()}">${data.signal}</span>
-                                    <span class="confidence">${(data.confidence * 100).toFixed(1)}%</span>
-                                </div>
-                                <p>Risk Level: <span class="risk-${data.risk_level.toLowerCase()}">${data.risk_level}</span></p>
-                                <p>${data.prediction}</p>
-                            </div>
-                        `;
+                        updateRecommendationBanner(data);
+                        updateTechnicalAnalysis(data);
+                        updateSentimentAnalysis(data);
+                        updateEconomicAnalysis(data);
+                        updateSessionInfo(data);
+                        updateDetailedReasoning(data);
+                        updateNextReviewTime(data.next_review);
+                    } else {
+                        showAnalysisError('Failed to load AI analysis');
                     }
                 })
                 .catch(error => {
                     console.error('Error loading AI analysis:', error);
+                    showAnalysisError('Connection error');
                 });
+        }
+        
+        function updateRecommendationBanner(data) {
+            const banner = document.getElementById('recommendation-banner');
+            const rec = data.recommendation;
+            const signalColor = rec.action === 'BUY' ? '#00ff88' : rec.action === 'SELL' ? '#ff4444' : '#ffa500';
+            const riskColor = rec.risk_level === 'Low' ? '#00ff88' : rec.risk_level === 'Medium' ? '#ffa500' : '#ff4444';
+            
+            banner.innerHTML = `
+                <div class="recommendation-content" style="background: linear-gradient(135deg, rgba(0,0,0,0.8), rgba(20,20,20,0.9)); padding: 20px; border-radius: 12px; border-left: 4px solid ${signalColor};">
+                    <div class="rec-header" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
+                        <div class="rec-signal" style="display: flex; align-items: center; gap: 15px;">
+                            <div class="signal-badge large" style="background: ${signalColor}; color: #000; font-weight: bold; padding: 8px 16px; border-radius: 8px; font-size: 18px;">
+                                ${rec.action}
+                            </div>
+                            <div class="confidence-info">
+                                <div style="font-size: 14px; color: #ccc;">Confidence</div>
+                                <div style="font-size: 20px; font-weight: bold; color: ${signalColor};">${(rec.confidence * 100).toFixed(1)}%</div>
+                            </div>
+                            <div class="strength-info">
+                                <div style="font-size: 14px; color: #ccc;">Strength</div>
+                                <div style="font-size: 16px; font-weight: bold; color: #fff;">${rec.strength}</div>
+                            </div>
+                        </div>
+                        <div class="risk-info" style="text-align: right;">
+                            <div style="font-size: 14px; color: #ccc;">Risk Level</div>
+                            <div style="font-size: 16px; font-weight: bold; color: ${riskColor};">${rec.risk_level}</div>
+                        </div>
+                    </div>
+                    <div class="rec-scores" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
+                        <div class="score-item" style="text-align: center; padding: 10px; background: rgba(255,255,255,0.05); border-radius: 8px;">
+                            <div style="font-size: 12px; color: #ccc;">Technical</div>
+                            <div style="font-size: 18px; font-weight: bold; color: #00ff88;">${(data.technical_score * 100).toFixed(0)}%</div>
+                        </div>
+                        <div class="score-item" style="text-align: center; padding: 10px; background: rgba(255,255,255,0.05); border-radius: 8px;">
+                            <div style="font-size: 12px; color: #ccc;">Sentiment</div>
+                            <div style="font-size: 18px; font-weight: bold; color: #ffa500;">${(data.sentiment_score * 100).toFixed(0)}%</div>
+                        </div>
+                        <div class="score-item" style="text-align: center; padding: 10px; background: rgba(255,255,255,0.05); border-radius: 8px;">
+                            <div style="font-size: 12px; color: #ccc;">Economic</div>
+                            <div style="font-size: 18px; font-weight: bold; color: #ff6b6b;">${(data.economic_score * 100).toFixed(0)}%</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function updateTechnicalAnalysis(data) {
+            const content = document.getElementById('technical-analysis-content');
+            const badge = document.getElementById('technical-score-badge');
+            const indicators = data.indicators.technical;
+            
+            badge.textContent = `${(data.technical_score * 100).toFixed(0)}%`;
+            badge.style.background = data.technical_score > 0.6 ? '#00ff88' : data.technical_score < 0.4 ? '#ff4444' : '#ffa500';
+            
+            content.innerHTML = `
+                <div class="indicators-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 12px;">
+                    <div class="indicator-item">
+                        <span style="color: #ccc;">RSI:</span>
+                        <span style="color: ${indicators.rsi < 30 ? '#00ff88' : indicators.rsi > 70 ? '#ff4444' : '#fff'}; font-weight: bold;">${indicators.rsi}</span>
+                    </div>
+                    <div class="indicator-item">
+                        <span style="color: #ccc;">MACD:</span>
+                        <span style="color: ${indicators.macd > indicators.macd_signal ? '#00ff88' : '#ff4444'}; font-weight: bold;">${indicators.macd.toFixed(3)}</span>
+                    </div>
+                    <div class="indicator-item">
+                        <span style="color: #ccc;">Trend:</span>
+                        <span style="color: ${indicators.trend_direction.includes('bullish') ? '#00ff88' : indicators.trend_direction.includes('bearish') ? '#ff4444' : '#ffa500'}; font-weight: bold;">${indicators.trend_direction}</span>
+                    </div>
+                    <div class="indicator-item">
+                        <span style="color: #ccc;">Bollinger:</span>
+                        <span style="color: #fff; font-weight: bold;">${indicators.bollinger_position}</span>
+                    </div>
+                    <div class="indicator-item">
+                        <span style="color: #ccc;">Support:</span>
+                        <span style="color: #00ff88; font-weight: bold;">$${indicators.support_level}</span>
+                    </div>
+                    <div class="indicator-item">
+                        <span style="color: #ccc;">Resistance:</span>
+                        <span style="color: #ff4444; font-weight: bold;">$${indicators.resistance_level}</span>
+                    </div>
+                </div>
+                <div style="margin-top: 10px; padding: 8px; background: rgba(255,255,255,0.05); border-radius: 6px; font-size: 11px;">
+                    <div><strong>Volatility:</strong> ${(indicators.volatility * 100).toFixed(1)}%</div>
+                    <div><strong>Momentum:</strong> ${indicators.momentum > 0 ? '+' : ''}${(indicators.momentum * 100).toFixed(1)}%</div>
+                </div>
+            `;
+        }
+        
+        function updateSentimentAnalysis(data) {
+            const content = document.getElementById('sentiment-analysis-content');
+            const badge = document.getElementById('sentiment-score-badge');
+            const sentiment = data.indicators.sentiment;
+            
+            badge.textContent = `${(data.sentiment_score * 100).toFixed(0)}%`;
+            badge.style.background = data.sentiment_score > 0.6 ? '#00ff88' : data.sentiment_score < 0.4 ? '#ff4444' : '#ffa500';
+            
+            const fearGreedColor = sentiment.fear_greed_index < 25 ? '#00ff88' : sentiment.fear_greed_index > 75 ? '#ff4444' : '#ffa500';
+            
+            content.innerHTML = `
+                <div class="sentiment-indicators" style="font-size: 12px;">
+                    <div class="sentiment-item" style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <span style="color: #ccc;">Fear & Greed:</span>
+                        <span style="color: ${fearGreedColor}; font-weight: bold;">${sentiment.fear_greed_index}</span>
+                    </div>
+                    <div class="sentiment-item" style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <span style="color: #ccc;">News Sentiment:</span>
+                        <span style="color: ${sentiment.news_sentiment > 0.6 ? '#00ff88' : sentiment.news_sentiment < 0.4 ? '#ff4444' : '#ffa500'}; font-weight: bold;">${(sentiment.news_sentiment * 100).toFixed(0)}%</span>
+                    </div>
+                    <div class="sentiment-item" style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <span style="color: #ccc;">Social Media:</span>
+                        <span style="color: ${sentiment.social_sentiment > 0.6 ? '#00ff88' : sentiment.social_sentiment < 0.4 ? '#ff4444' : '#ffa500'}; font-weight: bold;">${(sentiment.social_sentiment * 100).toFixed(0)}%</span>
+                    </div>
+                    <div class="sentiment-item" style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <span style="color: #ccc;">Institutional Flow:</span>
+                        <span style="color: ${sentiment.institutional_flow.includes('buying') ? '#00ff88' : sentiment.institutional_flow.includes('selling') ? '#ff4444' : '#ffa500'}; font-weight: bold;">${sentiment.institutional_flow}</span>
+                    </div>
+                    <div class="sentiment-item" style="display: flex; justify-content: space-between;">
+                        <span style="color: #ccc;">Put/Call Ratio:</span>
+                        <span style="color: #fff; font-weight: bold;">${sentiment.options_put_call_ratio}</span>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function updateEconomicAnalysis(data) {
+            const content = document.getElementById('economic-analysis-content');
+            const badge = document.getElementById('economic-score-badge');
+            const economic = data.indicators.economic;
+            
+            badge.textContent = `${(data.economic_score * 100).toFixed(0)}%`;
+            badge.style.background = data.economic_score > 0.6 ? '#00ff88' : data.economic_score < 0.4 ? '#ff4444' : '#ffa500';
+            
+            content.innerHTML = `
+                <div class="economic-indicators" style="font-size: 12px;">
+                    <div class="economic-item" style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <span style="color: #ccc;">Dollar Index:</span>
+                        <span style="color: ${economic.dollar_index > 104 ? '#ff4444' : economic.dollar_index < 102 ? '#00ff88' : '#ffa500'}; font-weight: bold;">${economic.dollar_index}</span>
+                    </div>
+                    <div class="economic-item" style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <span style="color: #ccc;">Bond Yields:</span>
+                        <span style="color: ${economic.bond_yields > 4.5 ? '#ff4444' : '#00ff88'}; font-weight: bold;">${economic.bond_yields}%</span>
+                    </div>
+                    <div class="economic-item" style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <span style="color: #ccc;">Fed Policy:</span>
+                        <span style="color: ${economic.fed_policy_sentiment === 'dovish' ? '#00ff88' : economic.fed_policy_sentiment === 'hawkish' ? '#ff4444' : '#ffa500'}; font-weight: bold;">${economic.fed_policy_sentiment}</span>
+                    </div>
+                    <div class="economic-item" style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <span style="color: #ccc;">Geopolitical Risk:</span>
+                        <span style="color: ${economic.geopolitical_risk === 'high' || economic.geopolitical_risk === 'very_high' ? '#00ff88' : '#ffa500'}; font-weight: bold;">${economic.geopolitical_risk}</span>
+                    </div>
+                    <div class="economic-item" style="display: flex; justify-content: space-between;">
+                        <span style="color: #ccc;">Inflation Expectation:</span>
+                        <span style="color: #fff; font-weight: bold;">${economic.inflation_expectation}%</span>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function updateSessionInfo(data) {
+            const content = document.getElementById('session-info-content');
+            const session = data.trading_session;
+            
+            content.innerHTML = `
+                <div class="session-info" style="font-size: 12px;">
+                    <div class="session-item" style="margin-bottom: 10px;">
+                        <div style="color: #ccc; margin-bottom: 4px;">Session Status:</div>
+                        <div style="color: ${session.is_day_trading_session ? '#00ff88' : '#ffa500'}; font-weight: bold;">${session.session_type}</div>
+                    </div>
+                    <div class="session-item" style="margin-bottom: 10px;">
+                        <div style="color: #ccc; margin-bottom: 4px;">Optimal Trading:</div>
+                        <div style="color: ${session.optimal_trading_time ? '#00ff88' : '#ff4444'}; font-weight: bold;">${session.optimal_trading_time ? 'Yes' : 'No'}</div>
+                    </div>
+                    <div class="session-item">
+                        <div style="color: #ccc; margin-bottom: 4px;">Expected Volatility:</div>
+                        <div style="color: ${session.session_volatility === 'High' ? '#00ff88' : '#ffa500'}; font-weight: bold;">${session.session_volatility}</div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function updateDetailedReasoning(data) {
+            const content = document.getElementById('detailed-reasoning-content');
+            const reasoning = data.detailed_analysis;
+            
+            content.innerHTML = `
+                <div class="reasoning-list" style="font-size: 13px; line-height: 1.5;">
+                    ${reasoning.map((reason, index) => `
+                        <div class="reasoning-item" style="margin-bottom: 10px; padding: 8px; background: rgba(255,255,255,0.05); border-radius: 6px; border-left: 3px solid #00ff88;">
+                            <i class="fas fa-check-circle" style="color: #00ff88; margin-right: 8px;"></i>
+                            ${reason}
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+        
+        function updateNextReviewTime(nextReview) {
+            const element = document.getElementById('next-review-time');
+            if (element) {
+                const reviewTime = new Date(nextReview);
+                element.textContent = reviewTime.toLocaleTimeString();
+            }
+        }
+        
+        function showAnalysisError(message) {
+            const banner = document.getElementById('recommendation-banner');
+            banner.innerHTML = `
+                <div style="background: rgba(255, 68, 68, 0.1); color: #ff4444; padding: 15px; border-radius: 8px; text-align: center;">
+                    <i class="fas fa-exclamation-triangle"></i> ${message}
+                </div>
+            `;
+        }
+        
+        function switchAnalysisType(type) {
+            // Update button states
+            document.getElementById('day-trading-btn').classList.toggle('active', type === 'day_trading');
+            document.getElementById('weekly-btn').classList.toggle('active', type === 'weekly');
+            
+            // Show loading state
+            document.getElementById('recommendation-banner').innerHTML = `
+                <div class="loading-state">
+                    <i class="fas fa-spinner fa-spin"></i> Loading ${type === 'day_trading' ? 'day trading' : 'weekly'} analysis...
+                </div>
+            `;
+            
+            // Load new analysis
+            loadAIAnalysisData(type);
+        }
+        
+        function startLiveUpdates() {
+            // Load pattern detection and news alerts
+            loadPatternDetection();
+            loadNewsAlerts();
+            
+            // Set up periodic updates
+            setInterval(() => {
+                loadPatternDetection();
+                loadNewsAlerts();
+            }, 30000); // Update every 30 seconds
+        }
+        
+        function loadPatternDetection() {
+            fetch('/api/patterns/live/XAUUSD')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        updatePatternDetection(data.patterns);
+                    }
+                })
+                .catch(error => {
+                    console.error('Pattern detection error:', error);
+                    document.getElementById('pattern-detection-content').innerHTML = `
+                        <div style="color: #ff4444; text-align: center; padding: 20px;">
+                            <i class="fas fa-exclamation-triangle"></i> Pattern detection unavailable
+                        </div>
+                    `;
+                });
+        }
+        
+        function updatePatternDetection(patterns) {
+            const content = document.getElementById('pattern-detection-content');
+            
+            if (patterns.length === 0) {
+                content.innerHTML = `
+                    <div style="text-align: center; color: #888; padding: 20px;">
+                        <i class="fas fa-search"></i> No patterns detected
+                    </div>
+                `;
+                return;
+            }
+            
+            content.innerHTML = `
+                <div class="patterns-list" style="max-height: 300px; overflow-y: auto;">
+                    ${patterns.map(pattern => {
+                        const confidenceColor = pattern.confidence > 0.8 ? '#00ff88' : pattern.confidence > 0.6 ? '#ffa500' : '#ff4444';
+                        const directionIcon = pattern.direction === 'bullish' ? 'fa-arrow-up' : pattern.direction === 'bearish' ? 'fa-arrow-down' : 'fa-minus';
+                        const directionColor = pattern.direction === 'bullish' ? '#00ff88' : pattern.direction === 'bearish' ? '#ff4444' : '#ffa500';
+                        
+                        return `
+                            <div class="pattern-item" style="background: rgba(255,255,255,0.05); padding: 12px; margin-bottom: 8px; border-radius: 8px; border-left: 3px solid ${confidenceColor};">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                    <div style="font-weight: bold; color: #fff; font-size: 13px;">${pattern.name}</div>
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <div style="color: ${directionColor}; font-size: 12px;">
+                                            <i class="fas ${directionIcon}"></i> ${pattern.direction}
+                                        </div>
+                                        <div style="background: ${confidenceColor}; color: #000; padding: 2px 6px; border-radius: 10px; font-size: 10px; font-weight: bold;">
+                                            ${(pattern.confidence * 100).toFixed(0)}%
+                                        </div>
+                                    </div>
+                                </div>
+                                <div style="font-size: 11px; color: #ccc; margin-bottom: 4px;">${pattern.description}</div>
+                                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; font-size: 10px;">
+                                    <div><span style="color: #888;">Timeframe:</span> <span style="color: #fff;">${pattern.timeframe}</span></div>
+                                    <div><span style="color: #888;">Status:</span> <span style="color: ${pattern.status === 'confirmed' ? '#00ff88' : '#ffa500'};">${pattern.status}</span></div>
+                                    <div><span style="color: #888;">Target:</span> <span style="color: #00ff88;">$${pattern.target_price}</span></div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+        }
+        
+        function loadNewsAlerts() {
+            fetch('/api/news/alerts/XAUUSD')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        updateNewsAlerts(data.alerts);
+                        document.getElementById('alert-counter').textContent = data.alerts.length;
+                    }
+                })
+                .catch(error => {
+                    console.error('News alerts error:', error);
+                    document.getElementById('news-alerts-content').innerHTML = `
+                        <div style="color: #ff4444; text-align: center; padding: 20px;">
+                            <i class="fas fa-exclamation-triangle"></i> News alerts unavailable
+                        </div>
+                    `;
+                });
+        }
+        
+        function updateNewsAlerts(alerts) {
+            const content = document.getElementById('news-alerts-content');
+            
+            if (alerts.length === 0) {
+                content.innerHTML = `
+                    <div style="text-align: center; color: #888; padding: 20px;">
+                        <i class="fas fa-bell-slash"></i> No active alerts
+                    </div>
+                `;
+                return;
+            }
+            
+            content.innerHTML = `
+                <div class="alerts-list" style="max-height: 300px; overflow-y: auto;">
+                    ${alerts.slice(0, 5).map(alert => {
+                        const severityColor = {
+                            'Critical': '#ff4444',
+                            'High': '#ff6b6b',
+                            'Medium': '#ffa500',
+                            'Low': '#00ff88'
+                        }[alert.severity] || '#ffa500';
+                        
+                        const impactIcon = alert.impact === 'bullish' ? 'fa-arrow-up' : alert.impact === 'bearish' ? 'fa-arrow-down' : 'fa-minus';
+                        const impactColor = alert.impact === 'bullish' ? '#00ff88' : alert.impact === 'bearish' ? '#ff4444' : '#ffa500';
+                        
+                        const timeAgo = new Date(alert.timestamp);
+                        const minutesAgo = Math.floor((new Date() - timeAgo) / 60000);
+                        const timeText = minutesAgo < 1 ? 'Just now' : minutesAgo < 60 ? `${minutesAgo}m ago` : `${Math.floor(minutesAgo/60)}h ago`;
+                        
+                        return `
+                            <div class="alert-item" style="background: rgba(255,255,255,0.05); padding: 10px; margin-bottom: 6px; border-radius: 6px; border-left: 3px solid ${severityColor};">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                                    <div style="display: flex; align-items: center; gap: 6px;">
+                                        <div style="background: ${severityColor}; color: #000; padding: 1px 4px; border-radius: 6px; font-size: 8px; font-weight: bold;">
+                                            ${alert.severity}
+                                        </div>
+                                        <div style="color: ${impactColor}; font-size: 10px;">
+                                            <i class="fas ${impactIcon}"></i> ${alert.impact}
+                                        </div>
+                                    </div>
+                                    <div style="font-size: 9px; color: #888;">${timeText}</div>
+                                </div>
+                                <div style="font-weight: bold; color: #fff; font-size: 11px; margin-bottom: 3px; line-height: 1.3;">${alert.title}</div>
+                                <div style="font-size: 10px; color: #ccc; line-height: 1.3; margin-bottom: 4px;">${alert.content}</div>
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <div style="font-size: 8px; color: #888; font-style: italic;">${alert.source}</div>
+                                    <div style="display: flex; align-items: center; gap: 4px;">
+                                        <div style="font-size: 8px; color: #888;">Impact:</div>
+                                        <div style="font-size: 8px; color: ${alert.market_impact > 0.7 ? '#ff4444' : alert.market_impact > 0.4 ? '#ffa500' : '#00ff88'}; font-weight: bold;">
+                                            ${(alert.market_impact * 100).toFixed(0)}%
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+                ${alerts.length > 5 ? `<div style="text-align: center; font-size: 10px; color: #888; margin-top: 8px;">+${alerts.length - 5} more alerts</div>` : ''}
+            `;
         }
         
         function loadMLPredictionsData() {

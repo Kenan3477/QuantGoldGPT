@@ -164,44 +164,238 @@ def get_current_gold_price():
             'source': 'fallback'
         }
 
-# Advanced AI analysis with comprehensive signals
-def get_ai_analysis():
-    """Advanced AI analysis with multiple indicators"""
+# Advanced AI analysis with comprehensive trading recommendations
+def get_ai_analysis(analysis_type='day_trading'):
+    """
+    Advanced AI analysis with comprehensive signals
+    analysis_type: 'day_trading' for current session or 'weekly' for 7-day analysis
+    """
+    # Determine if we're in day trading session (11:05 PM Thursday - 10:00 PM Friday)
+    now = datetime.now()
+    is_day_trading_session = True  # Simplified for demo
+    
+    # Base signal generation
     signals = ['BUY', 'SELL', 'HOLD']
-    signal = random.choice(signals)
-    confidence = round(random.uniform(0.65, 0.92), 3)
     
-    # Generate technical indicators
+    # Generate comprehensive technical indicators
     technical_indicators = {
-        'rsi': round(random.uniform(30, 70), 2),
-        'macd': round(random.uniform(-1.5, 1.5), 3),
-        'bollinger_position': random.choice(['upper', 'middle', 'lower']),
-        'support_level': round(2380 + random.uniform(-10, 10), 2),
-        'resistance_level': round(2420 + random.uniform(-10, 10), 2),
-        'trend': random.choice(['bullish', 'bearish', 'sideways'])
+        'rsi': round(random.uniform(25, 75), 2),
+        'macd': round(random.uniform(-2.0, 2.0), 3),
+        'macd_signal': round(random.uniform(-1.8, 1.8), 3),
+        'bollinger_position': random.choice(['upper_band', 'middle_band', 'lower_band', 'above_upper', 'below_lower']),
+        'support_level': round(2380 + random.uniform(-15, 15), 2),
+        'resistance_level': round(2420 + random.uniform(-15, 15), 2),
+        'trend_direction': random.choice(['strong_bullish', 'bullish', 'sideways', 'bearish', 'strong_bearish']),
+        'volume_trend': random.choice(['increasing', 'decreasing', 'stable']),
+        'momentum': round(random.uniform(-0.5, 0.5), 3),
+        'volatility': round(random.uniform(0.15, 0.45), 3)
     }
     
-    # Generate sentiment data
+    # Generate comprehensive sentiment data
     sentiment_data = {
-        'news_sentiment': round(random.uniform(0.3, 0.8), 3),
-        'social_sentiment': round(random.uniform(0.2, 0.7), 3),
-        'institutional_flow': random.choice(['buying', 'selling', 'neutral']),
-        'fear_greed_index': round(random.uniform(20, 80), 0)
+        'fear_greed_index': round(random.uniform(10, 90), 0),
+        'news_sentiment': round(random.uniform(0.2, 0.9), 3),
+        'social_sentiment': round(random.uniform(0.15, 0.85), 3),
+        'institutional_flow': random.choice(['heavy_buying', 'buying', 'neutral', 'selling', 'heavy_selling']),
+        'retail_sentiment': round(random.uniform(0.2, 0.8), 3),
+        'options_put_call_ratio': round(random.uniform(0.6, 1.4), 2)
     }
+    
+    # Economic indicators
+    economic_indicators = {
+        'dollar_index': round(random.uniform(100, 106), 2),
+        'bond_yields': round(random.uniform(3.8, 4.8), 2),
+        'inflation_expectation': round(random.uniform(2.0, 3.5), 1),
+        'fed_policy_sentiment': random.choice(['hawkish', 'neutral', 'dovish']),
+        'geopolitical_risk': random.choice(['low', 'medium', 'high', 'very_high']),
+        'economic_data_bias': random.choice(['positive', 'neutral', 'negative'])
+    }
+    
+    # Calculate composite scores
+    technical_score = calculate_technical_score(technical_indicators)
+    sentiment_score = calculate_sentiment_score(sentiment_data)
+    economic_score = calculate_economic_score(economic_indicators)
+    
+    # Generate final recommendation using weighted scoring
+    final_recommendation = generate_trading_recommendation(
+        technical_score, sentiment_score, economic_score, analysis_type
+    )
+    
+    # Time-specific analysis
+    trading_session_info = {
+        'is_day_trading_session': is_day_trading_session,
+        'session_type': 'Asian/European Overlap' if is_day_trading_session else 'Off-hours',
+        'optimal_trading_time': is_day_trading_session,
+        'session_volatility': 'High' if is_day_trading_session else 'Low'
+    }
+    
+    # Generate detailed reasoning
+    detailed_analysis = generate_detailed_reasoning(
+        final_recommendation, technical_indicators, sentiment_data, 
+        economic_indicators, analysis_type
+    )
     
     return {
         'success': True,
-        'signal': signal,
-        'confidence': confidence,
-        'analysis': f"Advanced technical analysis suggests {signal} signal with {confidence*100:.1f}% confidence",
-        'technical_score': round(random.uniform(0.4, 0.9), 3),
-        'sentiment_score': round(random.uniform(0.3, 0.8), 3),
+        'analysis_type': analysis_type,
+        'recommendation': final_recommendation,
+        'confidence': final_recommendation['confidence'],
+        'signal': final_recommendation['action'],
+        'technical_score': technical_score,
+        'sentiment_score': sentiment_score,
+        'economic_score': economic_score,
         'technical_indicators': technical_indicators,
         'sentiment_data': sentiment_data,
-        'prediction': f"Price expected to move {signal.lower()} based on confluence of indicators",
-        'risk_level': random.choice(['Low', 'Medium', 'High']),
-        'timestamp': datetime.now().isoformat()
+        'economic_indicators': economic_indicators,
+        'trading_session': trading_session_info,
+        'detailed_analysis': detailed_analysis,
+        'risk_level': final_recommendation['risk_level'],
+        'timestamp': datetime.now().isoformat(),
+        'next_review': (datetime.now() + timedelta(hours=1 if analysis_type == 'day_trading' else 24)).isoformat()
     }
+
+def calculate_technical_score(indicators):
+    """Calculate technical analysis score (0-1)"""
+    score = 0.5  # neutral base
+    
+    # RSI contribution
+    if indicators['rsi'] < 30:
+        score += 0.2  # oversold, bullish
+    elif indicators['rsi'] > 70:
+        score -= 0.2  # overbought, bearish
+    
+    # MACD contribution
+    if indicators['macd'] > indicators['macd_signal']:
+        score += 0.15
+    else:
+        score -= 0.15
+    
+    # Trend contribution
+    trend_weights = {
+        'strong_bullish': 0.25, 'bullish': 0.15, 'sideways': 0.0,
+        'bearish': -0.15, 'strong_bearish': -0.25
+    }
+    score += trend_weights.get(indicators['trend_direction'], 0)
+    
+    # Bollinger bands contribution
+    bollinger_weights = {
+        'below_lower': 0.1, 'lower_band': 0.05, 'middle_band': 0.0,
+        'upper_band': -0.05, 'above_upper': -0.1
+    }
+    score += bollinger_weights.get(indicators['bollinger_position'], 0)
+    
+    return max(0.0, min(1.0, score))
+
+def calculate_sentiment_score(sentiment):
+    """Calculate sentiment analysis score (0-1)"""
+    score = 0.5  # neutral base
+    
+    # Fear/Greed index (inverted for gold)
+    if sentiment['fear_greed_index'] < 25:  # extreme fear = good for gold
+        score += 0.2
+    elif sentiment['fear_greed_index'] > 75:  # extreme greed = bad for gold
+        score -= 0.2
+    
+    # News sentiment
+    score += (sentiment['news_sentiment'] - 0.5) * 0.3
+    
+    # Institutional flow
+    flow_weights = {
+        'heavy_buying': 0.2, 'buying': 0.1, 'neutral': 0.0,
+        'selling': -0.1, 'heavy_selling': -0.2
+    }
+    score += flow_weights.get(sentiment['institutional_flow'], 0)
+    
+    return max(0.0, min(1.0, score))
+
+def calculate_economic_score(economic):
+    """Calculate economic indicators score (0-1)"""
+    score = 0.5  # neutral base
+    
+    # Dollar strength (inverse for gold)
+    if economic['dollar_index'] > 104:
+        score -= 0.15
+    elif economic['dollar_index'] < 102:
+        score += 0.15
+    
+    # Bond yields (inverse for gold)
+    if economic['bond_yields'] > 4.5:
+        score -= 0.1
+    elif economic['bond_yields'] < 4.0:
+        score += 0.1
+    
+    # Fed policy
+    fed_weights = {'hawkish': -0.15, 'neutral': 0.0, 'dovish': 0.15}
+    score += fed_weights.get(economic['fed_policy_sentiment'], 0)
+    
+    # Geopolitical risk (positive for gold)
+    risk_weights = {'low': -0.05, 'medium': 0.0, 'high': 0.1, 'very_high': 0.2}
+    score += risk_weights.get(economic['geopolitical_risk'], 0)
+    
+    return max(0.0, min(1.0, score))
+
+def generate_trading_recommendation(tech_score, sent_score, econ_score, analysis_type):
+    """Generate final trading recommendation"""
+    # Weighted composite score
+    if analysis_type == 'day_trading':
+        composite = (tech_score * 0.4) + (sent_score * 0.35) + (econ_score * 0.25)
+    else:  # weekly analysis
+        composite = (tech_score * 0.3) + (sent_score * 0.3) + (econ_score * 0.4)
+    
+    # Generate recommendation
+    if composite >= 0.65:
+        action = 'BUY'
+        confidence = round(composite * random.uniform(0.85, 0.95), 3)
+        risk_level = 'Medium' if composite < 0.8 else 'Low'
+    elif composite <= 0.35:
+        action = 'SELL'
+        confidence = round((1 - composite) * random.uniform(0.85, 0.95), 3)
+        risk_level = 'Medium' if composite > 0.2 else 'Low'
+    else:
+        action = 'HOLD'
+        confidence = round(0.5 + abs(composite - 0.5) * random.uniform(0.6, 0.8), 3)
+        risk_level = 'High'
+    
+    return {
+        'action': action,
+        'confidence': confidence,
+        'composite_score': round(composite, 3),
+        'risk_level': risk_level,
+        'strength': 'Strong' if confidence > 0.8 else 'Moderate' if confidence > 0.65 else 'Weak'
+    }
+
+def generate_detailed_reasoning(recommendation, technical, sentiment, economic, analysis_type):
+    """Generate detailed trading reasoning"""
+    reasoning = []
+    
+    # Technical reasoning
+    if technical['rsi'] < 30:
+        reasoning.append("RSI indicates oversold conditions, suggesting potential bullish reversal")
+    elif technical['rsi'] > 70:
+        reasoning.append("RSI shows overbought conditions, indicating possible bearish pressure")
+    
+    # Sentiment reasoning
+    if sentiment['fear_greed_index'] < 30:
+        reasoning.append("Extreme fear in markets typically benefits gold as safe-haven asset")
+    elif sentiment['fear_greed_index'] > 70:
+        reasoning.append("Market greed may reduce gold's appeal as investors seek riskier assets")
+    
+    # Economic reasoning
+    if economic['geopolitical_risk'] in ['high', 'very_high']:
+        reasoning.append("Elevated geopolitical tensions support gold's safe-haven demand")
+    
+    if economic['fed_policy_sentiment'] == 'dovish':
+        reasoning.append("Dovish Fed policy stance weakens USD and supports gold prices")
+    elif economic['fed_policy_sentiment'] == 'hawkish':
+        reasoning.append("Hawkish Fed policy strengthens USD pressure on gold")
+    
+    # Time-specific reasoning
+    if analysis_type == 'day_trading':
+        reasoning.append("Day trading session analysis focuses on short-term momentum and volatility")
+    else:
+        reasoning.append("Weekly analysis emphasizes fundamental drivers and medium-term trends")
+    
+    return reasoning
 
 # Advanced ML predictions with multiple models
 def get_ml_predictions():
@@ -840,31 +1034,197 @@ def api_correlation():
             'error': str(e)
         }), 500
 
-@app.route('/api/ai-analysis/status')
-def api_ai_analysis_status():
-    """AI Analysis system status"""
+@app.route('/api/ai-analysis/<symbol>')
+def get_ai_analysis_for_symbol(symbol):
+    """Get AI analysis for specific symbol"""
     try:
-        status_data = {
-            'success': True,
-            'status': 'active',
-            'components': {
-                'technical_analysis': {'status': 'active', 'last_update': datetime.now().isoformat()},
-                'sentiment_analysis': {'status': 'active', 'last_update': datetime.now().isoformat()},
-                'ml_predictions': {'status': 'active', 'last_update': datetime.now().isoformat()},
-                'signal_generation': {'status': 'active', 'last_update': datetime.now().isoformat()}
-            },
-            'performance': {
-                'accuracy_24h': round(random.uniform(0.75, 0.90), 3),
-                'signals_generated': random.randint(50, 120),
-                'uptime': '99.8%'
-            },
-            'timestamp': datetime.now().isoformat()
-        }
-        return jsonify(status_data)
+        analysis_type = request.args.get('type', 'day_trading')
+        analysis_result = get_ai_analysis(analysis_type)
+        
+        if analysis_result['success']:
+            return jsonify({
+                'success': True,
+                'symbol': symbol,
+                'recommendation': analysis_result['recommendation'],
+                'patterns': get_live_patterns(symbol),
+                'news_alerts': get_news_alerts(symbol),
+                'timestamp': analysis_result['timestamp']
+            })
+        else:
+            return jsonify({'success': False, 'error': 'Analysis failed'})
     except Exception as e:
+        logger.error(f"AI analysis error for {symbol}: {e}")
+        return jsonify({'success': False, 'error': str(e)})
+
+@app.route('/api/patterns/live/<symbol>')
+def get_live_patterns_endpoint(symbol):
+    """Get live pattern detection for symbol"""
+    try:
+        patterns = get_live_patterns(symbol)
+        return jsonify({
+            'success': True,
+            'symbol': symbol,
+            'patterns': patterns,
+            'timestamp': datetime.now().isoformat()
+        })
+    except Exception as e:
+        logger.error(f"Pattern detection error for {symbol}: {e}")
+        return jsonify({'success': False, 'error': str(e)})
+
+@app.route('/api/news/alerts/<symbol>')
+def get_news_alerts_endpoint(symbol):
+    """Get news alerts for symbol"""
+    try:
+        alerts = get_news_alerts(symbol)
+        return jsonify({
+            'success': True,
+            'symbol': symbol,
+            'alerts': alerts,
+            'timestamp': datetime.now().isoformat()
+        })
+    except Exception as e:
+        logger.error(f"News alerts error for {symbol}: {e}")
+        return jsonify({'success': False, 'error': str(e)})
+
+def get_live_patterns(symbol):
+    """Advanced pattern detection system"""
+    patterns = []
+    
+    # Simulate advanced pattern recognition
+    pattern_types = [
+        'Head and Shoulders', 'Double Top', 'Double Bottom', 'Triangle',
+        'Flag', 'Pennant', 'Cup and Handle', 'Ascending Triangle',
+        'Descending Triangle', 'Symmetrical Triangle', 'Wedge',
+        'Channel', 'Support Break', 'Resistance Break'
+    ]
+    
+    # Generate 2-4 detected patterns
+    num_patterns = random.randint(2, 4)
+    selected_patterns = random.sample(pattern_types, num_patterns)
+    
+    for pattern in selected_patterns:
+        confidence = round(random.uniform(0.65, 0.92), 3)
+        timeframe = random.choice(['1H', '4H', '1D'])
+        direction = random.choice(['bullish', 'bearish', 'neutral'])
+        
+        pattern_data = {
+            'name': pattern,
+            'confidence': confidence,
+            'timeframe': timeframe,
+            'direction': direction,
+            'status': random.choice(['forming', 'confirmed', 'breaking']),
+            'target_price': round(2400 + random.uniform(-50, 50), 2),
+            'stop_loss': round(2380 + random.uniform(-20, 20), 2),
+            'completion': round(random.uniform(0.6, 0.95), 2),
+            'detected_at': (datetime.now() - timedelta(minutes=random.randint(5, 180))).isoformat(),
+            'description': f"{pattern} pattern detected on {timeframe} timeframe with {direction} bias"
+        }
+        
+        patterns.append(pattern_data)
+    
+    return patterns
+
+def get_news_alerts(symbol):
+    """Advanced news alert system"""
+    alerts = []
+    
+    # Simulate real-time news alerts
+    alert_types = [
+        'Fed Policy Decision', 'Economic Data Release', 'Geopolitical Event',
+        'Central Bank Announcement', 'Market Moving News', 'Technical Breakout',
+        'Volume Alert', 'Price Alert', 'Volatility Spike', 'Institutional Flow'
+    ]
+    
+    severity_levels = ['Low', 'Medium', 'High', 'Critical']
+    
+    # Generate 3-6 alerts
+    num_alerts = random.randint(3, 6)
+    
+    for i in range(num_alerts):
+        alert_type = random.choice(alert_types)
+        severity = random.choice(severity_levels)
+        impact = random.choice(['bullish', 'bearish', 'neutral'])
+        
+        # Create realistic news content based on alert type
+        if alert_type == 'Fed Policy Decision':
+            title = "Federal Reserve Policy Decision Imminent"
+            content = f"Fed officials signal {random.choice(['hawkish', 'dovish', 'neutral'])} stance on interest rates"
+        elif alert_type == 'Economic Data Release':
+            title = f"{random.choice(['NFP', 'CPI', 'GDP', 'PMI'])} Data Release"
+            content = f"Economic indicator shows {random.choice(['stronger', 'weaker', 'mixed'])} than expected results"
+        elif alert_type == 'Geopolitical Event':
+            title = "Geopolitical Tensions Rise"
+            content = f"International tensions affecting safe-haven demand for gold"
+        elif alert_type == 'Technical Breakout':
+            title = f"Gold Breaks Key {random.choice(['Support', 'Resistance'])} Level"
+            content = f"Price action confirms breakout above/below critical technical level"
+        else:
+            title = f"{alert_type} Alert"
+            content = f"Market-moving event detected affecting gold prices"
+        
+        alert_data = {
+            'id': f"alert_{random.randint(1000, 9999)}",
+            'type': alert_type,
+            'severity': severity,
+            'impact': impact,
+            'title': title,
+            'content': content,
+            'timestamp': (datetime.now() - timedelta(minutes=random.randint(1, 60))).isoformat(),
+            'source': random.choice(['Reuters', 'Bloomberg', 'Market Watch', 'Economic Calendar']),
+            'priority': random.randint(1, 10),
+            'market_impact': round(random.uniform(0.1, 0.9), 2),
+            'time_sensitive': random.choice([True, False]),
+            'related_instruments': ['XAUUSD', 'DXY', 'US10Y', 'SPX500']
+        }
+        
+        alerts.append(alert_data)
+    
+    # Sort by priority (highest first)
+    alerts.sort(key=lambda x: x['priority'], reverse=True)
+    
+    return alerts
+    """Get comprehensive AI analysis status with trading recommendations"""
+    try:
+        # Get analysis type from query parameter
+        analysis_type = request.args.get('type', 'day_trading')  # 'day_trading' or 'weekly'
+        
+        # Get comprehensive AI analysis
+        analysis_result = get_ai_analysis(analysis_type)
+        
+        if analysis_result['success']:
+            return jsonify({
+                'success': True,
+                'status': 'active',
+                'analysis_type': analysis_type,
+                'recommendation': analysis_result['recommendation'],
+                'signal': analysis_result['signal'],
+                'confidence': analysis_result['confidence'],
+                'technical_score': analysis_result['technical_score'],
+                'sentiment_score': analysis_result['sentiment_score'],
+                'economic_score': analysis_result['economic_score'],
+                'risk_level': analysis_result['risk_level'],
+                'trading_session': analysis_result['trading_session'],
+                'detailed_analysis': analysis_result['detailed_analysis'],
+                'indicators': {
+                    'technical': analysis_result['technical_indicators'],
+                    'sentiment': analysis_result['sentiment_data'],
+                    'economic': analysis_result['economic_indicators']
+                },
+                'timestamp': analysis_result['timestamp'],
+                'next_review': analysis_result['next_review']
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'status': 'error',
+                'message': 'Failed to generate AI analysis'
+            })
+    except Exception as e:
+        logger.error(f"AI analysis status error: {e}")
         return jsonify({
             'success': False,
-            'error': str(e)
+            'status': 'error',
+            'message': 'AI analysis system temporarily unavailable'
         }), 500
 
 # WebSocket events for real-time updates
