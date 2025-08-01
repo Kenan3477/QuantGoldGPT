@@ -242,7 +242,9 @@ def get_real_time_economic_indicators():
             'unemployment_rate': round(random.uniform(3.4, 5.8), 1),
             'fed_funds_rate': round(random.uniform(4.5, 5.75), 2),
             'oil_price': round(random.uniform(68, 85), 2),
-            'copper_price': round(random.uniform(3.2, 4.1), 2)
+            'copper_price': round(random.uniform(3.2, 4.1), 2),
+            'fed_policy_sentiment': random.choice(['hawkish', 'neutral', 'dovish']),
+            'geopolitical_risk': random.choice(['low', 'medium', 'high', 'very_high'])
         }
         
         # Add time-sensitive news events
@@ -262,6 +264,8 @@ def get_real_time_economic_indicators():
             'fed_funds_rate': 5.25,
             'oil_price': 75.8,
             'copper_price': 3.7,
+            'fed_policy_sentiment': 'neutral',
+            'geopolitical_risk': 'medium',
             'news_events': [],
             'timestamp': datetime.now().isoformat()
         }
@@ -288,154 +292,182 @@ def get_ai_analysis(analysis_type='day_trading'):
     Enhanced AI analysis with real-time data integration
     analysis_type: 'day_trading' for current session or 'weekly' for 7-day analysis
     """
-    now = datetime.now()
-    
-    # Get real-time market data
-    current_price_data = get_current_gold_price()
-    economic_data = get_real_time_economic_indicators()
-    current_price = current_price_data['price']
-    
-    # Determine trading session and time-specific factors
-    market_session = current_price_data.get('market_session', 'unknown')
-    is_day_trading_session = market_session in ['european', 'american', 'overlap']
-    
-    # Calculate time-specific analysis parameters
-    if analysis_type == 'day_trading':
-        # Focus on intraday movements and session-specific factors
-        time_weight_technical = 0.5
-        time_weight_sentiment = 0.3
-        time_weight_economic = 0.2
-        analysis_period = 'current_session'
+    try:
+        now = datetime.now()
         
-        # Day trading specific indicators
-        technical_indicators = {
-            'rsi': round(random.uniform(35, 65), 2),  # Tighter range for day trading
-            'macd': round(random.uniform(-1.5, 1.5), 3),
-            'macd_signal': round(random.uniform(-1.3, 1.3), 3),
-            'bollinger_position': random.choice(['middle_band', 'upper_band', 'lower_band']),
-            'support_level': round(current_price - random.uniform(3, 8), 2),
-            'resistance_level': round(current_price + random.uniform(3, 8), 2),
-            'trend_direction': random.choice(['bullish', 'sideways', 'bearish']),
-            'volume_trend': random.choice(['increasing', 'decreasing', 'stable']),
-            'momentum': round(random.uniform(-0.3, 0.3), 3),
-            'volatility': round(random.uniform(0.05, 0.25), 3),
-            'session_momentum': 'strong' if is_day_trading_session else 'weak',
-            'intraday_range': round(current_price_data['high'] - current_price_data['low'], 2),
-            'session_high': current_price_data['high'],
-            'session_low': current_price_data['low']
+        # Get real-time market data with error handling
+        try:
+            current_price_data = get_current_gold_price()
+            economic_data = get_real_time_economic_indicators()
+            current_price = current_price_data.get('price', 2400.0)
+        except Exception as e:
+            logger.error(f"Error fetching market data: {e}")
+            # Fallback data
+            current_price_data = {
+                'price': 2400.0,
+                'high': 2415.0,
+                'low': 2385.0,
+                'market_session': 'unknown'
+            }
+            economic_data = {
+                'dollar_index': 103.2,
+                'bond_yields_10y': 4.2,
+                'vix_index': 18.5,
+                'fed_policy_sentiment': 'neutral',
+                'geopolitical_risk': 'medium'
+            }
+            current_price = 2400.0
+        
+        # Determine trading session and time-specific factors
+        market_session = current_price_data.get('market_session', 'unknown')
+        is_day_trading_session = market_session in ['european', 'american', 'overlap']
+        
+        # Calculate time-specific analysis parameters
+        if analysis_type == 'day_trading':
+            # Focus on intraday movements and session-specific factors
+            time_weight_technical = 0.5
+            time_weight_sentiment = 0.3
+            time_weight_economic = 0.2
+            analysis_period = 'current_session'
+            
+            # Day trading specific indicators
+            technical_indicators = {
+                'rsi': round(random.uniform(35, 65), 2),  # Tighter range for day trading
+                'macd': round(random.uniform(-1.5, 1.5), 3),
+                'macd_signal': round(random.uniform(-1.3, 1.3), 3),
+                'bollinger_position': random.choice(['middle_band', 'upper_band', 'lower_band']),
+                'support_level': round(current_price - random.uniform(3, 8), 2),
+                'resistance_level': round(current_price + random.uniform(3, 8), 2),
+                'trend_direction': random.choice(['bullish', 'sideways', 'bearish']),
+                'volume_trend': random.choice(['increasing', 'decreasing', 'stable']),
+                'momentum': round(random.uniform(-0.3, 0.3), 3),
+                'volatility': round(random.uniform(0.05, 0.25), 3),
+                'session_momentum': 'strong' if is_day_trading_session else 'weak',
+                'intraday_range': round(current_price_data['high'] - current_price_data['low'], 2),
+                'session_high': current_price_data['high'],
+                'session_low': current_price_data['low']
+            }
+            
+        else:  # weekly
+            # Focus on fundamental analysis and longer-term trends
+            time_weight_technical = 0.3
+            time_weight_sentiment = 0.25
+            time_weight_economic = 0.45
+            analysis_period = 'weekly_trend'
+            
+            # Weekly analysis specific indicators
+            technical_indicators = {
+                'rsi': round(random.uniform(25, 75), 2),  # Wider range for weekly
+                'macd': round(random.uniform(-2.5, 2.5), 3),
+                'macd_signal': round(random.uniform(-2.2, 2.2), 3),
+                'bollinger_position': random.choice(['upper_band', 'middle_band', 'lower_band', 'above_upper', 'below_lower']),
+                'support_level': round(current_price - random.uniform(15, 25), 2),
+                'resistance_level': round(current_price + random.uniform(15, 25), 2),
+                'trend_direction': random.choice(['strong_bullish', 'bullish', 'sideways', 'bearish', 'strong_bearish']),
+                'volume_trend': random.choice(['increasing', 'decreasing', 'stable']),
+                'momentum': round(random.uniform(-0.8, 0.8), 3),
+                'volatility': round(random.uniform(0.15, 0.45), 3),
+                'weekly_trend': random.choice(['strong_uptrend', 'uptrend', 'consolidation', 'downtrend', 'strong_downtrend']),
+                'fibonacci_level': random.choice(['23.6%', '38.2%', '50%', '61.8%', '78.6%']),
+                'weekly_high': round(current_price + random.uniform(20, 40), 2),
+                'weekly_low': round(current_price - random.uniform(20, 40), 2)
+            }
+        
+        # Generate enhanced sentiment data based on analysis type
+        if analysis_type == 'day_trading':
+            sentiment_data = {
+                'fear_greed_index': round(random.uniform(20, 80), 0),
+                'news_sentiment': round(random.uniform(0.3, 0.8), 3),
+                'social_sentiment': round(random.uniform(0.2, 0.9), 3),
+                'institutional_flow': random.choice(['buying', 'neutral', 'selling']),
+                'retail_sentiment': round(random.uniform(0.3, 0.7), 3),
+                'session_sentiment': 'positive' if is_day_trading_session else 'neutral',
+                'market_makers_activity': random.choice(['active', 'moderate', 'low']),
+                'option_flow': random.choice(['bullish', 'neutral', 'bearish'])
+            }
+        else:
+            sentiment_data = {
+                'fear_greed_index': round(random.uniform(10, 90), 0),
+                'news_sentiment': round(random.uniform(0.1, 0.95), 3),
+                'social_sentiment': round(random.uniform(0.15, 0.85), 3),
+                'institutional_flow': random.choice(['heavy_buying', 'buying', 'neutral', 'selling', 'heavy_selling']),
+                'retail_sentiment': round(random.uniform(0.2, 0.8), 3),
+                'cot_data': random.choice(['commercial_long', 'commercial_short', 'commercial_neutral']),
+                'fund_positioning': random.choice(['overweight', 'neutral', 'underweight']),
+                'central_bank_activity': random.choice(['buying', 'selling', 'neutral']),
+                'options_put_call_ratio': round(random.uniform(0.6, 1.4), 2)
+            }
+        
+        # Integrate real-time economic data
+        economic_indicators = economic_data
+        
+        # Add time-specific economic factors
+        if analysis_type == 'day_trading':
+            # Add intraday economic factors
+            economic_indicators.update({
+                'session_liquidity': random.choice(['high', 'medium', 'low']),
+                'intraday_events': get_daily_news_events()[:2],  # Limit to 2 events for day trading
+                'market_opening_sentiment': random.choice(['positive', 'neutral', 'negative'])
+            })
+        else:
+            # Add weekly economic factors
+            economic_indicators.update({
+                'weekly_events': get_daily_news_events(),
+                'central_bank_calendar': random.choice(['fed_meeting', 'ecb_meeting', 'no_major_events']),
+                'weekly_data_releases': random.choice(['employment', 'inflation', 'gdp', 'none'])
+            })
+        
+        # Calculate composite scores
+        technical_score = calculate_technical_score(technical_indicators)
+        sentiment_score = calculate_sentiment_score(sentiment_data)
+        economic_score = calculate_economic_score(economic_indicators)
+        
+        # Generate final recommendation using weighted scoring
+        final_recommendation = generate_trading_recommendation(
+            technical_score, sentiment_score, economic_score, analysis_type
+        )
+        
+        # Time-specific analysis
+        trading_session_info = {
+            'is_day_trading_session': is_day_trading_session,
+            'session_type': 'Asian/European Overlap' if is_day_trading_session else 'Off-hours',
+            'optimal_trading_time': is_day_trading_session,
+            'session_volatility': 'High' if is_day_trading_session else 'Low'
         }
         
-    else:  # weekly
-        # Focus on fundamental analysis and longer-term trends
-        time_weight_technical = 0.3
-        time_weight_sentiment = 0.25
-        time_weight_economic = 0.45
-        analysis_period = 'weekly_trend'
+        # Generate detailed reasoning
+        detailed_analysis = generate_detailed_reasoning(
+            final_recommendation, technical_indicators, sentiment_data, 
+            economic_indicators, analysis_type
+        )
         
-        # Weekly analysis specific indicators
-        technical_indicators = {
-            'rsi': round(random.uniform(25, 75), 2),  # Wider range for weekly
-            'macd': round(random.uniform(-2.5, 2.5), 3),
-            'macd_signal': round(random.uniform(-2.2, 2.2), 3),
-            'bollinger_position': random.choice(['upper_band', 'middle_band', 'lower_band', 'above_upper', 'below_lower']),
-            'support_level': round(current_price - random.uniform(15, 25), 2),
-            'resistance_level': round(current_price + random.uniform(15, 25), 2),
-            'trend_direction': random.choice(['strong_bullish', 'bullish', 'sideways', 'bearish', 'strong_bearish']),
-            'volume_trend': random.choice(['increasing', 'decreasing', 'stable']),
-            'momentum': round(random.uniform(-0.8, 0.8), 3),
-            'volatility': round(random.uniform(0.15, 0.45), 3),
-            'weekly_trend': random.choice(['strong_uptrend', 'uptrend', 'consolidation', 'downtrend', 'strong_downtrend']),
-            'fibonacci_level': random.choice(['23.6%', '38.2%', '50%', '61.8%', '78.6%']),
-            'weekly_high': round(current_price + random.uniform(20, 40), 2),
-            'weekly_low': round(current_price - random.uniform(20, 40), 2)
+        return {
+            'success': True,
+            'analysis_type': analysis_type,
+            'recommendation': final_recommendation,
+            'confidence': final_recommendation['confidence'],
+            'signal': final_recommendation['action'],
+            'technical_score': technical_score,
+            'sentiment_score': sentiment_score,
+            'economic_score': economic_score,
+            'technical_indicators': technical_indicators,
+            'sentiment_data': sentiment_data,
+            'economic_indicators': economic_indicators,
+            'trading_session': trading_session_info,
+            'detailed_analysis': detailed_analysis,
+            'risk_level': final_recommendation['risk_level'],
+            'timestamp': datetime.now().isoformat(),
+            'next_review': (datetime.now() + timedelta(hours=1 if analysis_type == 'day_trading' else 24)).isoformat()
         }
     
-    # Generate enhanced sentiment data based on analysis type
-    if analysis_type == 'day_trading':
-        sentiment_data = {
-            'fear_greed_index': round(random.uniform(20, 80), 0),
-            'news_sentiment': round(random.uniform(0.3, 0.8), 3),
-            'social_sentiment': round(random.uniform(0.2, 0.9), 3),
-            'institutional_flow': random.choice(['buying', 'neutral', 'selling']),
-            'retail_sentiment': round(random.uniform(0.3, 0.7), 3),
-            'session_sentiment': 'positive' if is_day_trading_session else 'neutral',
-            'market_makers_activity': random.choice(['active', 'moderate', 'low']),
-            'option_flow': random.choice(['bullish', 'neutral', 'bearish'])
+    except Exception as e:
+        logger.error(f"Error in AI analysis: {e}")
+        return {
+            'success': False,
+            'error': str(e),
+            'analysis_type': analysis_type,
+            'timestamp': datetime.now().isoformat()
         }
-    else:
-        sentiment_data = {
-            'fear_greed_index': round(random.uniform(10, 90), 0),
-            'news_sentiment': round(random.uniform(0.1, 0.95), 3),
-            'social_sentiment': round(random.uniform(0.15, 0.85), 3),
-            'institutional_flow': random.choice(['heavy_buying', 'buying', 'neutral', 'selling', 'heavy_selling']),
-            'retail_sentiment': round(random.uniform(0.2, 0.8), 3),
-            'cot_data': random.choice(['commercial_long', 'commercial_short', 'commercial_neutral']),
-            'fund_positioning': random.choice(['overweight', 'neutral', 'underweight']),
-            'central_bank_activity': random.choice(['buying', 'selling', 'neutral']),
-            'options_put_call_ratio': round(random.uniform(0.6, 1.4), 2)
-        }
-    
-    # Integrate real-time economic data
-    economic_indicators = economic_data
-    
-    # Add time-specific economic factors
-    if analysis_type == 'day_trading':
-        # Add intraday economic factors
-        economic_indicators.update({
-            'session_liquidity': random.choice(['high', 'medium', 'low']),
-            'intraday_events': get_daily_news_events()[:2],  # Limit to 2 events for day trading
-            'market_opening_sentiment': random.choice(['positive', 'neutral', 'negative'])
-        })
-    else:
-        # Add weekly economic factors
-        economic_indicators.update({
-            'weekly_events': get_daily_news_events(),
-            'central_bank_calendar': random.choice(['fed_meeting', 'ecb_meeting', 'no_major_events']),
-            'weekly_data_releases': random.choice(['employment', 'inflation', 'gdp', 'none'])
-        })
-    
-    # Calculate composite scores
-    technical_score = calculate_technical_score(technical_indicators)
-    sentiment_score = calculate_sentiment_score(sentiment_data)
-    economic_score = calculate_economic_score(economic_indicators)
-    
-    # Generate final recommendation using weighted scoring
-    final_recommendation = generate_trading_recommendation(
-        technical_score, sentiment_score, economic_score, analysis_type
-    )
-    
-    # Time-specific analysis
-    trading_session_info = {
-        'is_day_trading_session': is_day_trading_session,
-        'session_type': 'Asian/European Overlap' if is_day_trading_session else 'Off-hours',
-        'optimal_trading_time': is_day_trading_session,
-        'session_volatility': 'High' if is_day_trading_session else 'Low'
-    }
-    
-    # Generate detailed reasoning
-    detailed_analysis = generate_detailed_reasoning(
-        final_recommendation, technical_indicators, sentiment_data, 
-        economic_indicators, analysis_type
-    )
-    
-    return {
-        'success': True,
-        'analysis_type': analysis_type,
-        'recommendation': final_recommendation,
-        'confidence': final_recommendation['confidence'],
-        'signal': final_recommendation['action'],
-        'technical_score': technical_score,
-        'sentiment_score': sentiment_score,
-        'economic_score': economic_score,
-        'technical_indicators': technical_indicators,
-        'sentiment_data': sentiment_data,
-        'economic_indicators': economic_indicators,
-        'trading_session': trading_session_info,
-        'detailed_analysis': detailed_analysis,
-        'risk_level': final_recommendation['risk_level'],
-        'timestamp': datetime.now().isoformat(),
-        'next_review': (datetime.now() + timedelta(hours=1 if analysis_type == 'day_trading' else 24)).isoformat()
-    }
 
 def calculate_technical_score(indicators):
     """Calculate technical analysis score (0-1)"""
@@ -501,19 +533,20 @@ def calculate_economic_score(economic):
     elif economic['dollar_index'] < 102:
         score += 0.15
     
-    # Bond yields (inverse for gold)
-    if economic['bond_yields'] > 4.5:
+    # Bond yields (inverse for gold) - Fixed key name
+    bond_yields = economic.get('bond_yields_10y', economic.get('bond_yields', 4.2))
+    if bond_yields > 4.5:
         score -= 0.1
-    elif economic['bond_yields'] < 4.0:
+    elif bond_yields < 4.0:
         score += 0.1
     
     # Fed policy
     fed_weights = {'hawkish': -0.15, 'neutral': 0.0, 'dovish': 0.15}
-    score += fed_weights.get(economic['fed_policy_sentiment'], 0)
+    score += fed_weights.get(economic.get('fed_policy_sentiment'), 0)
     
     # Geopolitical risk (positive for gold)
     risk_weights = {'low': -0.05, 'medium': 0.0, 'high': 0.1, 'very_high': 0.2}
-    score += risk_weights.get(economic['geopolitical_risk'], 0)
+    score += risk_weights.get(economic.get('geopolitical_risk'), 0)
     
     return max(0.0, min(1.0, score))
 
@@ -564,12 +597,12 @@ def generate_detailed_reasoning(recommendation, technical, sentiment, economic, 
         reasoning.append("Market greed may reduce gold's appeal as investors seek riskier assets")
     
     # Economic reasoning
-    if economic['geopolitical_risk'] in ['high', 'very_high']:
+    if economic.get('geopolitical_risk') in ['high', 'very_high']:
         reasoning.append("Elevated geopolitical tensions support gold's safe-haven demand")
     
-    if economic['fed_policy_sentiment'] == 'dovish':
+    if economic.get('fed_policy_sentiment') == 'dovish':
         reasoning.append("Dovish Fed policy stance weakens USD and supports gold prices")
-    elif economic['fed_policy_sentiment'] == 'hawkish':
+    elif economic.get('fed_policy_sentiment') == 'hawkish':
         reasoning.append("Hawkish Fed policy strengthens USD pressure on gold")
     
     # Time-specific reasoning
