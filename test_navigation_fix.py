@@ -33,11 +33,11 @@ def test_local_navigation():
             else:
                 print("   ❌ System Hub link configuration issue")
                 
-            # Check for LEFT PANEL AI Analysis button
-            if 'data-section="ai-analysis"' in response.text:
-                print("   ✅ Left panel AI Analysis button found")
+            # Check for LEFT PANEL AI Analysis button (should be REMOVED)
+            if 'data-section="ai-analysis"' not in response.text:
+                print("   ✅ Left panel AI Analysis button properly removed")
             else:
-                print("   ❌ Left panel AI Analysis button MISSING")
+                print("   ❌ Left panel AI Analysis button still exists (should be removed)")
                 
             # Check if AI Tools section was removed
             if 'AI Tools' not in response.text or response.text.count('AI Tools') <= 1:
@@ -75,8 +75,8 @@ def test_local_navigation():
     
     print("\n" + "=" * 50)
     print("✅ AI Analysis navigation test completed")
-    print("\n💡 Now testing both System Hub AND Left Panel AI Analysis access!")
-    print("🎯 Both should navigate to the comprehensive AI Analysis suite with daily/weekly toggles")
+    print("\n💡 Only System Hub AI Analysis Center should work now!")
+    print("🎯 System Hub → AI Analysis Center → Daily/Weekly Analysis Suite")
     
     return True
 
