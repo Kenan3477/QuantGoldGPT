@@ -1086,6 +1086,52 @@ def get_news_alerts_endpoint(symbol):
         logger.error(f"News alerts error for {symbol}: {e}")
         return jsonify({'success': False, 'error': str(e)})
 
+@app.route('/api/ai-analysis/status')
+def api_ai_analysis_status():
+    """Get comprehensive AI analysis status with trading recommendations"""
+    try:
+        # Get analysis type from query parameter
+        analysis_type = request.args.get('type', 'day_trading')  # 'day_trading' or 'weekly'
+        
+        # Get comprehensive AI analysis
+        analysis_result = get_ai_analysis(analysis_type)
+        
+        if analysis_result['success']:
+            return jsonify({
+                'success': True,
+                'status': 'active',
+                'analysis_type': analysis_type,
+                'recommendation': analysis_result['recommendation'],
+                'signal': analysis_result['signal'],
+                'confidence': analysis_result['confidence'],
+                'technical_score': analysis_result['technical_score'],
+                'sentiment_score': analysis_result['sentiment_score'],
+                'economic_score': analysis_result['economic_score'],
+                'risk_level': analysis_result['risk_level'],
+                'trading_session': analysis_result['trading_session'],
+                'detailed_analysis': analysis_result['detailed_analysis'],
+                'indicators': {
+                    'technical': analysis_result['technical_indicators'],
+                    'sentiment': analysis_result['sentiment_data'],
+                    'economic': analysis_result['economic_indicators']
+                },
+                'timestamp': analysis_result['timestamp'],
+                'next_review': analysis_result['next_review']
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'status': 'error',
+                'message': 'Failed to generate AI analysis'
+            })
+    except Exception as e:
+        logger.error(f"AI analysis status error: {e}")
+        return jsonify({
+            'success': False,
+            'status': 'error',
+            'message': 'AI analysis system temporarily unavailable'
+        }), 500
+
 def get_live_patterns(symbol):
     """Advanced pattern detection system"""
     patterns = []
