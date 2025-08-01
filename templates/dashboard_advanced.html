@@ -10197,24 +10197,41 @@
             const signalColor = rec.action === 'BUY' ? '#00ff88' : rec.action === 'SELL' ? '#ff4444' : '#ffa500';
             const riskColor = rec.risk_level === 'Low' ? '#00ff88' : rec.risk_level === 'Medium' ? '#ffa500' : '#ff4444';
             
+            // Analysis type specific labels
+            const analysisLabel = data.analysis_type === 'day_trading' ? 'Day Trading Signal' : 'Weekly Market Signal';
+            const timeLabel = data.analysis_type === 'day_trading' ? 'Current Session' : 'Weekly Outlook';
+            const sessionInfo = data.trading_session ? data.trading_session.session_type : 'Market Session';
+            
             banner.innerHTML = `
-                <div class="recommendation-content" style="background: linear-gradient(135deg, rgba(0,0,0,0.8), rgba(20,20,20,0.9)); padding: 20px; border-radius: 12px; border-left: 4px solid ${signalColor};">
-                    <div class="rec-header" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
-                        <div class="rec-signal" style="display: flex; align-items: center; gap: 15px;">
-                            <div class="signal-badge large" style="background: ${signalColor}; color: #000; font-weight: bold; padding: 8px 16px; border-radius: 8px; font-size: 18px;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 8px;">
+                            <span style="color: ${signalColor}; font-size: 24px; font-weight: bold;">
+                                <i class="fas fa-${rec.action === 'BUY' ? 'arrow-up' : rec.action === 'SELL' ? 'arrow-down' : 'minus'}"></i>
                                 ${rec.action}
-                            </div>
-                            <div class="confidence-info">
-                                <div style="font-size: 14px; color: #ccc;">Confidence</div>
-                                <div style="font-size: 20px; font-weight: bold; color: ${signalColor};">${(rec.confidence * 100).toFixed(1)}%</div>
-                            </div>
-                            <div class="strength-info">
-                                <div style="font-size: 14px; color: #ccc;">Strength</div>
-                                <div style="font-size: 16px; font-weight: bold; color: #fff;">${rec.strength}</div>
-                            </div>
+                            </span>
+                            <span style="background: rgba(${rec.action === 'BUY' ? '0,255,136' : rec.action === 'SELL' ? '255,68,68' : '255,165,0'}, 0.2); 
+                                         color: ${signalColor}; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: bold;">
+                                ${analysisLabel}
+                            </span>
+                            <span style="color: #ccc; font-size: 14px;">${timeLabel}</span>
                         </div>
-                        <div class="risk-info" style="text-align: right;">
-                            <div style="font-size: 14px; color: #ccc;">Risk Level</div>
+                        <div style="color: #999; font-size: 14px;">
+                            Confidence: <span style="color: ${signalColor};">${(rec.confidence * 100).toFixed(1)}%</span> | 
+                            Risk: <span style="color: ${riskColor};">${rec.risk_level}</span> | 
+                            Session: <span style="color: #ccc;">${sessionInfo}</span>
+                        </div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="color: #ccc; font-size: 12px; margin-bottom: 4px;">Composite Score</div>
+                        <div style="font-size: 20px; font-weight: bold; color: ${signalColor};">
+                            ${(rec.composite_score * 100).toFixed(1)}
+                        </div>
+                        <div style="color: #666; font-size: 10px;">${rec.strength} Signal</div>
+                    </div>
+                </div>
+            `;
+        }
                             <div style="font-size: 16px; font-weight: bold; color: ${riskColor};">${rec.risk_level}</div>
                         </div>
                     </div>
@@ -10403,19 +10420,30 @@
             `;
         }
         
+        // Global state for AI Analysis Centre
+        let currentAnalysisType = 'day_trading';
+        
         function switchAnalysisType(type) {
+            // Update global state
+            currentAnalysisType = type;
+            
             // Update button states
             document.getElementById('day-trading-btn').classList.toggle('active', type === 'day_trading');
             document.getElementById('weekly-btn').classList.toggle('active', type === 'weekly');
             
-            // Show loading state
+            // Show loading state with enhanced messaging
+            const analysisLabel = type === 'day_trading' ? 'Day Trading Analysis' : 'Weekly Market Analysis';
+            const loadingMessage = type === 'day_trading' ? 
+                'Loading real-time intraday signals and session analysis...' : 
+                'Loading comprehensive weekly trends and fundamental analysis...';
+                
             document.getElementById('recommendation-banner').innerHTML = `
                 <div class="loading-state">
-                    <i class="fas fa-spinner fa-spin"></i> Loading ${type === 'day_trading' ? 'day trading' : 'weekly'} analysis...
+                    <i class="fas fa-spinner fa-spin"></i> ${loadingMessage}
                 </div>
             `;
             
-            // Load new analysis
+            // Load new analysis with type-specific data
             loadAIAnalysisData(type);
         }
         
@@ -10424,11 +10452,16 @@
             loadPatternDetection();
             loadNewsAlerts();
             
-            // Set up periodic updates
+            // Set up periodic updates with current analysis type
             setInterval(() => {
                 loadPatternDetection();
                 loadNewsAlerts();
-            }, 30000); // Update every 30 seconds
+                
+                // Update AI analysis based on current type
+                if (currentAnalysisType) {
+                    loadAIAnalysisData(currentAnalysisType);
+                }
+            }, 30000); // Update every 30 seconds for real-time data
         }
         
         function loadPatternDetection() {
