@@ -281,3 +281,5 @@ This project is proprietary software owned by Kenan Davies. All rights reserved.
 *GoldGPT - Where AI meets Trading Excellence*
 
 </div>
+#   N a v i g a t i o n   f i x   d e p l o y e d   2 0 2 5 - 0 8 - 0 1   2 0 : 4 2 : 0 2  
+ 
