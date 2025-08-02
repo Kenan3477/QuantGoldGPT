@@ -1,0 +1,222 @@
+<!-- WebSocket Integration Scripts -->
+<!-- Add these script tags to the <head> or before closing </body> tag -->
+
+<!-- Core WebSocket Manager -->
+<script src="{{ url_for('static', filename='js/websocket_manager.js') }}"></script>
+
+<!-- Auto Integration (automatically connects and handles updates) -->
+<script src="{{ url_for('static', filename='js/websocket_auto_integration.js') }}"></script>
+
+<!-- CSS for WebSocket Status Indicators -->
+<style>
+.connection-status {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: bold;
+    text-transform: uppercase;
+    transition: all 0.3s ease;
+}
+
+.connection-status.connected,
+.connection-status.authenticated {
+    background-color: #10b981;
+    color: white;
+    animation: pulse-green 2s infinite;
+}
+
+.connection-status.connecting,
+.connection-status.reconnecting {
+    background-color: #f59e0b;
+    color: white;
+    animation: pulse-yellow 1s infinite;
+}
+
+.connection-status.disconnected,
+.connection-status.error,
+.connection-status.failed {
+    background-color: #ef4444;
+    color: white;
+}
+
+.status-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 8px;
+    transition: all 0.3s ease;
+}
+
+.status-dot.connected,
+.status-dot.authenticated {
+    background-color: #10b981;
+    animation: pulse-green 2s infinite;
+}
+
+.status-dot.connecting,
+.status-dot.reconnecting {
+    background-color: #f59e0b;
+    animation: pulse-yellow 1s infinite;
+}
+
+.status-dot.disconnected,
+.status-dot.error,
+.status-dot.failed {
+    background-color: #ef4444;
+}
+
+/* Price animation styles */
+.price-up {
+    color: #10b981 !important;
+    animation: flash-green 0.5s ease-out;
+}
+
+.price-down {
+    color: #ef4444 !important;
+    animation: flash-red 0.5s ease-out;
+}
+
+/* AI Signal styles */
+.ai-signal.buy {
+    color: #10b981;
+    font-weight: bold;
+}
+
+.ai-signal.sell {
+    color: #ef4444;
+    font-weight: bold;
+}
+
+.ai-signal.hold {
+    color: #6b7280;
+    font-weight: bold;
+}
+
+/* Portfolio P&L styles */
+.portfolio-pnl.positive {
+    color: #10b981;
+}
+
+.portfolio-pnl.negative {
+    color: #ef4444;
+}
+
+/* Confidence bar styles */
+.confidence-bar {
+    height: 4px;
+    border-radius: 2px;
+    transition: all 0.3s ease;
+}
+
+/* Animations */
+@keyframes pulse-green {
+    0% { opacity: 1; }
+    50% { opacity: 0.7; }
+    100% { opacity: 1; }
+}
+
+@keyframes pulse-yellow {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+@keyframes flash-green {
+    0% { background-color: rgba(16, 185, 129, 0.2); }
+    50% { background-color: rgba(16, 185, 129, 0.4); }
+    100% { background-color: transparent; }
+}
+
+@keyframes flash-red {
+    0% { background-color: rgba(239, 68, 68, 0.2); }
+    50% { background-color: rgba(239, 68, 68, 0.4); }
+    100% { background-color: transparent; }
+}
+
+/* Notification styles */
+.ws-notification {
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+</style>
+
+<!-- Connection Status HTML Examples -->
+<!--
+Add these elements where you want to show connection status:
+
+<div class="connection-indicator">
+    <span class="status-dot"></span>
+    <span class="connection-status">Connecting...</span>
+</div>
+
+<div class="real-time-indicator">
+    Real-time: <span class="connection-status">Connecting...</span>
+</div>
+-->
+
+<!-- Price Display HTML Examples -->
+<!--
+Add these elements for live price updates:
+
+<div class="price-display">
+    <span class="gold-price">$2,000.00</span>
+    <span class="price-change">+10.50 (+0.53%)</span>
+    <div class="price-timestamp">Last updated: --:--:--</div>
+</div>
+
+<div class="price-high-low">
+    <span>High: <span class="price-high">$2,010.00</span></span>
+    <span>Low: <span class="price-low">$1,990.00</span></span>
+</div>
+-->
+
+<!-- AI Analysis HTML Examples -->
+<!--
+Add these elements for AI analysis updates:
+
+<div class="ai-analysis-display">
+    <div class="ai-signal">HOLD</div>
+    <div class="ai-confidence">85.5%</div>
+    <div class="confidence-bar-container">
+        <div class="confidence-bar"></div>
+    </div>
+    <div class="ai-recommendations"></div>
+</div>
+-->
+
+<!-- Portfolio HTML Examples -->
+<!--
+Add these elements for portfolio updates:
+
+<div class="portfolio-display">
+    <div class="portfolio-value">$50,000</div>
+    <div class="portfolio-pnl">+$1,250</div>
+    <div class="positions-list"></div>
+</div>
+-->
+
+<!-- Debug Console -->
+<!--
+Add this for debugging WebSocket connection:
+
+<div style="position: fixed; bottom: 10px; right: 10px; z-index: 9999;">
+    <button onclick="checkWebSocketStatus()" style="padding: 8px; font-size: 12px;">
+        Check WS Status
+    </button>
+    <button onclick="requestPriceUpdate()" style="padding: 8px; font-size: 12px;">
+        Request Price
+    </button>
+</div>
+-->

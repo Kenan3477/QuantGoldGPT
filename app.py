@@ -19,12 +19,212 @@ import random
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# Enhanced SocketIO integration
+try:
+    from enhanced_socketio_integration import (
+        integrate_enhanced_socketio, 
+        add_enhanced_websocket_routes
+    )
+    ENHANCED_SOCKETIO_AVAILABLE = True
+    logger.info("✅ Enhanced SocketIO integration available")
+except ImportError as e:
+    ENHANCED_SOCKETIO_AVAILABLE = False
+    logger.warning(f"⚠️ Enhanced SocketIO not available: {e}")
+
 # Initialize Flask app
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'goldgpt-advanced-secret-key-2025')
 
 # Initialize SocketIO
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading')
+
+# Initialize Enhanced SocketIO features
+enhanced_server = None
+if ENHANCED_SOCKETIO_AVAILABLE:
+    try:
+        enhanced_server = integrate_enhanced_socketio(app, socketio)
+        logger.info("🚀 Enhanced SocketIO server initialized")
+        
+        # Add enhanced WebSocket routes directly here instead of importing
+        @app.route('/websocket-test')
+        def websocket_test_page():
+            """Test page for WebSocket functionality"""
+            return '''
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>GoldGPT WebSocket Test</title>
+                <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+                <style>
+                    body { font-family: Arial, sans-serif; margin: 20px; }
+                    .status { padding: 10px; margin: 10px 0; border-radius: 5px; }
+                    .connected { background: #d4edda; color: #155724; }
+                    .disconnected { background: #f8d7da; color: #721c24; }
+                    .message { background: #f8f9fa; padding: 10px; margin: 5px 0; border-left: 3px solid #007bff; }
+                    button { padding: 10px 15px; margin: 5px; }
+                    #messages { height: 300px; overflow-y: scroll; border: 1px solid #ddd; padding: 10px; }
+                </style>
+            </head>
+            <body>
+                <h1>🚀 GoldGPT WebSocket Test</h1>
+                
+                <div id="status" class="status disconnected">Disconnected</div>
+                
+                <div>
+                    <button onclick="connect()">Connect</button>
+                    <button onclick="disconnect()">Disconnect</button>
+                    <button onclick="authenticate()">Authenticate</button>
+                    <button onclick="requestPriceUpdate()">Request Price Update</button>
+                    <button onclick="requestAIAnalysis()">Request AI Analysis</button>
+                    <button onclick="requestPortfolioUpdate()">Request Portfolio Update</button>
+                </div>
+                
+                <div id="messages"></div>
+                
+                <script>
+                    let socket = null;
+                    let wsClient = null;
+                    
+                    function addMessage(message, type = 'info') {
+                        const messages = document.getElementById('messages');
+                        const div = document.createElement('div');
+                        div.className = 'message';
+                        div.innerHTML = `<strong>[${new Date().toLocaleTimeString()}]</strong> ${message}`;
+                        messages.appendChild(div);
+                        messages.scrollTop = messages.scrollHeight;
+                    }
+                    
+                    function updateStatus(status, className) {
+                        const statusEl = document.getElementById('status');
+                        statusEl.textContent = status;
+                        statusEl.className = `status ${className}`;
+                    }
+                    
+                    async function connect() {
+                        try {
+                            if (typeof GoldGPTWebSocketClient !== 'undefined') {
+                                // Use enhanced client if available
+                                wsClient = new GoldGPTWebSocketClient();
+                                await wsClient.connect();
+                                addMessage('Connected using enhanced WebSocket client!');
+                                updateStatus('Connected (Enhanced)', 'connected');
+                            } else {
+                                // Fallback to basic Socket.IO
+                                socket = io();
+                                socket.on('connect', () => {
+                                    addMessage('Connected using basic Socket.IO');
+                                    updateStatus('Connected (Basic)', 'connected');
+                                });
+                                socket.on('disconnect', () => {
+                                    addMessage('Disconnected');
+                                    updateStatus('Disconnected', 'disconnected');
+                                });
+                            }
+                        } catch (error) {
+                            addMessage(`Connection failed: ${error.message}`);
+                            updateStatus('Connection Failed', 'disconnected');
+                        }
+                    }
+                    
+                    function disconnect() {
+                        if (wsClient) {
+                            wsClient.disconnect();
+                            wsClient = null;
+                        } else if (socket) {
+                            socket.disconnect();
+                            socket = null;
+                        }
+                        addMessage('Disconnected');
+                        updateStatus('Disconnected', 'disconnected');
+                    }
+                    
+                    function authenticate() {
+                        if (wsClient) {
+                            addMessage('Authentication handled automatically by enhanced client');
+                        } else {
+                            addMessage('Basic Socket.IO doesn\\'t support authentication');
+                        }
+                    }
+                    
+                    function requestPriceUpdate() {
+                        if (wsClient) {
+                            wsClient.requestPriceUpdate();
+                            addMessage('Requested price update (enhanced)');
+                        } else if (socket) {
+                            socket.emit('request_price_update');
+                            addMessage('Requested price update (basic)');
+                        }
+                    }
+                    
+                    function requestAIAnalysis() {
+                        if (wsClient) {
+                            wsClient.requestAIAnalysis();
+                            addMessage('Requested AI analysis (enhanced)');
+                        } else if (socket) {
+                            socket.emit('request_ai_analysis');
+                            addMessage('Requested AI analysis (basic)');
+                        }
+                    }
+                    
+                    function requestPortfolioUpdate() {
+                        if (wsClient) {
+                            wsClient.requestPortfolioUpdate();
+                            addMessage('Requested portfolio update (enhanced)');
+                        } else if (socket) {
+                            socket.emit('request_portfolio_update');
+                            addMessage('Requested portfolio update (basic)');
+                        }
+                    }
+                    
+                    // Auto-connect on page load
+                    window.addEventListener('load', () => {
+                        addMessage('WebSocket test page loaded');
+                        addMessage('Click Connect to start testing');
+                    });
+                </script>
+            </body>
+            </html>
+            '''
+        
+        @app.route('/api/websocket/stats')
+        def websocket_stats():
+            """Get WebSocket server statistics"""
+            if enhanced_server:
+                return enhanced_server.get_server_stats()
+            else:
+                return jsonify({
+                    "success": False,
+                    "error": "Enhanced server not available"
+                })
+        
+        logger.info("📡 Features: 2s price updates, JWT auth, auto-reconnect, rate limiting")
+        logger.info("🔗 Test endpoints: /websocket-test, /api/websocket/stats")
+        
+        # Verify routes were added
+        routes = [str(rule) for rule in app.url_map.iter_rules()]
+        websocket_routes = [r for r in routes if 'websocket' in r.lower()]
+        logger.info(f"📍 WebSocket routes registered: {websocket_routes}")
+        
+        # Add a test route to verify registration is working
+        @app.route('/test-enhanced-routes')
+        def test_enhanced_routes():
+            return jsonify({
+                "success": True,
+                "message": "Enhanced routes are working!",
+                "websocket_routes": websocket_routes
+            })
+        
+        # Unified Chart Demo route
+        @app.route('/chart-demo')
+        def chart_demo():
+            logger.debug("Serving Unified Chart Demo page")
+            return render_template('unified_chart_demo.html')
+        
+    except Exception as e:
+        logger.error(f"❌ Failed to initialize enhanced SocketIO: {e}")
+        import traceback
+        logger.error(f"📋 Full error: {traceback.format_exc()}")
+        ENHANCED_SOCKETIO_AVAILABLE = False
 
 # Database configuration for Railway
 def init_database():
@@ -97,6 +297,26 @@ def init_database():
             
     except Exception as e:
         print(f"⚠️ Database initialization error: {e}")
+
+# Initialize ML Dashboard API
+try:
+    from ml_dashboard_api import register_ml_dashboard_routes
+    register_ml_dashboard_routes(app)
+    logger.info("✅ ML Dashboard API routes registered")
+except ImportError as e:
+    logger.warning(f"⚠️ ML Dashboard API not available: {e}")
+except Exception as e:
+    logger.error(f"❌ Failed to register ML Dashboard API: {e}")
+
+# Initialize ML Dashboard Test Routes
+try:
+    from ml_dashboard_test import register_ml_test_routes
+    register_ml_test_routes(app)
+    logger.info("✅ ML Dashboard Test routes registered")
+except ImportError as e:
+    logger.warning(f"⚠️ ML Dashboard Test routes not available: {e}")
+except Exception as e:
+    logger.error(f"❌ Failed to register ML Dashboard Test routes: {e}")
 
 # Initialize database on startup
 init_database()

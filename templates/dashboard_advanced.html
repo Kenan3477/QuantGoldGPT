@@ -21,6 +21,19 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/correlation-analyzer.css') }}">
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.4/socket.io.js"></script>
+    <script src="{{ url_for('static', filename='js/enhanced_websocket_client.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/websocket_manager.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/websocket_manager_examples.js') }}"></script>
+    
+    <!-- UnifiedChartManager Integration -->
+    <script src="{{ url_for('static', filename='js/unified_chart_manager.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/chart_auto_integration.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/chart_error_enhancement.js') }}"></script>
+    
+    <!-- ML Dashboard System -->
+    <script src="{{ url_for('static', filename='js/ml_data_manager.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/ml_dashboard_controller.js') }}"></script>
+    
     <script src="https://cdn.jsdelivr.net/npm/apexcharts@latest"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
@@ -156,6 +169,55 @@
             align-items: center;
             gap: 8px;
             font-size: 14px;
+        }
+
+        /* Enhanced WebSocket Connection Status */
+        .connection-status.connected .status-dot {
+            background: #10b981; /* Green */
+            animation: pulse-green 2s infinite;
+        }
+
+        .connection-status.authenticated .status-dot {
+            background: #3b82f6; /* Blue */
+            animation: pulse-blue 2s infinite;
+        }
+
+        .connection-status.disconnected .status-dot {
+            background: #ef4444; /* Red */
+            animation: pulse-red 2s infinite;
+        }
+
+        .connection-status.reconnecting .status-dot {
+            background: #f59e0b; /* Orange */
+            animation: pulse-orange 2s infinite;
+        }
+
+        @keyframes pulse-green {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            50% { box-shadow: 0 0 0 4px rgba(16, 185, 129, 0); }
+        }
+
+        @keyframes pulse-blue {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); }
+            50% { box-shadow: 0 0 0 4px rgba(59, 130, 246, 0); }
+        }
+
+        @keyframes pulse-red {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            50% { box-shadow: 0 0 0 4px rgba(239, 68, 68, 0); }
+        }
+
+        @keyframes pulse-orange {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7); }
+            50% { box-shadow: 0 0 0 4px rgba(245, 158, 11, 0); }
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #6b7280;
+            transition: all 0.3s ease;
         }
 
         /* Theme Toggle Button */
@@ -449,17 +511,506 @@
             position: relative;
         }
 
-        .ml-predictions-section {
+        /* Advanced ML Dashboard Styles */
+        .ml-dashboard-section {
             width: 100%;
             background: var(--bg-secondary);
             border-radius: 12px;
             border: 1px solid var(--border-primary);
             margin: 20px 0;
             overflow: visible;
-            display: block !important; /* Ensure it's visible */
-            min-height: 200px; /* Ensure it has height */
+            display: block !important;
+            min-height: 400px;
             position: relative;
             z-index: 10;
+        }
+
+        .panel-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .refresh-btn {
+            background: var(--accent-secondary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.2s ease;
+        }
+
+        .refresh-btn:hover {
+            background: var(--accent-primary);
+            transform: translateY(-1px);
+        }
+
+        .refresh-btn i {
+            font-size: 10px;
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 20px 0 15px 0;
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            border-bottom: 1px solid var(--border-primary);
+            padding-bottom: 8px;
+        }
+
+        .section-title i {
+            margin-right: 8px;
+            color: var(--accent-primary);
+        }
+
+        .update-time {
+            font-size: 11px;
+            color: var(--text-secondary);
+            font-weight: normal;
+        }
+
+        .info-tooltip {
+            cursor: help;
+            color: var(--text-secondary);
+            margin-left: 5px;
+        }
+
+        /* Prediction Cards */
+        .ml-predictions-container {
+            margin-bottom: 30px;
+        }
+
+        .predictions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .prediction-card {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-secondary);
+            border-radius: 10px;
+            padding: 15px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .prediction-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            border-color: var(--accent-primary);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .timeframe-badge {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .prediction-status {
+            font-size: 16px;
+        }
+
+        .prediction-status.loading {
+            color: var(--accent-secondary);
+        }
+
+        .prediction-status.success {
+            color: #10b981;
+        }
+
+        .prediction-status.error {
+            color: #ef4444;
+        }
+
+        .prediction-value {
+            margin-bottom: 15px;
+        }
+
+        .prediction-value .value {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--text-primary);
+            display: block;
+        }
+
+        .prediction-value .change {
+            font-size: 14px;
+            font-weight: 500;
+            margin-left: 10px;
+        }
+
+        .prediction-value .change.positive {
+            color: #10b981;
+        }
+
+        .prediction-value .change.negative {
+            color: #ef4444;
+        }
+
+        .confidence-section {
+            margin-bottom: 15px;
+        }
+
+        .confidence-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .confidence-bar {
+            position: relative;
+            background: var(--bg-primary);
+            border-radius: 10px;
+            height: 8px;
+            overflow: hidden;
+        }
+
+        .confidence-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ef4444 0%, #f59e0b 50%, #10b981 100%);
+            border-radius: 10px;
+            transition: width 0.8s ease;
+            width: 0%;
+        }
+
+        .confidence-text {
+            position: absolute;
+            right: 5px;
+            top: -20px;
+            font-size: 11px;
+            font-weight: bold;
+            color: var(--text-primary);
+        }
+
+        .prediction-direction {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .prediction-direction.bullish {
+            color: #10b981;
+        }
+
+        .prediction-direction.bearish {
+            color: #ef4444;
+        }
+
+        .prediction-direction.neutral {
+            color: var(--text-secondary);
+        }
+
+        .prediction-direction i {
+            font-size: 12px;
+        }
+
+        /* Feature Importance Styles */
+        .feature-importance-container {
+            margin-bottom: 30px;
+        }
+
+        .feature-chart-container {
+            display: grid;
+            grid-template-columns: 1fr 200px;
+            gap: 20px;
+            background: var(--bg-tertiary);
+            border-radius: 10px;
+            padding: 20px;
+            border: 1px solid var(--border-secondary);
+        }
+
+        .feature-legend {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+        }
+
+        .feature-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+        }
+
+        .feature-name {
+            flex: 1;
+            color: var(--text-primary);
+        }
+
+        .feature-value {
+            font-weight: bold;
+            color: var(--text-secondary);
+        }
+
+        /* Accuracy Metrics Styles */
+        .accuracy-metrics-container {
+            margin-bottom: 30px;
+        }
+
+        .time-selector select {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-secondary);
+            border-radius: 6px;
+            padding: 6px 10px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .accuracy-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .accuracy-card {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-secondary);
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .metric-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .metric-value {
+            margin-bottom: 10px;
+        }
+
+        .metric-value .value {
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--text-primary);
+            display: block;
+        }
+
+        .metric-bar {
+            width: 100%;
+            height: 6px;
+            background: var(--bg-primary);
+            border-radius: 3px;
+            overflow: hidden;
+            margin: 8px 0;
+        }
+
+        .metric-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-secondary), var(--accent-primary));
+            border-radius: 3px;
+            transition: width 0.8s ease;
+            width: 0%;
+        }
+
+        .metric-trend {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        .metric-trend.positive {
+            color: #10b981;
+        }
+
+        .metric-trend.negative {
+            color: #ef4444;
+        }
+
+        .accuracy-chart-container {
+            background: var(--bg-tertiary);
+            border-radius: 10px;
+            padding: 20px;
+            border: 1px solid var(--border-secondary);
+        }
+
+        /* Model Performance Styles */
+        .model-performance-container {
+            margin-bottom: 20px;
+        }
+
+        .performance-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+        }
+
+        .stat-item {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-secondary);
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-value {
+            font-size: 16px;
+            font-weight: bold;
+            color: var(--text-primary);
+        }
+
+        .stat-value.health {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .health-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #10b981;
+        }
+
+        .health-indicator.warning {
+            background: #f59e0b;
+        }
+
+        .health-indicator.error {
+            background: #ef4444;
+        }
+
+        /* Loading States */
+        .loading {
+            position: relative;
+            opacity: 0.7;
+            pointer-events: none;
+        }
+
+        .loading::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(1px);
+            z-index: 1;
+            border-radius: inherit;
+        }
+
+        .loading::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            margin: -10px 0 0 -10px;
+            border: 2px solid transparent;
+            border-top: 2px solid var(--accent-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            z-index: 2;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Error States */
+        .ml-error-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #ef4444;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 10000;
+            font-size: 14px;
+            max-width: 300px;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .predictions-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .feature-chart-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .accuracy-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .performance-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .accuracy-grid,
+            .performance-stats {
+                grid-template-columns: 1fr;
+            }
         }
 
         /* RIGHT PANEL - News & Sentiment */
@@ -863,6 +1414,92 @@
 
         .chart-content {
             height: 100%; /* Fill the entire container */
+        }
+
+        /* UnifiedChartManager Styles */
+        .unified-charts-section {
+            margin: 20px 0;
+            opacity: 0;
+            animation: fadeIn 0.5s ease-out 0.2s forwards;
+        }
+
+        .unified-charts-section .chart-container {
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .unified-charts-section .chart-container:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .chart-auto-controls {
+            background: rgba(255,255,255,0.05) !important;
+            border: 1px solid var(--border-primary) !important;
+            border-radius: 6px !important;
+            padding: 12px !important;
+            margin-bottom: 12px !important;
+            display: flex !important;
+            gap: 15px !important;
+            flex-wrap: wrap !important;
+            align-items: center !important;
+            font-size: 12px !important;
+        }
+
+        .chart-auto-controls select {
+            background: var(--bg-tertiary) !important;
+            color: var(--text-primary) !important;
+            border: 1px solid var(--border-secondary) !important;
+            border-radius: 4px !important;
+            padding: 6px 8px !important;
+            font-size: 12px !important;
+        }
+
+        .chart-auto-controls button {
+            background: var(--accent-secondary) !important;
+            color: white !important;
+            border: none !important;
+            border-radius: 4px !important;
+            padding: 6px 12px !important;
+            cursor: pointer !important;
+            font-size: 11px !important;
+            transition: all 0.2s ease !important;
+        }
+
+        .chart-auto-controls button:hover {
+            background: var(--accent-primary) !important;
+            transform: translateY(-1px);
+        }
+
+        .chart-connection-indicator {
+            position: absolute !important;
+            top: 12px !important;
+            right: 12px !important;
+            padding: 4px 8px !important;
+            border-radius: 4px !important;
+            font-size: 10px !important;
+            font-weight: bold !important;
+            text-transform: uppercase !important;
+            z-index: 1000 !important;
+            pointer-events: none !important;
+            backdrop-filter: blur(4px);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsive design for unified charts */
+        @media (max-width: 768px) {
+            .unified-charts-section > div {
+                grid-template-columns: 1fr !important;
+            }
+            
+            .chart-auto-controls {
+                flex-direction: column !important;
+                align-items: stretch !important;
+            }
         }
 
         /* Open Positions Box - Top Right Corner */
@@ -2766,10 +3403,10 @@
         <main class="content">
             <!-- Chart Section -->
             <div class="chart-container fade-in">
-                <div class="chart-content" id="tradingview-chart">
-                    <!-- TradingView Chart Widget will be loaded here -->
+                <div class="chart-content" id="tradingview-chart" data-unified-chart="true" data-auto-controls="true">
+                    <!-- UnifiedChartManager will enhance this container -->
                     <div style="padding: 20px; text-align: center; color: var(--text-secondary); font-size: 14px;" id="chart-loading-message">
-                        <i class="fas fa-spinner fa-spin"></i> Loading TradingView Chart...
+                        <i class="fas fa-spinner fa-spin"></i> Loading Advanced Chart System...
                     </div>
                 </div>
                 
@@ -2874,36 +3511,274 @@
                 </script>
             </div>
 
-            <!-- ML Predictions Section - Directly Below Chart -->
-            <div class="ml-predictions-section fade-in">
-                <div class="analysis-panel" id="ml-predictions-panel">
+            <!-- Advanced ML Dashboard Section -->
+            <div class="ml-dashboard-section fade-in">
+                <div class="analysis-panel" id="ml-dashboard-panel">
                     <div class="panel-header">
-                        <h3><i class="fas fa-robot"></i> ML Predictions</h3>
-                        <div class="panel-status">
-                            <div class="status-dot success"></div>
-                            <span>ACTIVE</span>
+                        <h3><i class="fas fa-brain"></i> Advanced ML Dashboard</h3>
+                        <div class="panel-controls">
+                            <button class="refresh-btn" onclick="MLDashboard.refreshPredictions()">
+                                <i class="fas fa-sync-alt"></i> Refresh
+                            </button>
+                            <div class="panel-status">
+                                <div class="status-dot success" id="ml-status-dot"></div>
+                                <span id="ml-status-text">ACTIVE</span>
+                            </div>
                         </div>
                     </div>
                     <div class="panel-content">
-                        <div class="predictions-grid" id="ml-predictions">
-                            <div class="prediction-item">
-                                <span class="prediction-label">1H Forecast:</span>
-                                <span class="prediction-value loading"><i class="fas fa-spinner fa-spin"></i> Loading...</span>
-                                <span class="confidence">--</span>
+                        <!-- Multi-Timeframe Prediction Cards -->
+                        <div class="ml-predictions-container">
+                            <h4 class="section-title">
+                                <i class="fas fa-clock"></i> Multi-Timeframe Predictions
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <button class="refresh-btn" onclick="window.refreshMLPredictions()" title="Refresh Predictions">
+                                        <i class="fas fa-sync-alt"></i>
+                                    </button>
+                                    <span class="update-time" id="predictions-update-time">Last updated: --</span>
+                                </div>
+                            </h4>
+                            <div class="predictions-grid" id="ml-predictions-grid">
+                                <!-- 15m Prediction Card -->
+                                <div class="prediction-card" data-timeframe="15m">
+                                    <div class="card-header">
+                                        <div class="timeframe-badge">15m</div>
+                                        <div class="prediction-status" id="status-15m">
+                                            <i class="fas fa-spinner fa-spin"></i>
+                                        </div>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="prediction-value" id="prediction-15m">
+                                            <span class="value">--</span>
+                                            <span class="change">--</span>
+                                        </div>
+                                        <div class="confidence-section">
+                                            <div class="confidence-label">Confidence</div>
+                                            <div class="confidence-bar">
+                                                <div class="confidence-fill" id="confidence-15m"></div>
+                                                <span class="confidence-text" id="confidence-text-15m">--%</span>
+                                            </div>
+                                        </div>
+                                        <div class="prediction-direction" id="direction-15m">
+                                            <i class="fas fa-arrow-right"></i>
+                                            <span>Neutral</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 1h Prediction Card -->
+                                <div class="prediction-card" data-timeframe="1h">
+                                    <div class="card-header">
+                                        <div class="timeframe-badge">1H</div>
+                                        <div class="prediction-status" id="status-1h">
+                                            <i class="fas fa-spinner fa-spin"></i>
+                                        </div>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="prediction-value" id="prediction-1h">
+                                            <span class="value">--</span>
+                                            <span class="change">--</span>
+                                        </div>
+                                        <div class="confidence-section">
+                                            <div class="confidence-label">Confidence</div>
+                                            <div class="confidence-bar">
+                                                <div class="confidence-fill" id="confidence-1h"></div>
+                                                <span class="confidence-text" id="confidence-text-1h">--%</span>
+                                            </div>
+                                        </div>
+                                        <div class="prediction-direction" id="direction-1h">
+                                            <i class="fas fa-arrow-right"></i>
+                                            <span>Neutral</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 4h Prediction Card -->
+                                <div class="prediction-card" data-timeframe="4h">
+                                    <div class="card-header">
+                                        <div class="timeframe-badge">4H</div>
+                                        <div class="prediction-status" id="status-4h">
+                                            <i class="fas fa-spinner fa-spin"></i>
+                                        </div>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="prediction-value" id="prediction-4h">
+                                            <span class="value">--</span>
+                                            <span class="change">--</span>
+                                        </div>
+                                        <div class="confidence-section">
+                                            <div class="confidence-label">Confidence</div>
+                                            <div class="confidence-bar">
+                                                <div class="confidence-fill" id="confidence-4h"></div>
+                                                <span class="confidence-text" id="confidence-text-4h">--%</span>
+                                            </div>
+                                        </div>
+                                        <div class="prediction-direction" id="direction-4h">
+                                            <i class="fas fa-arrow-right"></i>
+                                            <span>Neutral</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 24h Prediction Card -->
+                                <div class="prediction-card" data-timeframe="24h">
+                                    <div class="card-header">
+                                        <div class="timeframe-badge">24H</div>
+                                        <div class="prediction-status" id="status-24h">
+                                            <i class="fas fa-spinner fa-spin"></i>
+                                        </div>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="prediction-value" id="prediction-24h">
+                                            <span class="value">--</span>
+                                            <span class="change">--</span>
+                                        </div>
+                                        <div class="confidence-section">
+                                            <div class="confidence-label">Confidence</div>
+                                            <div class="confidence-bar">
+                                                <div class="confidence-fill" id="confidence-24h"></div>
+                                                <span class="confidence-text" id="confidence-text-24h">--%</span>
+                                            </div>
+                                        </div>
+                                        <div class="prediction-direction" id="direction-24h">
+                                            <i class="fas fa-arrow-right"></i>
+                                            <span>Neutral</span>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="prediction-item">
-                                <span class="prediction-label">4H Forecast:</span>
-                                <span class="prediction-value loading"><i class="fas fa-spinner fa-spin"></i> Loading...</span>
-                                <span class="confidence">--</span>
+                        </div>
+
+                        <!-- Feature Importance Visualization -->
+                        <div class="feature-importance-container">
+                            <h4 class="section-title">
+                                <i class="fas fa-chart-bar"></i> Feature Importance Analysis
+                                <div class="info-tooltip" title="Shows which factors most influence predictions">
+                                    <i class="fas fa-info-circle"></i>
+                                </div>
+                            </h4>
+                            <div class="feature-chart-container">
+                                <canvas id="feature-importance-chart" width="400" height="300"></canvas>
+                                <div class="feature-legend" id="feature-legend">
+                                    <!-- Features will be populated by JavaScript -->
+                                </div>
                             </div>
-                            <div class="prediction-item">
-                                <span class="prediction-label">1D Forecast:</span>
-                                <span class="prediction-value loading"><i class="fas fa-spinner fa-spin"></i> Loading...</span>
-                                <span class="confidence">--</span>
+                        </div>
+
+                        <!-- Historical Accuracy Metrics -->
+                        <div class="accuracy-metrics-container">
+                            <h4 class="section-title">
+                                <i class="fas fa-bullseye"></i> Historical Prediction Accuracy
+                                <div class="time-selector">
+                                    <select id="accuracy-timeframe" onchange="MLDashboard.updateAccuracyMetrics(this.value)">
+                                        <option value="24h">Last 24h</option>
+                                        <option value="7d" selected>Last 7 days</option>
+                                        <option value="30d">Last 30 days</option>
+                                    </select>
+                                </div>
+                            </h4>
+                            <div class="accuracy-grid">
+                                <div class="accuracy-card">
+                                    <div class="metric-label">Overall Accuracy</div>
+                                    <div class="metric-value" id="overall-accuracy">
+                                        <span class="value">--%</span>
+                                        <div class="metric-bar">
+                                            <div class="metric-fill" id="overall-accuracy-bar"></div>
+                                        </div>
+                                    </div>
+                                    <div class="metric-trend" id="overall-accuracy-trend">
+                                        <i class="fas fa-arrow-right"></i>
+                                        <span>No change</span>
+                                    </div>
+                                </div>
+
+                                <div class="accuracy-card">
+                                    <div class="metric-label">Direction Accuracy</div>
+                                    <div class="metric-value" id="direction-accuracy">
+                                        <span class="value">--%</span>
+                                        <div class="metric-bar">
+                                            <div class="metric-fill" id="direction-accuracy-bar"></div>
+                                        </div>
+                                    </div>
+                                    <div class="metric-trend" id="direction-accuracy-trend">
+                                        <i class="fas fa-arrow-right"></i>
+                                        <span>No change</span>
+                                    </div>
+                                </div>
+
+                                <div class="accuracy-card">
+                                    <div class="metric-label">Price Accuracy</div>
+                                    <div class="metric-value" id="price-accuracy">
+                                        <span class="value">--%</span>
+                                        <div class="metric-bar">
+                                            <div class="metric-fill" id="price-accuracy-bar"></div>
+                                        </div>
+                                    </div>
+                                    <div class="metric-trend" id="price-accuracy-trend">
+                                        <i class="fas fa-arrow-right"></i>
+                                        <span>No change</span>
+                                    </div>
+                                </div>
+
+                                <div class="accuracy-card">
+                                    <div class="metric-label">Avg Confidence</div>
+                                    <div class="metric-value" id="avg-confidence">
+                                        <span class="value">--%</span>
+                                        <div class="metric-bar">
+                                            <div class="metric-fill" id="avg-confidence-bar"></div>
+                                        </div>
+                                    </div>
+                                    <div class="metric-trend" id="avg-confidence-trend">
+                                        <i class="fas fa-arrow-right"></i>
+                                        <span>No change</span>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="prediction-item">
-                                <span class="prediction-label">3D Forecast:</span>
-                                <span class="prediction-value loading">Loading...</span>
+
+                            <!-- Accuracy Trend Chart -->
+                            <div class="accuracy-chart-container">
+                                <canvas id="accuracy-trend-chart" width="800" height="200"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Model Performance Summary -->
+                        <div class="model-performance-container">
+                            <h4 class="section-title">
+                                <i class="fas fa-cogs"></i> Model Performance Summary
+                            </h4>
+                            <div class="performance-stats">
+                                <div class="stat-item">
+                                    <div class="stat-label">Total Predictions</div>
+                                    <div class="stat-value" id="total-predictions">--</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-label">Successful Predictions</div>
+                                    <div class="stat-value" id="successful-predictions">--</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-label">Avg Response Time</div>
+                                    <div class="stat-value" id="avg-response-time">--ms</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-label">Model Version</div>
+                                    <div class="stat-value" id="model-version">v1.0</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-label">Last Training</div>
+                                    <div class="stat-value" id="last-training">--</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-label">Model Health</div>
+                                    <div class="stat-value health" id="model-health">
+                                        <div class="health-indicator" id="health-indicator"></div>
+                                        <span id="health-text">Checking...</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
                                 <span class="confidence">Loading...</span>
                             </div>
                             <div class="prediction-item">
@@ -3160,6 +4035,35 @@
                             </div>
                         </div>
                     </div>
+                    
+                    <!-- UnifiedChartManager Secondary Charts -->
+                    <div class="unified-charts-section" style="margin: 20px 0;">
+                        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px;">
+                            <!-- Multi-Timeframe Chart -->
+                            <div class="chart-container" style="background: var(--bg-secondary); border-radius: 8px; padding: 15px; border: 1px solid var(--border-primary);">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                    <h3 style="margin: 0; color: var(--text-primary); font-size: 16px;">
+                                        <i class="fas fa-chart-area"></i> Advanced Analysis Chart
+                                    </h3>
+                                    <div style="display: flex; gap: 10px; align-items: center;">
+                                        <span class="connection-status" style="font-size: 12px;">Connecting...</span>
+                                    </div>
+                                </div>
+                                <div id="trading-chart" data-auto-controls="true" style="height: 400px; width: 100%;"></div>
+                            </div>
+                            
+                            <!-- Price Overview Chart -->
+                            <div class="chart-container" style="background: var(--bg-secondary); border-radius: 8px; padding: 15px; border: 1px solid var(--border-primary);">
+                                <div style="margin-bottom: 10px;">
+                                    <h3 style="margin: 0; color: var(--text-primary); font-size: 16px;">
+                                        <i class="fas fa-chart-line"></i> Price Overview
+                                    </h3>
+                                </div>
+                                <div id="overview-chart" style="height: 200px; width: 100%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
                     <!-- Analysis Panels Grid -->
                     <div class="analysis-grid">
                         <!-- Technical Analysis Panel -->
