@@ -11726,10 +11726,26 @@
         // Initialize navigation on page load
         initializeNavigation();
         
+        // Initialize ML Dashboard System
+        console.log('🚀 Initializing ML Dashboard System...');
+        window.mlDataManager = new MLDataManager();
+        window.mlDashboardController = new MLDashboardController();
+        
+        // Add refresh function for ML Dashboard
+        window.refreshMLPredictions = function() {
+            console.log('🔄 Manual refresh triggered for ML Dashboard');
+            if (window.mlDataManager) {
+                window.mlDataManager.forceRefresh();
+            }
+        };
+        
         // FORCE REAL DATA REFRESH EVERY 30 SECONDS
         setInterval(() => {
             console.log('🔄 Periodic ML data refresh - ensuring real data only');
-            initializeMLPredictions();
+            if (window.mlDataManager) {
+                window.mlDataManager.forceRefresh();
+            }
+            initializeMLPredictions(); // Keep old system as backup
         }, 30000);
     </script>
 </body>
