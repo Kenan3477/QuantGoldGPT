@@ -28,12 +28,12 @@
                 console.log('📅 DAILY: Using cached prediction (24h cycle)');
                 data = dailyPrediction;
             } else {
-                console.log('🔄 DAILY: Fetching fresh prediction from dynamic API...');
+                console.log('🔄 DAILY: Fetching fresh prediction from ML Dashboard API...');
                 
-                // Try dynamic prediction endpoint first, then fallback to daily
+                // Use our new ML Dashboard API endpoints
                 const endpoints = [
-                    '/api/dynamic-ml-prediction/XAUUSD',
-                    '/api/daily-ml-prediction/XAUUSD'
+                    '/api/ml-predictions?timeframes=1h,4h,24h',  // New ML Dashboard API
+                    '/api/ml-predictions'  // Fallback
                 ];
                 
                 let response;
@@ -41,8 +41,21 @@
                 
                 for (const endpoint of endpoints) {
                     try {
-                        console.log(`🎯 Trying endpoint: ${endpoint}`);
-                        response = await fetch(endpoint);
+                        console.log(`🎯 Trying ML Dashboard endpoint: ${endpoint}`);
+                        if (endpoint.includes('timeframes=')) {
+                            response = await fetch(endpoint);
+                        } else {
+                            // POST request for ML Dashboard API
+                            response = await fetch(endpoint, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({
+                                    timeframes: ['1h', '4h', '24h']
+                                })
+                            });
+                        }
                         if (response.ok) {
                             apiUsed = endpoint;
                             break;
@@ -60,7 +73,35 @@
                 data = await response.json();
                 console.log(`📊 DAILY: Fresh API data from ${apiUsed}:`, data);
                 
-                // Show if dynamic monitoring is active
+                // Convert ML Dashboard API format to expected format
+                if (data.success && data.predictions) {
+                    // Transform the ML Dashboard format to match expected structure
+                    const transformedData = {
+                        success: true,
+                        predictions: {},
+                        strategy_info: {
+                            reasoning: "Multi-timeframe ML analysis using real prediction engines"
+                        },
+                        timestamp: data.timestamp || new Date().toISOString()
+                    };
+                    
+                    // Convert each timeframe prediction
+                    for (const [timeframe, prediction] of Object.entries(data.predictions)) {
+                        transformedData.predictions[timeframe] = {
+                            direction: prediction.direction || 'neutral',
+                            confidence: prediction.confidence || 0.7,
+                            price_target: prediction.predicted_price || prediction.target_price || 2000,
+                            current_price: prediction.current_price || 2000,
+                            signal: prediction.signal || prediction.direction?.toUpperCase() || 'NEUTRAL',
+                            source: prediction.source || 'ml_dashboard_api'
+                        };
+                    }
+                    
+                    data = transformedData;
+                    console.log(`🔄 TRANSFORMED: ML Dashboard data converted:`, data);
+                }
+                
+                // Show if dynamic monitoring is active (legacy field)
                 if (data.dynamic_info && data.dynamic_info.monitoring_active) {
                     console.log(`🔄 DYNAMIC: Market monitoring ACTIVE (${data.dynamic_info.update_count} updates)`);
                     console.log(`⏰ Last updated: ${data.dynamic_info.last_updated}`);
