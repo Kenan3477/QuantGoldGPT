@@ -214,6 +214,17 @@ if ENHANCED_SOCKETIO_AVAILABLE:
                 "websocket_routes": websocket_routes
             })
         
+        # ML Endpoints Test route
+        @app.route('/test-ml-endpoints')
+        def test_ml_endpoints():
+            logger.debug("Serving ML Endpoints Test page")
+            try:
+                with open('test_ml_endpoints.html', 'r') as f:
+                    return f.read()
+            except Exception as e:
+                logger.error(f"Failed to serve ML test page: {e}")
+                return f"<h1>Error loading ML test page: {e}</h1>", 500
+        
         # Unified Chart Demo route
         @app.route('/chart-demo')
         def chart_demo():

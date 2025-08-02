@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ML Endpoints Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #1a1a1a; color: #fff; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #333; border-radius: 5px; }
+        .test-button { padding: 10px 20px; margin: 5px; background: #007acc; color: white; border: none; border-radius: 3px; cursor: pointer; }
+        .test-button:hover { background: #005a9e; }
+        .result { margin: 10px 0; padding: 10px; background: #2a2a2a; border-radius: 3px; }
+        .success { border-left: 4px solid #4caf50; }
+        .error { border-left: 4px solid #f44336; }
+        pre { white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+</head>
+<body>
+    <h1>🧠 ML Dashboard API Endpoints Test</h1>
+    
+    <div class="test-section">
+        <h2>🎯 Core ML Predictions</h2>
+        <button class="test-button" onclick="testMLPredictions()">Test ML Predictions (POST)</button>
+        <button class="test-button" onclick="testMLPredictionsGET()">Test ML Predictions (GET)</button>
+        <div id="ml-predictions-result" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>📊 Accuracy Metrics</h2>
+        <button class="test-button" onclick="testAccuracyMetrics()">Test Accuracy Metrics</button>
+        <div id="accuracy-result" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>⚡ Performance Data</h2>
+        <button class="test-button" onclick="testPerformanceData()">Test Performance Data</button>
+        <div id="performance-result" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>🏥 Health Check</h2>
+        <button class="test-button" onclick="testHealthCheck()">Test Health Check</button>
+        <div id="health-result" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>🔄 Compatibility Endpoints</h2>
+        <button class="test-button" onclick="testDynamicPrediction()">Test Dynamic ML Prediction</button>
+        <button class="test-button" onclick="testDailyPrediction()">Test Daily ML Prediction</button>
+        <button class="test-button" onclick="testNewsSentiment()">Test News Sentiment</button>
+        <div id="compatibility-result" class="result"></div>
+    </div>
+
+    <script>
+        function displayResult(elementId, data, isError = false) {
+            const element = document.getElementById(elementId);
+            element.className = `result ${isError ? 'error' : 'success'}`;
+            element.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+        }
+        
+        async function testMLPredictions() {
+            try {
+                const response = await fetch('/api/ml-predictions', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ timeframes: ['15m', '1h', '4h', '24h'] })
+                });
+                const data = await response.json();
+                displayResult('ml-predictions-result', { status: response.status, data });
+            } catch (error) {
+                displayResult('ml-predictions-result', { error: error.message }, true);
+            }
+        }
+        
+        async function testMLPredictionsGET() {
+            try {
+                const response = await fetch('/api/ml-predictions?timeframes=15m,1h,4h,24h');
+                const data = await response.json();
+                displayResult('ml-predictions-result', { status: response.status, data });
+            } catch (error) {
+                displayResult('ml-predictions-result', { error: error.message }, true);
+            }
+        }
+        
+        async function testAccuracyMetrics() {
+            try {
+                const response = await fetch('/api/ml-accuracy?timeframe=7d');
+                const data = await response.json();
+                displayResult('accuracy-result', { status: response.status, data });
+            } catch (error) {
+                displayResult('accuracy-result', { error: error.message }, true);
+            }
+        }
+        
+        async function testPerformanceData() {
+            try {
+                const response = await fetch('/api/ml-performance');
+                const data = await response.json();
+                displayResult('performance-result', { status: response.status, data });
+            } catch (error) {
+                displayResult('performance-result', { error: error.message }, true);
+            }
+        }
+        
+        async function testHealthCheck() {
+            try {
+                const response = await fetch('/api/ml-health');
+                const data = await response.json();
+                displayResult('health-result', { status: response.status, data });
+            } catch (error) {
+                displayResult('health-result', { error: error.message }, true);
+            }
+        }
+        
+        async function testDynamicPrediction() {
+            try {
+                const response = await fetch('/api/dynamic-ml-prediction/XAUUSD');
+                const data = await response.json();
+                displayResult('compatibility-result', { endpoint: 'dynamic', status: response.status, data });
+            } catch (error) {
+                displayResult('compatibility-result', { endpoint: 'dynamic', error: error.message }, true);
+            }
+        }
+        
+        async function testDailyPrediction() {
+            try {
+                const response = await fetch('/api/daily-ml-prediction/XAUUSD');
+                const data = await response.json();
+                displayResult('compatibility-result', { endpoint: 'daily', status: response.status, data });
+            } catch (error) {
+                displayResult('compatibility-result', { endpoint: 'daily', error: error.message }, true);
+            }
+        }
+        
+        async function testNewsSentiment() {
+            try {
+                const response = await fetch('/api/news/sentiment-summary');
+                const data = await response.json();
+                displayResult('compatibility-result', { endpoint: 'news', status: response.status, data });
+            } catch (error) {
+                displayResult('compatibility-result', { endpoint: 'news', error: error.message }, true);
+            }
+        }
+        
+        // Auto-run a basic test on page load
+        window.addEventListener('load', () => {
+            console.log('🧪 ML Endpoints Test Page Loaded');
+            testHealthCheck();
+        });
+    </script>
+</body>
+</html>
