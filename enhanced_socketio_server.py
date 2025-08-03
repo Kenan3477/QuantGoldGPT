@@ -341,21 +341,6 @@ class GoldGPTSocketIOServer:
                 'ask': round(current_price + 0.5, 2),
                 'spread': 1.0
             }
-                    
-                    # Add additional metadata
-                    price_data.update({
-                        'timestamp': datetime.utcnow().isoformat(),
-                        'source': api['url'].split('/')[2],
-                        'status': 'live',
-                        'currency': 'USD',
-                        'unit': 'troy_ounce'
-                    })
-                    
-                    return price_data
-                    
-            except Exception as e:
-                logger.warning(f"API {api['url']} failed: {e}")
-                continue
         
         # Fallback to mock data if all APIs fail
         base_price = 2000 + (time.time() % 100)
