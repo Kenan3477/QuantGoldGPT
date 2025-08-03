@@ -334,7 +334,7 @@ def add_enhanced_websocket_routes(app):
   "change": +5.25,
   "change_percent": 0.26,
   "timestamp": "2025-08-01T12:00:00Z",
-  "source": "api.metals.live",
+  "source": "metalpriceapi",
   "status": "live"
 }</pre>
             </div>
@@ -467,49 +467,32 @@ socket.on('price_update', (data) => {
 
 # Fallback functions for compatibility
 def enhanced_get_current_gold_price():
-    """Enhanced gold price function with multiple API fallbacks"""
-    import requests
-    import time
-    from datetime import datetime
-    
-    apis = [
-        {
-            'url': 'https://api.metals.live/v1/spot/gold',
-            'parser': lambda r: {
-                'price': r.json().get('price', 0),
-                'change': r.json().get('change', 0),
-                'change_percent': r.json().get('change_percent', 0)
-            }
+    """Enhanced gold price function using free gold service"""
+    try:
+        # Use the new free gold service
+        from free_gold_api_service import get_free_gold_price
+        return get_free_gold_price()
+        
+    except ImportError:
+        # Fallback to simple simulation
+        import random
+        import time
+        from datetime import datetime
+        
+        base_price = 2400.0
+        variation = random.uniform(-20, 20)
+        current_price = round(base_price + variation, 2)
+        
+        return {
+            'price': current_price,
+            'change': round(variation, 2),
+            'change_percent': round((variation / base_price) * 100, 3),
+            'timestamp': datetime.utcnow().isoformat(),
+            'source': 'socketio_fallback',
+            'status': 'simulated',
+            'currency': 'USD',
+            'unit': 'troy_ounce'
         }
-    ]
-    
-    for api in apis:
-        try:
-            response = requests.get(api['url'], timeout=5)
-            if response.status_code == 200:
-                price_data = api['parser'](response)
-                price_data.update({
-                    'timestamp': datetime.utcnow().isoformat(),
-                    'source': api['url'].split('/')[2],
-                    'status': 'live',
-                    'currency': 'USD',
-                    'unit': 'troy_ounce'
-                })
-                return price_data
-        except Exception as e:
-            logger.warning(f"API {api['url']} failed: {e}")
-            continue
-    
-    # Fallback
-    base_price = 2000 + (time.time() % 100)
-    return {
-        'price': round(base_price, 2),
-        'change': round((time.time() % 20) - 10, 2),
-        'change_percent': round(((time.time() % 20) - 10) / base_price * 100, 3),
-        'timestamp': datetime.utcnow().isoformat(),
-        'source': 'fallback',
-        'status': 'simulated',
-        'currency': 'USD',
         'unit': 'troy_ounce'
     }
 

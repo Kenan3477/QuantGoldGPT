@@ -319,6 +319,16 @@ except ImportError as e:
 except Exception as e:
     logger.error(f"❌ Failed to register ML Dashboard API: {e}")
 
+# Initialize Enhanced ML Dashboard API
+try:
+    from enhanced_ml_dashboard_api import register_enhanced_ml_routes
+    register_enhanced_ml_routes(app)
+    logger.info("✅ Enhanced ML Dashboard API routes registered")
+except ImportError as e:
+    logger.warning(f"⚠️ Enhanced ML Dashboard API not available: {e}")
+except Exception as e:
+    logger.error(f"❌ Failed to register Enhanced ML Dashboard API: {e}")
+
 # Initialize ML Dashboard Test Routes
 try:
     from ml_dashboard_test import register_ml_test_routes
@@ -334,114 +344,98 @@ init_database()
 
 # Advanced Gold price functions with realistic data integration
 def get_current_gold_price():
-    """Get current gold price with comprehensive data and real API integration"""
+    """Get current gold price using the free Gold API from https://api.gold-api.com/price/XAU"""
     try:
-        # Enhanced real-time gold price fetching
         import requests
         
-        # Primary real-time gold APIs with fallback
-        apis = [
-            {
-                'url': 'https://api.metals.live/v1/spot/gold',
-                'parser': lambda x: {'price': x.get('price', 2400), 'source': 'metals.live'}
-            },
-            {
-                'url': 'https://api.coinbase.com/v2/exchange-rates?currency=XAU',
-                'parser': lambda x: {'price': float(x.get('data', {}).get('rates', {}).get('USD', 2400)), 'source': 'coinbase'}
-            },
-            {
-                'url': 'https://api.fxempire.com/v1/en/markets/precious-metals/quotes/XAUUSD',
-                'parser': lambda x: {'price': x.get('ask', 2400), 'source': 'fxempire'}
-            }
-        ]
+        # Use the correct Gold API endpoint
+        response = requests.get('https://api.gold-api.com/price/XAU', timeout=10)
         
-        for api in apis:
-            try:
-                response = requests.get(api['url'], timeout=5)
-                if response.status_code == 200:
-                    data = response.json()
-                    price_data = api['parser'](data)
-                    
-                    # Calculate realistic daily range
-                    current_price = float(price_data['price'])
-                    daily_volatility = random.uniform(0.008, 0.025)  # 0.8% to 2.5%
-                    high_price = round(current_price * (1 + daily_volatility), 2)
-                    low_price = round(current_price * (1 - daily_volatility), 2)
-                    
-                    # Calculate realistic daily change
-                    previous_close = current_price * random.uniform(0.985, 1.015)  # -1.5% to +1.5%
-                    change = round(current_price - previous_close, 2)
-                    change_percent = round((change / previous_close) * 100, 3)
-                    
-                    return {
-                        'price': current_price,
-                        'high': high_price,
-                        'low': low_price,
-                        'volume': round(random.uniform(80000, 400000), 0),
-                        'change': change,
-                        'change_percent': change_percent,
-                        'timestamp': datetime.now().isoformat(),
-                        'source': price_data['source'],
-                        'bid': round(current_price - random.uniform(0.1, 0.5), 2),
-                        'ask': round(current_price + random.uniform(0.1, 0.5), 2),
-                        'spread': round(random.uniform(0.2, 1.0), 2)
-                    }
-            except Exception as e:
-                logger.warning(f"API {api['url']} failed: {e}")
-                continue
-                
-        # Enhanced fallback with realistic market simulation
-        base_price = 2400.0
-        now = datetime.now()
-        
-        # Market hour variation (higher volatility during London/NY sessions)
-        market_hour_multiplier = 1.0
-        if 8 <= now.hour <= 17:  # European/US market hours
-            market_hour_multiplier = 1.5
-        elif 0 <= now.hour <= 6:  # Asian market hours
-            market_hour_multiplier = 0.8
+        if response.status_code == 200:
+            data = response.json()
             
-        hour_variation = (hash(str(now.hour)) % 100 - 50) * 0.5 * market_hour_multiplier
-        minute_variation = (hash(str(now.minute)) % 20 - 10) * 0.1
+            # Extract price data from the API response
+            price = data.get('price', 0)
+            if price > 0:
+                # Calculate additional trading data based on real price
+                change = data.get('change', 0)
+                change_percent = data.get('change_percent', 0)
+                
+                # Estimate high/low based on current price and typical daily volatility
+                daily_volatility = 0.015  # 1.5% typical daily volatility for gold
+                high_price = round(price * (1 + daily_volatility), 2)
+                low_price = round(price * (1 - daily_volatility), 2)
+                
+                # Calculate bid/ask spread (typically 0.5-1.0 for gold)
+                spread = round(price * 0.0004, 2)  # 0.04% spread
+                bid = round(price - spread/2, 2)
+                ask = round(price + spread/2, 2)
+                
+                return {
+                    'price': round(price, 2),
+                    'high': high_price,
+                    'low': low_price,
+                    'volume': round(random.uniform(100000, 500000), 0),
+                    'change': round(change, 2),
+                    'change_percent': round(change_percent, 3),
+                    'timestamp': datetime.now().isoformat(),
+                    'source': 'gold-api.com',
+                    'bid': bid,
+                    'ask': ask,
+                    'spread': spread,
+                    'market_session': get_current_market_session(),
+                    'currency': 'USD',
+                    'unit': 'ounce'
+                }
         
-        current_price = round(base_price + hour_variation + minute_variation, 2)
+        # If API call fails, log and fall through to fallback
+        logger.warning(f"Gold API returned status {response.status_code}")
         
-        # Enhanced daily range calculation
-        daily_volatility = random.uniform(0.01, 0.03)  # 1% to 3%
-        high_price = round(current_price * (1 + daily_volatility), 2)
-        low_price = round(current_price * (1 - daily_volatility), 2)
-        
-        return {
-            'price': current_price,
-            'high': high_price,
-            'low': low_price,
-            'volume': round(random.uniform(100000, 500000), 0),
-            'change': round(hour_variation + minute_variation, 2),
-            'change_percent': round(((hour_variation + minute_variation) / base_price) * 100, 3),
-            'timestamp': datetime.now().isoformat(),
-            'source': 'enhanced_simulation',
-            'bid': round(current_price - random.uniform(0.1, 0.5), 2),
-            'ask': round(current_price + random.uniform(0.1, 0.5), 2),
-            'spread': round(random.uniform(0.2, 1.0), 2),
-            'market_session': get_current_market_session()
-        }
-        
+    except requests.exceptions.RequestException as e:
+        logger.warning(f"Gold API request failed: {e}")
     except Exception as e:
-        logger.error(f"Error getting gold price: {e}")
-        return {
-            'price': 2400.0,
-            'high': 2415.0,
-            'low': 2385.0,
-            'volume': 250000,
-            'change': 0.0,
-            'change_percent': 0.0,
-            'timestamp': datetime.now().isoformat(),
-            'source': 'fallback',
-            'bid': 2399.5,
-            'ask': 2400.5,
-            'spread': 1.0,
-            'market_session': 'unknown'
-        }
+        logger.warning(f"Error fetching gold price from API: {e}")
+    
+    # Fallback to enhanced simulation with realistic current market data
+    logger.info("Using enhanced simulation fallback for gold price")
+    
+    # Enhanced fallback with realistic market simulation
+    base_price = 2650.0  # Current approximate gold price
+    now = datetime.now()
+    
+    # Market hour variation (higher volatility during London/NY sessions)
+    market_hour_multiplier = 1.0
+    if 8 <= now.hour <= 17:  # European/US market hours
+        market_hour_multiplier = 1.5
+    elif 0 <= now.hour <= 6:  # Asian market hours
+        market_hour_multiplier = 0.8
+        
+    hour_variation = (hash(str(now.hour)) % 100 - 50) * 0.5 * market_hour_multiplier
+    minute_variation = (hash(str(now.minute)) % 20 - 10) * 0.1
+    
+    current_price = round(base_price + hour_variation + minute_variation, 2)
+    
+    # Enhanced daily range calculation
+    daily_volatility = random.uniform(0.01, 0.03)  # 1% to 3%
+    high_price = round(current_price * (1 + daily_volatility), 2)
+    low_price = round(current_price * (1 - daily_volatility), 2)
+    
+    return {
+        'price': current_price,
+        'high': high_price,
+        'low': low_price,
+        'volume': round(random.uniform(100000, 500000), 0),
+        'change': round(hour_variation + minute_variation, 2),
+        'change_percent': round(((hour_variation + minute_variation) / base_price) * 100, 3),
+        'timestamp': datetime.now().isoformat(),
+        'source': 'enhanced_simulation',
+        'bid': round(current_price - random.uniform(0.1, 0.5), 2),
+        'ask': round(current_price + random.uniform(0.1, 0.5), 2),
+        'spread': round(random.uniform(0.2, 1.0), 2),
+        'market_session': get_current_market_session(),
+        'currency': 'USD',
+        'unit': 'ounce'
+    }
 
 def get_current_market_session():
     """Determine current market session based on time"""
