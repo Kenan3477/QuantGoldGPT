@@ -3549,25 +3549,25 @@
                                     </div>
                                     <div class="card-body">
                                         <div class="prediction-value" id="prediction-15m">
-                                            <span class="value">--</span>
-                                            <span class="change">--</span>
+                                            <span class="value" data-placeholder="true" data-type="price">--</span>
+                                            <span class="change" data-placeholder="true" data-type="change">--</span>
                                         </div>
                                         <div class="confidence-section">
                                             <div class="confidence-label">Confidence</div>
                                             <div class="confidence-bar">
                                                 <div class="confidence-fill" id="confidence-15m"></div>
-                                                <span class="confidence-text" id="confidence-text-15m">--%</span>
+                                                <span class="confidence-text" id="confidence-text-15m" data-placeholder="true" data-type="confidence">--%</span>
                                             </div>
                                         </div>
                                         <div class="prediction-direction" id="direction-15m">
                                             <i class="fas fa-arrow-right"></i>
-                                            <span>Neutral</span>
+                                            <span data-placeholder="true" data-type="direction">Neutral</span>
                                         </div>
                                     </div>
                                 </div>
 
                                 <!-- 1h Prediction Card -->
-                                <div class="prediction-card" data-timeframe="1h">
+                                <div class="prediction-card" data-timeframe="1h" data-type="dynamic">
                                     <div class="card-header">
                                         <div class="timeframe-badge">1H</div>
                                         <div class="prediction-status" id="status-1h">
@@ -3576,19 +3576,19 @@
                                     </div>
                                     <div class="card-body">
                                         <div class="prediction-value" id="prediction-1h">
-                                            <span class="value">--</span>
-                                            <span class="change">--</span>
+                                            <span class="value" data-placeholder="true" data-type="price">--</span>
+                                            <span class="change" data-placeholder="true" data-type="change">--</span>
                                         </div>
                                         <div class="confidence-section">
                                             <div class="confidence-label">Confidence</div>
                                             <div class="confidence-bar">
                                                 <div class="confidence-fill" id="confidence-1h"></div>
-                                                <span class="confidence-text" id="confidence-text-1h">--%</span>
+                                                <span class="confidence-text" id="confidence-text-1h" data-placeholder="true" data-type="confidence">--%</span>
                                             </div>
                                         </div>
                                         <div class="prediction-direction" id="direction-1h">
                                             <i class="fas fa-arrow-right"></i>
-                                            <span>Neutral</span>
+                                            <span data-placeholder="true" data-type="direction">Neutral</span>
                                         </div>
                                     </div>
                                 </div>
@@ -3621,7 +3621,7 @@
                                 </div>
 
                                 <!-- 24h Prediction Card -->
-                                <div class="prediction-card" data-timeframe="24h">
+                                <div class="prediction-card" data-timeframe="24h" data-type="daily">
                                     <div class="card-header">
                                         <div class="timeframe-badge">24H</div>
                                         <div class="prediction-status" id="status-24h">
@@ -3630,19 +3630,19 @@
                                     </div>
                                     <div class="card-body">
                                         <div class="prediction-value" id="prediction-24h">
-                                            <span class="value">--</span>
-                                            <span class="change">--</span>
+                                            <span class="value" data-placeholder="true" data-type="price">--</span>
+                                            <span class="change" data-placeholder="true" data-type="change">--</span>
                                         </div>
                                         <div class="confidence-section">
                                             <div class="confidence-label">Confidence</div>
                                             <div class="confidence-bar">
                                                 <div class="confidence-fill" id="confidence-24h"></div>
-                                                <span class="confidence-text" id="confidence-text-24h">--%</span>
+                                                <span class="confidence-text" id="confidence-text-24h" data-placeholder="true" data-type="confidence">--%</span>
                                             </div>
                                         </div>
                                         <div class="prediction-direction" id="direction-24h">
                                             <i class="fas fa-arrow-right"></i>
-                                            <span>Neutral</span>
+                                            <span data-placeholder="true" data-type="direction">Neutral</span>
                                         </div>
                                     </div>
                                 </div>
@@ -3771,7 +3771,7 @@
                                     <div class="stat-label">Model Health</div>
                                     <div class="stat-value health" id="model-health">
                                         <div class="health-indicator" id="health-indicator"></div>
-                                        <span id="health-text">Checking...</span>
+                                        <span id="health-text" data-ml="health" data-placeholder="true">Checking...</span>
                                     </div>
                                 </div>
                             </div>
@@ -3779,12 +3779,12 @@
                     </div>
                 </div>
             </div>
-                                <span class="confidence">Loading...</span>
+                                <span class="confidence" data-placeholder="true" data-type="confidence">Loading...</span>
                             </div>
                             <div class="prediction-item">
                                 <span class="prediction-label">7D Forecast:</span>
-                                <span class="prediction-value loading">Loading...</span>
-                                <span class="confidence">Loading...</span>
+                                <span class="prediction-value loading" data-placeholder="true" data-type="forecast">Loading...</span>
+                                <span class="confidence" data-placeholder="true" data-type="confidence">Loading...</span>
                             </div>
                         </div>
                     </div>
@@ -7803,6 +7803,25 @@
                 
                 console.log('📡 All data feeds started successfully');
                 showNotification('Live Gold-API data feed started', 'success');
+                
+                // 🧠 Initialize ML Dashboard System
+                console.log('🚀 Initializing ML Dashboard System...');
+                try {
+                    window.mlDataManager = new MLDataManager();
+                    window.mlDashboardController = new MLDashboardController();
+                    console.log('✅ ML Dashboard System initialized successfully');
+                } catch (error) {
+                    console.error('❌ ML Dashboard initialization failed:', error);
+                }
+                
+                // Add refresh function for ML Dashboard
+                window.refreshMLPredictions = function() {
+                    console.log('🔄 Manual refresh triggered for ML Dashboard');
+                    if (window.mlDataManager) {
+                        window.mlDataManager.forceRefresh();
+                    }
+                };
+                
             }, 1000);
         }); // End DOMContentLoaded
 
@@ -7830,6 +7849,12 @@
             
             // 5.6. Initialize ML predictions
             initializeMLPredictions();
+            
+            // 5.61. Initialize model health status
+            initializeModelHealth();
+            
+            // 5.62. Initialize market regime
+            initializeMarketRegime();
             
             // 5.7. Initialize market news
             initializeMarketNews();
@@ -8067,7 +8092,7 @@
         
         function initializeMLPredictions() {
             try {
-                console.log('🚀 INITIALIZING ML PREDICTIONS - REAL DATA ONLY VERSION');
+                console.log('🚀 INITIALIZING ML PREDICTIONS - USING NEW ML DASHBOARD API');
                 
                 const mlPanel = document.getElementById('ml-predictions-panel');
                 if (!mlPanel) {
@@ -8075,13 +8100,16 @@
                     return;
                 }
                 
-                console.log('📡 Fetching REAL data from /api/advanced-ml/predictions...');
-                // Fetch predictions from Fixed ML Engine for all timeframes (same as ML dashboard)
-                fetch(`/api/advanced-ml/predictions?t=${Date.now()}`, {
-                    method: 'GET',
+                console.log('📡 Fetching REAL data from /api/ml-predictions...');
+                // Use our new ML Dashboard API
+                fetch('/api/ml-predictions', {
+                    method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
-                    }
+                    },
+                    body: JSON.stringify({
+                        timeframes: ['15m', '1h', '4h', '24h']
+                    })
                 })
                     .then(response => {
                         if (!response.ok) {
@@ -8090,41 +8118,39 @@
                         return response.json();
                     })
                     .then(data => {
-                        console.log('🎯 Fixed ML Engine response:', data);
-                        console.log('Status check:', data.status, 'Predictions:', !!data.predictions);
+                        console.log('🎯 ML Dashboard API response:', data);
+                        console.log('Status check:', data.success, 'Predictions:', !!data.predictions);
                         
                         // DEBUG: Log actual API prices (ML dashboard format)
                         if (data.predictions) {
                             Object.keys(data.predictions).forEach(tf => {
-                                const predList = data.predictions[tf];
-                                const pred = Array.isArray(predList) ? predList[0] : predList;
+                                const pred = data.predictions[tf];
                                 if (pred) {
-                                    console.log(`🔍 ${tf} API Data: Current $${pred.current_price?.toFixed(2)}, Target $${pred.target_price?.toFixed(2)}`);
+                                    console.log(`🔍 ${tf} API Data: Current $${pred.current_price?.toFixed(2)}, Target $${pred.predicted_price?.toFixed(2)}`);
                                 }
                             });
                         }
                         
-                        console.log('🚀 FORCING UPDATE WITH REAL API DATA - NO FALLBACKS');
-                        if (data.predictions) {
+                        console.log('🚀 FORCING UPDATE WITH REAL ML DASHBOARD DATA');
+                        if (data.success && data.predictions) {
                             updateMLPredictionsDisplay(data);
-                            console.log('✅ Used real Fixed ML Engine data successfully');
+                            console.log('✅ Used real ML Dashboard data successfully');
                         } else {
                             console.error('❌ No predictions in API response:', data);
                         }
                     })
                     .catch(error => {
-                        console.error('❌ Fixed ML Engine fetch error:', error);
-                        console.log('🔧 Trying to use Fixed ML data anyway...');
-                        // Try to get the data directly from same endpoint as ML dashboard
-                        fetch('/api/advanced-ml/predictions', { headers: { 'Content-Type': 'application/json' } })
+                        console.error('❌ ML Dashboard API fetch error:', error);
+                        console.log('🔧 Trying compatibility endpoint...');
+                        // Try compatibility endpoint as fallback
+                        fetch('/api/dynamic-ml-prediction/XAUUSD')
                             .then(response => response.json())
                             .then(data => {
-                                console.log('🔧 Retry successful:', data);
+                                console.log('🔧 Compatibility endpoint successful:', data);
                                 updateMLPredictionsDisplay(data);
                             })
                             .catch(e => {
-                                console.error('❌ Retry also failed:', e);
-                                // Last resort - show loading state instead of fake data
+                                console.error('❌ All endpoints failed:', e);
                                 console.log('🔧 Showing loading state instead of fake data');
                             });
                     });
@@ -10043,8 +10069,8 @@
         }, 1000);
     </script>
     
-    <!-- EMERGENCY ML PREDICTIONS FIX - Bypasses all JavaScript errors -->
-    <script src="{{ url_for('static', filename='js/emergency-ml-fix.js') }}"></script>
+    <!-- DASHBOARD ML FIX - Clean implementation with real ML data -->
+    <script src="{{ url_for('static', filename='js/dashboard-ml-fix.js') }}"></script>
     
     <!-- 🔧 ACCURACY FIX - Fixes Gold Price, ML Predictions & News Loading -->
     <script src="{{ url_for('static', filename='js/accuracy-fix.js') }}"></script>
@@ -11725,19 +11751,6 @@
         
         // Initialize navigation on page load
         initializeNavigation();
-        
-        // Initialize ML Dashboard System
-        console.log('🚀 Initializing ML Dashboard System...');
-        window.mlDataManager = new MLDataManager();
-        window.mlDashboardController = new MLDashboardController();
-        
-        // Add refresh function for ML Dashboard
-        window.refreshMLPredictions = function() {
-            console.log('🔄 Manual refresh triggered for ML Dashboard');
-            if (window.mlDataManager) {
-                window.mlDataManager.forceRefresh();
-            }
-        };
         
         // FORCE REAL DATA REFRESH EVERY 30 SECONDS
         setInterval(() => {

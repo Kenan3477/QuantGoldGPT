@@ -744,14 +744,16 @@ def get_ml_health():
     try:
         health_status = {
             'systems': {
-                'analysis_system': ml_api.analysis_system is not None,
-                'prediction_engine': ml_api.prediction_engine is not None,
-                'ensemble_system': ml_api.ensemble_system is not None
+                'analysis_engine': ml_api.analysis_engine is not None,
+                'ml_manager': ml_api.ml_manager is not None,
+                'ensemble_system': ml_api.ensemble_system is not None,
+                'advanced_engine': ml_api.advanced_engine is not None
             },
             'cache': {
                 'predictions': len(ml_api.prediction_cache),
                 'accuracy': len(ml_api.accuracy_cache)
             },
+            'real_ml_systems': REAL_ML_AVAILABLE,
             'status': 'healthy',
             'timestamp': datetime.now().isoformat()
         }
