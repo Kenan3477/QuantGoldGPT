@@ -493,8 +493,6 @@ def enhanced_get_current_gold_price():
             'currency': 'USD',
             'unit': 'troy_ounce'
         }
-        'unit': 'troy_ounce'
-    }
 
 
 if __name__ == '__main__':
