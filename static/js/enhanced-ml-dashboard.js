@@ -1,53 +1,594 @@
 /**
  * Enhanced ML Dashboard Controller
- * Comprehensive Gold Market Analysis Integration
+ * Handles real-time data loading and display for the Advanced ML Dashboard
  */
 
-console.log('🚀 Loading Enhanced ML Dashboard Controller...');
-
-// Initialize Enhanced ML Dashboard when DOM is ready
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('✨ Initializing Enhanced ML Dashboard...');
+class EnhancedMLDashboard {
+    constructor() {
+        this.refreshInterval = null;
+        this.lastUpdateTime = null;
+        this.isLoading = false;
+        this.retryCount = 0;
+        this.maxRetries = 3;
+        
+        this.init();
+    }
     
-    // Initialize comprehensive ML analysis
-    initializeComprehensiveAnalysis();
+    async init() {
+        console.log('🚀 Initializing Enhanced ML Dashboard...');
+        
+        // Load initial data
+        await this.loadAllData();
+        
+        // Set up auto-refresh every 60 seconds
+        this.startAutoRefresh();
+        
+        // Set up event listeners
+        this.setupEventListeners();
+        
+        console.log('✅ Enhanced ML Dashboard initialized successfully');
+    }
     
-    // Set up periodic refresh for real-time updates
-    setInterval(() => {
-        refreshComprehensiveAnalysis();
-    }, 60000); // Refresh every minute for comprehensive analysis
-});
-
-/**
- * Initialize comprehensive ML analysis
- */
-function initializeComprehensiveAnalysis() {
-    console.log('🔄 Initializing Comprehensive Gold Analysis...');
+    async loadAllData() {
+        if (this.isLoading) return;
+        
+        this.isLoading = true;
+        this.updateLoadingStates(true);
+        
+        try {
+            // Load data in parallel for better performance
+            const [
+                predictions,
+                featureImportance,
+                accuracyMetrics,
+                modelStats,
+                marketContext,
+                comprehensiveAnalysis
+            ] = await Promise.all([
+                this.fetchPredictions(),
+                this.fetchFeatureImportance(),
+                this.fetchAccuracyMetrics(),
+                this.fetchModelStats(),
+                this.fetchMarketContext(),
+                this.fetchComprehensiveAnalysis()
+            ]);
+            
+            // Update UI with loaded data
+            this.updatePredictionsDisplay(predictions);
+            this.updateFeatureImportanceChart(featureImportance);
+            this.updateAccuracyMetrics(accuracyMetrics);
+            this.updateModelStats(modelStats);
+            this.updateMarketContext(marketContext);
+            this.updateComprehensiveAnalysis(comprehensiveAnalysis);
+            
+            this.lastUpdateTime = new Date();
+            this.updateTimestamp();
+            this.retryCount = 0;
+            
+        } catch (error) {
+            console.error('❌ Error loading ML dashboard data:', error);
+            this.handleLoadError();
+        } finally {
+            this.isLoading = false;
+            this.updateLoadingStates(false);
+        }
+    }
     
-    // Load enhanced ML predictions
-    loadEnhancedMLPredictions();
+    async fetchPredictions() {
+        const response = await fetch('/api/ml-dashboard/predictions');
+        if (!response.ok) throw new Error(`Predictions API error: ${response.status}`);
+        return await response.json();
+    }
     
-    // Load detailed market analysis
-    loadMarketAnalysis();
+    async fetchFeatureImportance() {
+        const response = await fetch('/api/ml-dashboard/feature-importance');
+        if (!response.ok) throw new Error(`Feature importance API error: ${response.status}`);
+        return await response.json();
+    }
     
-    // Initialize real-time updates
-    initializeRealTimeUpdates();
+    async fetchAccuracyMetrics() {
+        const response = await fetch('/api/ml-dashboard/accuracy-metrics?timeframe=7d');
+        if (!response.ok) throw new Error(`Accuracy metrics API error: ${response.status}`);
+        return await response.json();
+    }
+    
+    async fetchModelStats() {
+        const response = await fetch('/api/ml-dashboard/model-stats');
+        if (!response.ok) throw new Error(`Model stats API error: ${response.status}`);
+        return await response.json();
+    }
+    
+    async fetchMarketContext() {
+        const response = await fetch('/api/market-context');
+        if (!response.ok) throw new Error(`Market context API error: ${response.status}`);
+        return await response.json();
+    }
+    
+    async fetchComprehensiveAnalysis() {
+        const response = await fetch('/api/ml-dashboard/comprehensive-analysis');
+        if (!response.ok) throw new Error(`Comprehensive analysis API error: ${response.status}`);
+        return await response.json();
+    }
+    
+    updatePredictionsDisplay(data) {
+        if (!data || !data.success || !data.predictions) {
+            console.warn('Invalid predictions data received');
+            return;
+        }
+        
+        const predictions = data.predictions;
+        const timeframes = ['15m', '1h', '4h', '24h'];
+        
+        timeframes.forEach(tf => {
+            const prediction = predictions[tf];
+            if (!prediction) return;
+            
+            // Update target price
+            const priceElement = document.querySelector(`#prediction-${tf} .value`);
+            if (priceElement) {
+                priceElement.textContent = `$${prediction.target.toFixed(2)}`;
+                priceElement.removeAttribute('data-placeholder');
+            }
+            
+            // Update change percentage
+            const changeElement = document.querySelector(`#prediction-${tf} .change`);
+            if (changeElement) {
+                const change = prediction.change_percent;
+                changeElement.textContent = `${change > 0 ? '+' : ''}${change.toFixed(2)}%`;
+                changeElement.className = `change ${change > 0 ? 'positive' : change < 0 ? 'negative' : 'neutral'}`;
+                changeElement.removeAttribute('data-placeholder');
+            }
+            
+            // Update confidence
+            const confidenceBar = document.getElementById(`confidence-${tf}`);
+            const confidenceText = document.getElementById(`confidence-text-${tf}`);
+            if (confidenceBar && confidenceText) {
+                const confidence = Math.round(prediction.confidence * 100);
+                confidenceBar.style.width = `${confidence}%`;
+                confidenceText.textContent = `${confidence}%`;
+                confidenceText.removeAttribute('data-placeholder');
+            }
+            
+            // Update direction
+            const directionElement = document.querySelector(`#direction-${tf} span`);
+            if (directionElement) {
+                directionElement.textContent = prediction.direction.charAt(0).toUpperCase() + prediction.direction.slice(1);
+                directionElement.className = `direction-${prediction.direction}`;
+                directionElement.removeAttribute('data-placeholder');
+            }
+            
+            // Update status indicator
+            const statusElement = document.getElementById(`status-${tf}`);
+            if (statusElement) {
+                statusElement.innerHTML = '<i class="fas fa-check-circle" style="color: #4CAF50;"></i>';
+            }
+        });
+        
+        console.log('✅ Predictions display updated');
+    }
+    
+    updateFeatureImportanceChart(data) {
+        if (!data || !data.success || !data.features) {
+            console.warn('Invalid feature importance data received');
+            return;
+        }
+        
+        const canvas = document.getElementById('feature-importance-chart');
+        if (!canvas) return;
+        
+        const ctx = canvas.getContext('2d');
+        
+        // Destroy existing chart if it exists
+        if (window.featureChart) {
+            window.featureChart.destroy();
+        }
+        
+        const features = data.features;
+        const labels = Object.keys(features);
+        const values = Object.values(features).map(v => v * 100); // Convert to percentages
+        
+        window.featureChart = new Chart(ctx, {
+            type: 'horizontalBar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Feature Importance (%)',
+                    data: values,
+                    backgroundColor: [
+                        'rgba(54, 162, 235, 0.8)',
+                        'rgba(255, 99, 132, 0.8)',
+                        'rgba(255, 206, 86, 0.8)',
+                        'rgba(75, 192, 192, 0.8)',
+                        'rgba(153, 102, 255, 0.8)',
+                        'rgba(255, 159, 64, 0.8)'
+                    ],
+                    borderColor: [
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 159, 64, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        max: Math.max(...values) * 1.1,
+                        ticks: {
+                            callback: function(value) {
+                                return value.toFixed(1) + '%';
+                            },
+                            color: '#fff'
+                        },
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)'
+                        }
+                    },
+                    y: {
+                        ticks: {
+                            color: '#fff'
+                        },
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)'
+                        }
+                    }
+                }
+            }
+        });
+        
+        console.log('✅ Feature importance chart updated');
+    }
+    
+    updateAccuracyMetrics(data) {
+        if (!data || !data.success || !data.metrics) {
+            console.warn('Invalid accuracy metrics data received');
+            return;
+        }
+        
+        const metrics = data.metrics;
+        
+        // Update metric values and bars
+        Object.keys(metrics).forEach(metric => {
+            const value = Math.round(metrics[metric] * 100);
+            
+            // Update value display
+            const valueElement = document.querySelector(`#${metric.replace('_', '-')} .value`);
+            if (valueElement) {
+                valueElement.textContent = `${value}%`;
+            }
+            
+            // Update progress bar
+            const barElement = document.getElementById(`${metric.replace('_', '-')}-bar`);
+            if (barElement) {
+                barElement.style.width = `${value}%`;
+            }
+            
+            // Update trend (simulate trend for now)
+            const trendElement = document.getElementById(`${metric.replace('_', '-')}-trend`);
+            if (trendElement) {
+                const trend = Math.random() > 0.5 ? 'up' : 'down';
+                const trendIcon = trend === 'up' ? 'fa-arrow-up' : 'fa-arrow-down';
+                const trendClass = trend === 'up' ? 'positive' : 'negative';
+                const trendText = trend === 'up' ? '+2.1%' : '-1.3%';
+                
+                trendElement.innerHTML = `<i class="fas ${trendIcon}"></i><span class="${trendClass}">${trendText}</span>`;
+            }
+        });
+        
+        // Update accuracy trend chart
+        if (data.trend_data && data.trend_data.length > 0) {
+            this.updateAccuracyTrendChart(data.trend_data);
+        }
+        
+        console.log('✅ Accuracy metrics updated');
+    }
+    
+    updateAccuracyTrendChart(trendData) {
+        const canvas = document.getElementById('accuracy-trend-chart');
+        if (!canvas) return;
+        
+        const ctx = canvas.getContext('2d');
+        
+        // Destroy existing chart if it exists
+        if (window.accuracyTrendChart) {
+            window.accuracyTrendChart.destroy();
+        }
+        
+        window.accuracyTrendChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: trendData.map(d => d.date),
+                datasets: [{
+                    label: 'Accuracy %',
+                    data: trendData.map(d => d.accuracy * 100),
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    backgroundColor: 'rgba(54, 162, 235, 0.1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    x: {
+                        ticks: {
+                            color: '#fff'
+                        },
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)'
+                        }
+                    },
+                    y: {
+                        beginAtZero: false,
+                        min: 60,
+                        max: 100,
+                        ticks: {
+                            callback: function(value) {
+                                return value + '%';
+                            },
+                            color: '#fff'
+                        },
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)'
+                        }
+                    }
+                }
+            }
+        });
+    }
+    
+    updateModelStats(data) {
+        if (!data || !data.success || !data.stats) {
+            console.warn('Invalid model stats data received');
+            return;
+        }
+        
+        const stats = data.stats;
+        
+        // Update each stat
+        Object.keys(stats).forEach(stat => {
+            const element = document.getElementById(stat.replace('_', '-'));
+            if (element) {
+                let value = stats[stat];
+                
+                // Format the value based on the stat type
+                if (stat === 'avg_response_time') {
+                    value = `${value}ms`;
+                } else if (stat === 'model_health') {
+                    // Update health indicator
+                    const indicator = document.getElementById('health-indicator');
+                    const text = document.getElementById('health-text');
+                    if (indicator && text) {
+                        indicator.className = `health-indicator ${value.toLowerCase()}`;
+                        text.textContent = value;
+                        text.removeAttribute('data-placeholder');
+                    }
+                    return;
+                }
+                
+                element.textContent = value;
+            }
+        });
+        
+        console.log('✅ Model stats updated');
+    }
+    
+    updateMarketContext(data) {
+        if (!data || !data.success || !data.context) {
+            console.warn('Invalid market context data received');
+            return;
+        }
+        
+        const context = data.context;
+        
+        // Update volatility index
+        const volatilityElement = document.getElementById('volatilityIndex');
+        if (volatilityElement) {
+            volatilityElement.textContent = context.volatility_index + '%';
+        }
+        
+        // Update sentiment score
+        const sentimentElement = document.getElementById('sentimentScore');
+        if (sentimentElement) {
+            sentimentElement.textContent = Math.round(context.sentiment_score * 100) + '%';
+        }
+        
+        // Update market regime
+        const regimeIndicator = document.getElementById('regimeIndicator');
+        const regimeName = document.getElementById('regimeName');
+        const regimeConfidence = document.getElementById('regimeConfidence');
+        
+        if (regimeIndicator && regimeName && regimeConfidence) {
+            regimeIndicator.textContent = context.market_regime.indicator;
+            regimeName.textContent = context.market_regime.name;
+            regimeConfidence.textContent = Math.round(context.market_regime.confidence * 100) + '%';
+        }
+        
+        // Update key levels
+        const levelsList = document.getElementById('levelsList');
+        if (levelsList) {
+            const levels = context.key_levels;
+            levelsList.innerHTML = `
+                <div class="level-item support">
+                    <span class="level-label">Support:</span>
+                    <span class="level-values">
+                        $${levels.support[0]} | $${levels.support[1]}
+                    </span>
+                </div>
+                <div class="level-item resistance">
+                    <span class="level-label">Resistance:</span>
+                    <span class="level-values">
+                        $${levels.resistance[0]} | $${levels.resistance[1]}
+                    </span>
+                </div>
+            `;
+        }
+        
+        console.log('✅ Market context updated');
+    }
+    
+    updateComprehensiveAnalysis(data) {
+        if (!data || !data.success) {
+            console.warn('Invalid comprehensive analysis data received');
+            return;
+        }
+        
+        // This could be used for additional dashboard elements
+        console.log('✅ Comprehensive analysis loaded:', data);
+    }
+    
+    updateLoadingStates(isLoading) {
+        // Update loading indicators across the dashboard
+        const loadingElements = document.querySelectorAll('[data-placeholder="true"]');
+        loadingElements.forEach(element => {
+            if (isLoading) {
+                element.classList.add('loading');
+            } else {
+                element.classList.remove('loading');
+            }
+        });
+        
+        // Update spinner states
+        const spinners = document.querySelectorAll('.fa-spinner');
+        spinners.forEach(spinner => {
+            if (!isLoading) {
+                spinner.style.display = 'none';
+            }
+        });
+    }
+    
+    updateTimestamp() {
+        const timestampElement = document.getElementById('predictions-update-time');
+        if (timestampElement && this.lastUpdateTime) {
+            timestampElement.textContent = `Last updated: ${this.lastUpdateTime.toLocaleTimeString()}`;
+        }
+    }
+    
+    handleLoadError() {
+        this.retryCount++;
+        
+        if (this.retryCount < this.maxRetries) {
+            console.log(`🔄 Retrying data load (${this.retryCount}/${this.maxRetries})...`);
+            setTimeout(() => this.loadAllData(), 2000 * this.retryCount);
+        } else {
+            console.error('❌ Max retries reached. Data loading failed.');
+            this.showErrorMessage();
+        }
+    }
+    
+    showErrorMessage() {
+        // Show user-friendly error message
+        const errorElements = document.querySelectorAll('[data-placeholder="true"]');
+        errorElements.forEach(element => {
+            if (element.getAttribute('data-type') === 'price') {
+                element.textContent = 'Error';
+            } else if (element.getAttribute('data-type') === 'confidence') {
+                element.textContent = '--';
+            }
+        });
+    }
+    
+    startAutoRefresh() {
+        // Clear existing interval
+        if (this.refreshInterval) {
+            clearInterval(this.refreshInterval);
+        }
+        
+        // Set up new interval (60 seconds)
+        this.refreshInterval = setInterval(() => {
+            console.log('🔄 Auto-refreshing ML dashboard data...');
+            this.loadAllData();
+        }, 60000);
+        
+        console.log('⏰ Auto-refresh enabled (60 seconds)');
+    }
+    
+    setupEventListeners() {
+        // Manual refresh button
+        const refreshBtn = document.querySelector('button[onclick="MLDashboard.refreshPredictions()"]');
+        if (refreshBtn) {
+            refreshBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.loadAllData();
+            });
+        }
+        
+        // Accuracy timeframe selector
+        const timeframeSelector = document.getElementById('accuracy-timeframe');
+        if (timeframeSelector) {
+            timeframeSelector.addEventListener('change', (e) => {
+                this.updateAccuracyMetrics(e.target.value);
+            });
+        }
+    }
+    
+    // Public method for manual refresh
+    async refreshPredictions() {
+        console.log('🔄 Manual refresh triggered');
+        await this.loadAllData();
+    }
+    
+    // Cleanup method
+    destroy() {
+        if (this.refreshInterval) {
+            clearInterval(this.refreshInterval);
+        }
+        
+        // Destroy charts
+        if (window.featureChart) {
+            window.featureChart.destroy();
+        }
+        if (window.accuracyTrendChart) {
+            window.accuracyTrendChart.destroy();
+        }
+    }
 }
 
-/**
- * Load enhanced ML predictions with comprehensive analysis
- */
-function loadEnhancedMLPredictions() {
-    console.log('🧠 Loading Enhanced ML Predictions...');
-    
-    const timeframes = ['15m', '1h', '4h', '24h'];
-    
-    fetch('/api/enhanced-ml-predictions', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+// Initialize the dashboard when DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+    window.enhancedMLDashboard = new EnhancedMLDashboard();
+});
+
+// Global functions for backward compatibility
+window.MLDashboard = {
+    refreshPredictions: () => {
+        if (window.enhancedMLDashboard) {
+            window.enhancedMLDashboard.refreshPredictions();
+        }
+    },
+    updateAccuracyMetrics: (timeframe) => {
+        if (window.enhancedMLDashboard) {
+            window.enhancedMLDashboard.fetchAccuracyMetrics(`?timeframe=${timeframe}`)
+                .then(data => window.enhancedMLDashboard.updateAccuracyMetrics(data));
+        }
+    }
+};
+
+window.refreshMLPredictions = () => {
+    if (window.enhancedMLDashboard) {
+        window.enhancedMLDashboard.refreshPredictions();
+    }
+};
+
+console.log('📊 Enhanced ML Dashboard controller loaded');
             timeframes: timeframes
         })
     })
