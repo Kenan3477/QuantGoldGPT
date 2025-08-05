@@ -339,6 +339,16 @@ except ImportError as e:
 except Exception as e:
     logger.error(f"❌ Failed to register ML Dashboard Test routes: {e}")
 
+# Initialize Strategy API Routes
+try:
+    from strategy_api import register_strategy_routes
+    register_strategy_routes(app)
+    logger.info("✅ Strategy API routes registered")
+except ImportError as e:
+    logger.warning(f"⚠️ Strategy API routes not available: {e}")
+except Exception as e:
+    logger.error(f"❌ Failed to register Strategy API routes: {e}")
+
 # Initialize database on startup
 init_database()
 
@@ -1823,155 +1833,6 @@ def start_background_updates():
     threading.Thread(target=portfolio_updater, daemon=True).start()
     
     logger.info("✅ All advanced background update tasks started")
-
-# Missing API endpoints that the JavaScript is calling
-@app.route('/api/ml-predictions', methods=['POST'])
-def api_ml_predictions_post():
-    """ML predictions endpoint (POST method)"""
-    try:
-        ml_data = get_ml_predictions()
-        return jsonify(ml_data)
-    except Exception as e:
-        logger.error(f"ML predictions error: {e}")
-        return jsonify({'success': False, 'error': str(e)}), 500
-
-@app.route('/api/ml-accuracy')
-def api_ml_accuracy():
-    """ML accuracy metrics endpoint"""
-    try:
-        timeframe = request.args.get('timeframe', '7d')
-        # Generate accuracy data based on timeframe
-        accuracy_data = {
-            'success': True,
-            'timeframe': timeframe,
-            'accuracy': round(random.uniform(0.72, 0.89), 3),
-            'last_updated': datetime.now().isoformat(),
-            'metrics': {
-                'precision': round(random.uniform(0.68, 0.85), 3),
-                'recall': round(random.uniform(0.70, 0.87), 3),
-                'f1_score': round(random.uniform(0.69, 0.86), 3)
-            }
-        }
-        return jsonify(accuracy_data)
-    except Exception as e:
-        logger.error(f"ML accuracy error: {e}")
-        return jsonify({'success': False, 'error': str(e)}), 500
-
-@app.route('/api/ml-performance')
-def api_ml_performance():
-    """ML performance metrics endpoint"""
-    try:
-        performance_data = {
-            'success': True,
-            'models': {
-                'LSTM': {'accuracy': 0.847, 'last_updated': datetime.now().isoformat()},
-                'Random Forest': {'accuracy': 0.832, 'last_updated': datetime.now().isoformat()},
-                'XGBoost': {'accuracy': 0.856, 'last_updated': datetime.now().isoformat()},
-                'Neural Network': {'accuracy': 0.841, 'last_updated': datetime.now().isoformat()}
-            },
-            'ensemble_accuracy': 0.862,
-            'sharpe_ratio': round(random.uniform(1.2, 2.8), 2),
-            'last_updated': datetime.now().isoformat()
-        }
-        return jsonify(performance_data)
-    except Exception as e:
-        logger.error(f"ML performance error: {e}")
-        return jsonify({'success': False, 'error': str(e)}), 500
-
-@app.route('/api/ml-health')
-def api_ml_health():
-    """ML system health check"""
-    try:
-        health_data = {
-            'success': True,
-            'status': 'healthy',
-            'models_active': 4,
-            'last_prediction': datetime.now().isoformat(),
-            'data_freshness': 'current',
-            'system_load': round(random.uniform(0.1, 0.7), 2)
-        }
-        return jsonify(health_data)
-    except Exception as e:
-        logger.error(f"ML health check error: {e}")
-        return jsonify({'success': False, 'error': str(e)}), 500
-
-@app.route('/api/market-regime/<symbol>')
-def api_market_regime(symbol):
-    """Market regime analysis endpoint"""
-    try:
-        regime_data = {
-            'success': True,
-            'symbol': symbol,
-            'regime': random.choice(['trending', 'ranging', 'volatile', 'stable']),
-            'confidence': round(random.uniform(0.65, 0.95), 3),
-            'volatility_level': random.choice(['low', 'medium', 'high']),
-            'trend_strength': round(random.uniform(0.1, 1.0), 3),
-            'last_updated': datetime.now().isoformat()
-        }
-        return jsonify(regime_data)
-    except Exception as e:
-        logger.error(f"Market regime error: {e}")
-        return jsonify({'success': False, 'error': str(e)}), 500
-
-@app.route('/api/news/sentiment-summary')
-def api_news_sentiment_summary():
-    """News sentiment summary endpoint"""
-    try:
-        sentiment_data = {
-            'success': True,
-            'overall_sentiment': round(random.uniform(0.3, 0.8), 3),
-            'sentiment_label': random.choice(['bullish', 'neutral', 'bearish']),
-            'news_count': random.randint(15, 50),
-            'sources': ['Reuters', 'Bloomberg', 'MarketWatch', 'CNBC'],
-            'last_updated': datetime.now().isoformat(),
-            'key_themes': ['Fed Policy', 'Inflation', 'Geopolitical Tensions', 'Market Volatility']
-        }
-        return jsonify(sentiment_data)
-    except Exception as e:
-        logger.error(f"News sentiment error: {e}")
-        return jsonify({'success': False, 'error': str(e)}), 500
-
-@app.route('/strategy/api/signals/recent')
-def api_strategy_signals_recent():
-    """Recent trading signals endpoint"""
-    try:
-        limit = int(request.args.get('limit', 10))
-        signals_data = {
-            'success': True,
-            'signals': [
-                {
-                    'id': i,
-                    'signal': random.choice(['BUY', 'SELL', 'HOLD']),
-                    'confidence': round(random.uniform(0.6, 0.9), 3),
-                    'timestamp': (datetime.now() - timedelta(hours=i)).isoformat(),
-                    'price': round(2400 + random.uniform(-50, 50), 2)
-                }
-                for i in range(limit)
-            ],
-            'last_updated': datetime.now().isoformat()
-        }
-        return jsonify(signals_data)
-    except Exception as e:
-        logger.error(f"Strategy signals error: {e}")
-        return jsonify({'success': False, 'error': str(e)}), 500
-
-@app.route('/strategy/api/performance')
-def api_strategy_performance():
-    """Strategy performance endpoint"""
-    try:
-        performance_data = {
-            'success': True,
-            'total_return': round(random.uniform(5.2, 23.8), 2),
-            'win_rate': round(random.uniform(0.65, 0.85), 3),
-            'sharpe_ratio': round(random.uniform(1.1, 2.5), 2),
-            'max_drawdown': round(random.uniform(-3.2, -8.7), 2),
-            'total_trades': random.randint(45, 180),
-            'last_updated': datetime.now().isoformat()
-        }
-        return jsonify(performance_data)
-    except Exception as e:
-        logger.error(f"Strategy performance error: {e}")
-        return jsonify({'success': False, 'error': str(e)}), 500
 
 # Error handlers
 @app.errorhandler(404)

@@ -1100,3 +1100,40 @@ function createPredictionCard(prediction) {
 }
 
 console.log('✅ Enhanced ML Dashboard Controller loaded successfully');
+
+// Auto-initialize when DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚀 Initializing Enhanced ML Dashboard...');
+    
+    try {
+        // Initialize the enhanced ML dashboard
+        if (typeof EnhancedMLDashboard !== 'undefined') {
+            window.enhancedMLDashboard = new EnhancedMLDashboard();
+            console.log('✅ Enhanced ML Dashboard initialized successfully');
+        } else {
+            console.error('❌ EnhancedMLDashboard class not found');
+        }
+    } catch (error) {
+        console.error('❌ Failed to initialize Enhanced ML Dashboard:', error);
+    }
+});
+
+// Initialize immediately if DOM is already loaded
+if (document.readyState === 'loading') {
+    // DOM is still loading, wait for DOMContentLoaded
+    console.log('⏳ Waiting for DOM to load...');
+} else {
+    // DOM is already loaded, initialize immediately
+    console.log('🚀 DOM already loaded, initializing Enhanced ML Dashboard...');
+    
+    try {
+        if (typeof EnhancedMLDashboard !== 'undefined') {
+            window.enhancedMLDashboard = new EnhancedMLDashboard();
+            console.log('✅ Enhanced ML Dashboard initialized successfully');
+        } else {
+            console.error('❌ EnhancedMLDashboard class not found');
+        }
+    } catch (error) {
+        console.error('❌ Failed to initialize Enhanced ML Dashboard:', error);
+    }
+}

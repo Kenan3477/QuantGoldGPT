@@ -362,9 +362,25 @@ def get_strategy_status():
             "message": str(e)
         }
 
+def register_strategy_routes(app):
+    """Register strategy API routes"""
+    try:
+        app.register_blueprint(strategy_bp)
+        logger.info("✅ Strategy API routes registered")
+        
+        # Log registered strategy routes for debugging
+        logger.info("📋 Registered Strategy routes:")
+        for rule in app.url_map.iter_rules():
+            if 'strategy' in str(rule):
+                logger.info(f"   {rule.rule} -> {rule.endpoint}")
+                
+    except Exception as e:
+        logger.error(f"❌ Failed to register Strategy API routes: {e}")
+
 # Export for use in main app
 __all__ = [
     'strategy_bp',
     'setup_strategy_integration',
-    'get_strategy_status'
+    'get_strategy_status',
+    'register_strategy_routes'
 ]
