@@ -19,6 +19,16 @@ import random
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# Import positions API
+try:
+    from positions_api import positions_bp
+    POSITIONS_API_AVAILABLE = True
+    logger.info("✅ Positions API available")
+except ImportError as e:
+    POSITIONS_API_AVAILABLE = False
+    logger.warning(f"⚠️ Positions API not available: {e}")
+    positions_bp = None
+
 # Enhanced SocketIO integration
 try:
     from enhanced_socketio_integration import (
@@ -348,6 +358,16 @@ except ImportError as e:
     logger.warning(f"⚠️ Strategy API routes not available: {e}")
 except Exception as e:
     logger.error(f"❌ Failed to register Strategy API routes: {e}")
+
+# Initialize Positions API Blueprint
+if POSITIONS_API_AVAILABLE and positions_bp:
+    try:
+        app.register_blueprint(positions_bp)
+        logger.info("✅ Positions API blueprint registered")
+    except Exception as e:
+        logger.error(f"❌ Failed to register Positions API blueprint: {e}")
+else:
+    logger.warning("⚠️ Positions API blueprint not available")
 
 # Initialize database on startup
 init_database()
