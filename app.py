@@ -364,6 +364,12 @@ if POSITIONS_API_AVAILABLE and positions_bp:
     try:
         app.register_blueprint(positions_bp)
         logger.info("✅ Positions API blueprint registered")
+        
+        # Initialize position monitoring with app context
+        from positions_api import init_position_monitoring
+        init_position_monitoring(app)
+        logger.info("✅ Position monitoring initialized")
+        
     except Exception as e:
         logger.error(f"❌ Failed to register Positions API blueprint: {e}")
 else:

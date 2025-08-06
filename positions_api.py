@@ -473,13 +473,36 @@ def live_update():
         return jsonify({'error': str(e)}), 500
 
 # Auto-close monitoring (runs in background)
-def start_position_monitor():
+def start_position_monitor(app):
     """Start background thread to monitor TP/SL"""
     def monitor_positions():
         while True:
             try:
                 time.sleep(30)  # Check every 30 seconds
-                get_open_positions()  # This will trigger auto-close if TP/SL hit
+                with app.app_context():
+                    # Call the actual function that checks positions
+                    conn = sqlite3.connect(DB_PATH)
+                    cursor = conn.cursor()
+                    
+                    cursor.execute('SELECT * FROM signals WHERE status = "OPEN"')
+                    columns = [description[0] for description in cursor.description]
+                    
+                    for row in cursor.fetchall():
+                        signal = dict(zip(columns, row))
+                        
+                        # Calculate live P&L
+                        pnl, pnl_percentage, current_price = calculate_pnl(signal)
+                        
+                        # Check if TP/SL hit
+                        if signal['type'] == 'BUY':
+                            if current_price >= signal['take_profit'] or current_price <= signal['stop_loss']:
+                                close_position(signal['id'], current_price, 'AUTO')
+                        else:  # SELL
+                            if current_price <= signal['take_profit'] or current_price >= signal['stop_loss']:
+                                close_position(signal['id'], current_price, 'AUTO')
+                    
+                    conn.close()
+                    
             except Exception as e:
                 logger.error(f"Position monitor error: {e}")
             
@@ -487,8 +510,10 @@ def start_position_monitor():
     monitor_thread.start()
     logger.info("Position monitor started")
 
-# Start monitoring on import
-start_position_monitor()
+# Initialize monitoring after app registration
+def init_position_monitoring(app):
+    """Initialize position monitoring with app context"""
+    start_position_monitor(app)
 
 if __name__ == '__main__':
     print("Positions API module - import this in your main app.py")
