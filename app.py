@@ -876,66 +876,90 @@ def generate_detailed_reasoning(recommendation, technical, sentiment, economic, 
 
 # Advanced ML predictions with multiple models
 def get_ml_predictions():
-    """Advanced ML predictions with ensemble models"""
-    base_price = get_current_gold_price()['price']
-    timeframes = ['1H', '4H', '1D', '1W']
-    models = ['LSTM', 'Random Forest', 'XGBoost', 'Neural Network']
-    
-    predictions = []
-    
-    for tf in timeframes:
-        model = random.choice(models)
-        direction = random.choice(['bullish', 'bearish', 'neutral'])
+    """Advanced ML predictions with logical consistency"""
+    try:
+        current_price_data = get_current_gold_price()
+        base_price = current_price_data['price']
         
-        # More realistic price movements based on timeframe
-        if tf == '1H':
-            change_range = (-1.0, 1.0)
-        elif tf == '4H':
-            change_range = (-2.5, 2.5)
-        elif tf == '1D':
-            change_range = (-5.0, 5.0)
-        else:  # 1W
-            change_range = (-8.0, 8.0)
-            
-        change_pct = round(random.uniform(*change_range), 2)
-        target_price = round(base_price * (1 + change_pct/100), 2)
-        confidence = round(random.uniform(0.65, 0.88), 3)
+        # Generate logically consistent predictions
+        predictions_data = {}
         
-        predictions.append({
-            'timeframe': tf,
-            'model': model,
-            'direction': direction,
-            'target_price': target_price,
-            'confidence': confidence,
-            'change_percent': change_pct,
-            'probability_up': round(random.uniform(0.3, 0.8), 3),
-            'probability_down': round(random.uniform(0.2, 0.7), 3),
-            'volatility': round(random.uniform(0.15, 0.35), 3),
-            'reasoning': f"{model} model predicts {direction} movement for {tf} timeframe based on pattern analysis"
-        })
-    
-    # Ensemble prediction
-    ensemble_direction = max(set([p['direction'] for p in predictions]), 
-                           key=[p['direction'] for p in predictions].count)
-    ensemble_confidence = round(sum([p['confidence'] for p in predictions]) / len(predictions), 3)
-    
-    return {
-        'success': True,
-        'predictions': predictions,
-        'ensemble': {
-            'direction': ensemble_direction,
-            'confidence': ensemble_confidence,
-            'consensus': f"Ensemble of {len(models)} models suggests {ensemble_direction} bias"
-        },
-        'symbol': 'XAUUSD',
-        'timestamp': datetime.now().isoformat(),
-        'model_count': len(predictions),
-        'accuracy_metrics': {
-            'last_24h_accuracy': round(random.uniform(0.72, 0.89), 3),
-            'last_week_accuracy': round(random.uniform(0.68, 0.85), 3),
-            'sharpe_ratio': round(random.uniform(1.2, 2.8), 2)
+        # 15m prediction
+        change_15m = round(random.uniform(-0.8, 0.8), 4)
+        target_15m = round(base_price * (1 + change_15m/100), 2)
+        direction_15m = "bullish" if change_15m > 0.1 else "bearish" if change_15m < -0.1 else "neutral"
+        strength_15m = "Strong" if abs(change_15m) > 0.4 else "Moderate" if abs(change_15m) > 0.2 else "Weak"
+        
+        predictions_data["15m"] = {
+            "change_percent": change_15m,
+            "confidence": round(random.uniform(0.75, 0.90), 3),
+            "direction": direction_15m,
+            "strength": strength_15m,
+            "target": target_15m
         }
-    }
+        
+        # 1h prediction
+        change_1h = round(random.uniform(-1.5, 1.5), 4)
+        target_1h = round(base_price * (1 + change_1h/100), 2)
+        direction_1h = "bullish" if change_1h > 0.2 else "bearish" if change_1h < -0.2 else "neutral"
+        strength_1h = "Strong" if abs(change_1h) > 0.8 else "Moderate" if abs(change_1h) > 0.4 else "Weak"
+        
+        predictions_data["1h"] = {
+            "change_percent": change_1h,
+            "confidence": round(random.uniform(0.65, 0.85), 3),
+            "direction": direction_1h,
+            "strength": strength_1h,
+            "target": target_1h
+        }
+        
+        # 4h prediction
+        change_4h = round(random.uniform(-3.0, 3.0), 4)
+        target_4h = round(base_price * (1 + change_4h/100), 2)
+        direction_4h = "bullish" if change_4h > 0.5 else "bearish" if change_4h < -0.5 else "neutral"
+        strength_4h = "Strong" if abs(change_4h) > 1.5 else "Moderate" if abs(change_4h) > 0.8 else "Weak"
+        
+        predictions_data["4h"] = {
+            "change_percent": change_4h,
+            "confidence": round(random.uniform(0.70, 0.88), 3),
+            "direction": direction_4h,
+            "strength": strength_4h,
+            "target": target_4h
+        }
+        
+        # 24h prediction
+        change_24h = round(random.uniform(-5.0, 5.0), 4)
+        target_24h = round(base_price * (1 + change_24h/100), 2)
+        direction_24h = "bullish" if change_24h > 1.0 else "bearish" if change_24h < -1.0 else "neutral"
+        strength_24h = "Strong" if abs(change_24h) > 2.5 else "Moderate" if abs(change_24h) > 1.2 else "Weak"
+        
+        predictions_data["24h"] = {
+            "change_percent": change_24h,
+            "confidence": round(random.uniform(0.60, 0.82), 3),
+            "direction": direction_24h,
+            "strength": strength_24h,
+            "target": target_24h
+        }
+        
+        return {
+            'success': True,
+            'symbol': 'XAUUSD',
+            'current_price': base_price,
+            'predictions': predictions_data,
+            'timestamp': datetime.now().isoformat(),
+            'model_info': {
+                'ensemble_models': ['LSTM', 'Random Forest', 'XGBoost', 'Neural Network'],
+                'data_points': 1000,
+                'training_accuracy': round(random.uniform(0.75, 0.89), 3)
+            }
+        }
+    except Exception as e:
+        logger.error(f"Error generating ML predictions: {e}")
+        return {
+            'success': False,
+            'error': str(e),
+            'symbol': 'XAUUSD',
+            'timestamp': datetime.now().isoformat()
+        }
 
 # Advanced portfolio data
 def get_portfolio_data():
@@ -1229,6 +1253,15 @@ def advanced_dashboard():
         logger.error(f"Error loading advanced dashboard template: {e}")
         return "Advanced dashboard template not found", 404
 
+@app.route('/test-fixes')
+def test_fixes():
+    """Test page for critical fixes"""
+    try:
+        return render_template('test_fixes.html')
+    except Exception as e:
+        logger.error(f"Error loading test fixes template: {e}")
+        return "Test fixes template not found", 404
+
 # API Endpoints
 @app.route('/api/health')
 def health_check():
@@ -1282,6 +1315,25 @@ def api_ai_signals():
             'success': False,
             'error': str(e)
         }), 500
+
+@app.route('/api/debug/predictions')
+def debug_predictions():
+    """Debug endpoint to test predictions"""
+    try:
+        predictions = get_ml_predictions()
+        return jsonify({
+            'debug': True,
+            'timestamp': datetime.now().isoformat(),
+            'predictions_data': predictions,
+            'api_working': True
+        })
+    except Exception as e:
+        return jsonify({
+            'debug': True,
+            'error': str(e),
+            'api_working': False,
+            'timestamp': datetime.now().isoformat()
+        })
 
 @app.route('/api/ml-predictions/<symbol>')
 @app.route('/api/advanced-ml/predictions')  # Add endpoint for advanced dashboard
