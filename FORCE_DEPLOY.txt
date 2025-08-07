@@ -1,0 +1,11 @@
+FORCE RAILWAY DEPLOYMENT - TIMESTAMP: 2025-01-16 23:49:00
+
+This file forces Railway to recognize new changes and redeploy.
+
+Critical fixes implemented:
+- Fixed ML prediction logic in app.py
+- Created critical-fixes.js for navigation
+- Fixed data inconsistencies
+- Added debug endpoints
+
+Railway should pick up these changes and redeploy automatically.
