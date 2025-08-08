@@ -308,8 +308,13 @@ def positions():
     '''
 
 if __name__ == '__main__':
+    import os
     print("🚀 Starting WORKING GoldGPT version...")
     print("📡 All endpoints functional")
     print("🔧 Navigation fixed")
     print("🧠 ML predictions working")
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    
+    # Railway-compatible port configuration
+    port = int(os.environ.get('PORT', 5000))
+    print(f"🌐 Starting on port {port}")
+    app.run(host='0.0.0.0', port=port, debug=False)
