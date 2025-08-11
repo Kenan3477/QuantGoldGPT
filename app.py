@@ -197,17 +197,6 @@ if ENHANCED_SOCKETIO_AVAILABLE:
             </html>
             '''
         
-        @app.route('/api/websocket/stats')
-        def websocket_stats():
-            """Get WebSocket server statistics"""
-            if enhanced_server:
-                return enhanced_server.get_server_stats()
-            else:
-                return jsonify({
-                    "success": False,
-                    "error": "Enhanced server not available"
-                })
-        
         logger.info("📡 Features: 2s price updates, JWT auth, auto-reconnect, rate limiting")
         logger.info("🔗 Test endpoints: /websocket-test, /api/websocket/stats")
         
