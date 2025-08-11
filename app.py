@@ -1292,31 +1292,31 @@ def dashboard():
                     
                     <!-- Quick Stats Cards -->
                     <div class="dashboard-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 20px;">
-                        <div class="dashboard-card" style="background: var(--bg-secondary); border: 1px solid var(--border-primary); border-radius: 12px; padding: 20px;">
-                            <h3><i class="fas fa-coins"></i> Current Gold Price</h3>
+                        <div class="dashboard-card" style="background: #141414; border: 1px solid #2a2a2a; border-radius: 12px; padding: 20px;">
+                            <h3 style="color: #ffffff;"><i class="fas fa-coins"></i> Current Gold Price</h3>
                             <div class="price-display" style="color: #00d088; font-size: 2rem; font-weight: bold;">${gold_data['price']}</div>
                             <div style="color: #b0b0b0; margin-top: 10px;">
                                 Change: {gold_data['change']:+.2f} ({gold_data['change_percent']:+.2f}%)
                             </div>
                         </div>
                         
-                        <div class="dashboard-card" style="background: var(--bg-secondary); border: 1px solid var(--border-primary); border-radius: 12px; padding: 20px;">
-                            <h3><i class="fas fa-brain"></i> AI Signals</h3>
+                        <div class="dashboard-card" style="background: #141414; border: 1px solid #2a2a2a; border-radius: 12px; padding: 20px;">
+                            <h3 style="color: #ffffff;"><i class="fas fa-brain"></i> AI Signals</h3>
                             <div class="signal-badge" style="display: inline-block; background: #ffa502; color: white; padding: 4px 8px; border-radius: 4px; font-weight: bold;">{ai_data['signal']}</div>
                             <div style="margin-top: 10px; color: #b0b0b0;">Confidence: {ai_data['confidence']*100:.1f}%</div>
                         </div>
                         
-                        <div class="dashboard-card" style="background: var(--bg-secondary); border: 1px solid var(--border-primary); border-radius: 12px; padding: 20px;">
-                            <h3><i class="fas fa-chart-line"></i> ML Predictions</h3>
+                        <div class="dashboard-card" style="background: #141414; border: 1px solid #2a2a2a; border-radius: 12px; padding: 20px;">
+                            <h3 style="color: #ffffff;"><i class="fas fa-chart-line"></i> ML Predictions</h3>
                             <div style="color: #00d4aa; font-size: 1.5rem; font-weight: bold;">{ml_data['ensemble']['direction']}</div>
                             <div style="color: #b0b0b0; margin-top: 10px;">Confidence: {ml_data['ensemble']['confidence']*100:.1f}%</div>
                         </div>
                     </div>
 
                     <!-- TradingView Chart Container -->
-                    <div class="chart-section" style="background: var(--bg-secondary); border: 1px solid var(--border-primary); border-radius: 12px; margin-bottom: 20px; height: 600px; position: relative;">
-                        <div class="chart-header" style="padding: 15px; border-bottom: 1px solid var(--border-primary); display: flex; justify-content: between; align-items: center;">
-                            <h3><i class="fas fa-chart-candlestick"></i> Live Gold Chart (XAU/USD)</h3>
+                    <div class="chart-section" style="background: #141414; border: 1px solid #2a2a2a; border-radius: 12px; margin-bottom: 20px; height: 600px; position: relative;">
+                        <div class="chart-header" style="padding: 15px; border-bottom: 1px solid #2a2a2a; display: flex; justify-content: space-between; align-items: center;">
+                            <h3 style="color: #ffffff;"><i class="fas fa-chart-candlestick"></i> Live Gold Chart (XAU/USD)</h3>
                             <div style="color: #00d088; font-weight: bold;">LIVE</div>
                         </div>
                         <div class="tradingview-widget-container" id="tradingview-chart" style="height: calc(100% - 60px); width: 100%;">
@@ -1328,8 +1328,8 @@ def dashboard():
                     </div>
 
                     <!-- ML Dashboard Section -->
-                    <div class="ml-dashboard-section" style="background: var(--bg-secondary); border: 1px solid var(--border-primary); border-radius: 12px; padding: 20px;">
-                        <h3><i class="fas fa-brain"></i> ML Predictions Dashboard</h3>
+                    <div class="ml-dashboard-section" style="background: #141414; border: 1px solid #2a2a2a; border-radius: 12px; padding: 20px;">
+                        <h3 style="color: #ffffff;"><i class="fas fa-brain"></i> ML Predictions Dashboard</h3>
                         <div class="predictions-grid" id="predictions-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 15px;">
                             <!-- ML Predictions will load here -->
                         </div>
