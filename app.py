@@ -1703,14 +1703,28 @@ def chart_only():
     """Isolated TradingView chart page"""
     return '''
     <!DOCTYPE html>
-    <html>
+    <html style="height:100%;">
     <head>
         <title>TradingView Chart - GoldGPT</title>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+            html, body {
+                height: 100%;
+                margin: 0;
+                padding: 0;
+                background: #131722;
+                overflow: hidden;
+            }
+            #tradingview_chart {
+                width: 100%;
+                height: 100vh;
+                min-height: 600px;
+            }
+        </style>
     </head>
-    <body style="margin:0;padding:0;background:#131722;">
-        <div id="tradingview_chart" style="width:100%;height:100vh;"></div>
+    <body>
+        <div id="tradingview_chart"></div>
         <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
         <script type="text/javascript">
             new TradingView.widget({
@@ -1727,7 +1741,8 @@ def chart_only():
                 "hide_top_toolbar": false,
                 "hide_legend": false,
                 "save_image": false,
-                "container_id": "tradingview_chart"
+                "container_id": "tradingview_chart",
+                "autosize": true
             });
         </script>
     </body>
