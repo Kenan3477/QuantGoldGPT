@@ -1042,89 +1042,364 @@ def dashboard():
         return render_template('dashboard_advanced.html')
     except Exception as e:
         logger.error(f"Error loading dashboard template: {e}")
-        # Fallback with advanced features preview
+        # Fallback with TradingView chart and full functionality
         gold_data = get_current_gold_price()
         ai_data = get_ai_analysis()
         ml_data = get_ml_predictions()
         
         return f"""
         <!DOCTYPE html>
-        <html>
+        <html lang="en">
         <head>
-            <title>GoldGPT - Advanced Trading Dashboard</title>
+            <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+            <title>GoldGPT Pro - Advanced AI Trading Platform</title>
+            <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+            <script src="https://s3.tradingview.com/tv.js"></script>
             <style>
-                body {{ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 20px; background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: white; }}
-                .dashboard {{ max-width: 1400px; margin: 0 auto; }}
-                .header {{ text-align: center; margin-bottom: 30px; }}
-                .header h1 {{ font-size: 3rem; margin: 0; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }}
-                .cards {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 30px; }}
-                .card {{ background: rgba(255,255,255,0.1); border-radius: 15px; padding: 20px; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); }}
-                .card h3 {{ margin-top: 0; color: #64B5F6; }}
-                .price {{ font-size: 2rem; font-weight: bold; color: #4CAF50; }}
-                .signal {{ font-size: 1.5rem; font-weight: bold; }}
-                .signal.BUY {{ color: #4CAF50; }}
-                .signal.SELL {{ color: #f44336; }}
-                .signal.HOLD {{ color: #FF9800; }}
-                .api-links {{ display: flex; gap: 15px; flex-wrap: wrap; justify-content: center; }}
-                .api-link {{ background: rgba(255,255,255,0.2); padding: 10px 20px; border-radius: 25px; text-decoration: none; color: white; border: 1px solid rgba(255,255,255,0.3); }}
-                .api-link:hover {{ background: rgba(255,255,255,0.3); }}
-                .predictions {{ margin-top: 20px; }}
-                .prediction {{ background: rgba(0,0,0,0.2); margin: 10px 0; padding: 15px; border-radius: 10px; }}
+                * {{ margin: 0; padding: 0; box-sizing: border-box; }}
+                body {{ 
+                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                    background: #0a0a0a; 
+                    color: #ffffff; 
+                    overflow-x: hidden;
+                }}
+                .main-layout {{
+                    display: grid;
+                    grid-template-columns: 280px 1fr;
+                    grid-template-rows: 64px 1fr;
+                    grid-template-areas: "header header" "sidebar content";
+                    height: 100vh;
+                    overflow: hidden;
+                }}
+                .header {{
+                    grid-area: header;
+                    background: #141414;
+                    border-bottom: 1px solid #2a2a2a;
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    padding: 0 20px;
+                }}
+                .logo {{
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    font-size: 18px;
+                    font-weight: bold;
+                }}
+                .logo i {{ color: #ffd700; }}
+                .header-nav {{
+                    display: flex;
+                    gap: 20px;
+                }}
+                .header-nav-item {{
+                    background: none;
+                    border: none;
+                    color: #b0b0b0;
+                    padding: 8px 16px;
+                    border-radius: 6px;
+                    cursor: pointer;
+                    text-decoration: none;
+                    transition: all 0.2s;
+                }}
+                .header-nav-item:hover, .header-nav-item.active {{
+                    color: #ffffff;
+                    background: #2a2a2a;
+                }}
+                .sidebar {{
+                    grid-area: sidebar;
+                    background: #141414;
+                    border-right: 1px solid #2a2a2a;
+                    overflow-y: auto;
+                    padding: 20px 0;
+                }}
+                .nav-section {{
+                    margin-bottom: 30px;
+                    padding: 0 20px;
+                }}
+                .nav-section-title {{
+                    color: #666666;
+                    font-size: 12px;
+                    font-weight: 600;
+                    text-transform: uppercase;
+                    margin-bottom: 15px;
+                    letter-spacing: 1px;
+                }}
+                .nav-item {{
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    padding: 12px 16px;
+                    margin: 4px 0;
+                    border-radius: 8px;
+                    background: none;
+                    border: none;
+                    color: #b0b0b0;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                    width: 100%;
+                    text-align: left;
+                }}
+                .nav-item:hover, .nav-item.active {{
+                    background: #2a2a2a;
+                    color: #ffffff;
+                }}
+                .content {{
+                    grid-area: content;
+                    background: #1a1a1a;
+                    display: flex;
+                    flex-direction: column;
+                    height: 100vh;
+                    overflow: hidden;
+                }}
+                .chart-container {{
+                    flex: 1;
+                    background: #1a1a1a;
+                    position: relative;
+                }}
+                .tradingview-widget-container {{
+                    height: 100%;
+                    width: 100%;
+                }}
+                .ml-dashboard-section {{
+                    background: #141414;
+                    border-top: 1px solid #2a2a2a;
+                    padding: 20px;
+                    max-height: 300px;
+                    overflow-y: auto;
+                }}
+                .predictions-grid {{
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                    gap: 15px;
+                    margin-top: 15px;
+                }}
+                .prediction-card {{
+                    background: #2a2a2a;
+                    border-radius: 8px;
+                    padding: 15px;
+                    border: 1px solid #333;
+                }}
+                .timeframe-badge {{
+                    background: #4285f4;
+                    color: white;
+                    padding: 4px 8px;
+                    border-radius: 4px;
+                    font-size: 12px;
+                    font-weight: bold;
+                }}
+                .prediction-value {{
+                    font-size: 18px;
+                    font-weight: bold;
+                    margin: 10px 0;
+                    color: #00d084;
+                }}
+                .direction {{
+                    font-weight: bold;
+                    padding: 4px 8px;
+                    border-radius: 4px;
+                    text-align: center;
+                    margin: 8px 0;
+                }}
+                .bullish {{ background: rgba(0, 208, 132, 0.2); color: #00d084; }}
+                .bearish {{ background: rgba(255, 71, 87, 0.2); color: #ff4757; }}
+                .neutral {{ background: rgba(255, 165, 0, 0.2); color: #ffa500; }}
+                .system-link {{
+                    color: #4285f4;
+                    text-decoration: none;
+                    padding: 8px 12px;
+                    border-radius: 6px;
+                    display: block;
+                    margin: 4px 0;
+                    transition: background 0.2s;
+                }}
+                .system-link:hover {{
+                    background: #2a2a2a;
+                }}
             </style>
         </head>
         <body>
-            <div class="dashboard">
-                <div class="header">
-                    <h1><i class="fas fa-chart-line"></i> GoldGPT Advanced Trading Dashboard</h1>
-                    <p>✅ Successfully deployed on Railway with advanced AI & ML features!</p>
-                </div>
-                
-                <div class="cards">
-                    <div class="card">
-                        <h3><i class="fas fa-coins"></i> Live Gold Price</h3>
-                        <div class="price">${gold_data['price']}</div>
-                        <p>Change: {gold_data['change']:+.2f} ({gold_data['change_percent']:+.2f}%)</p>
-                        <p>High: ${gold_data['high']} | Low: ${gold_data['low']}</p>
-                        <p>Volume: {gold_data['volume']:,.0f}</p>
+            <div class="main-layout">
+                <!-- Header -->
+                <header class="header">
+                    <div class="logo">
+                        <i class="fas fa-crown"></i>
+                        <span>GoldGPT Pro</span>
                     </div>
-                    
-                    <div class="card">
-                        <h3><i class="fas fa-brain"></i> AI Analysis</h3>
-                        <div class="signal {ai_data['signal']}">{ai_data['signal']}</div>
-                        <p>Confidence: {ai_data['confidence']*100:.1f}%</p>
-                        <p>Technical: {ai_data['technical_score']*100:.1f}%</p>
-                        <p>Sentiment: {ai_data['sentiment_score']*100:.1f}%</p>
-                        <p>Risk: {ai_data['risk_level']}</p>
+                    <nav class="header-nav">
+                        <button class="header-nav-item active">Trading</button>
+                        <button class="header-nav-item">Portfolio</button>
+                        <button class="header-nav-item">Analysis</button>
+                        <a class="header-nav-item" href="/api/ml-predictions" target="_blank">
+                            <i class="fas fa-robot"></i> Advanced ML
+                        </a>
+                    </nav>
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <div style="color: #00d084; font-weight: bold;">${gold_data['price']}</div>
+                        <div style="color: #b0b0b0;">Live</div>
                     </div>
-                    
-                    <div class="card">
-                        <h3><i class="fas fa-robot"></i> ML Predictions</h3>
-                        <p>Ensemble: <strong>{ml_data['ensemble']['direction']}</strong></p>
-                        <p>Confidence: {ml_data['ensemble']['confidence']*100:.1f}%</p>
-                        <p>Models: {ml_data['model_count']} active</p>
-                        <p>24h Accuracy: {ml_data['accuracy_metrics']['last_24h_accuracy']*100:.1f}%</p>
-                        <div class="predictions">
-                            <h4>Timeframe Predictions:</h4>
-                            {''.join([f'<div class="prediction"><strong>{p["timeframe"]}</strong> ({p["model"]}): {p["direction"]} - ${p["target_price"]} ({p["change_percent"]:+.1f}%)</div>' for p in ml_data['predictions']])}
+                </header>
+
+                <!-- Sidebar -->
+                <aside class="sidebar">
+                    <nav class="nav-section">
+                        <div class="nav-section-title">Trading</div>
+                        <button class="nav-item active">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Dashboard</span>
+                        </button>
+                        <button class="nav-item">
+                            <i class="fas fa-layer-group"></i>
+                            <span>Positions</span>
+                        </button>
+                        <button class="nav-item">
+                            <i class="fas fa-list-ul"></i>
+                            <span>Orders</span>
+                        </button>
+                        <button class="nav-item">
+                            <i class="fas fa-history"></i>
+                            <span>History</span>
+                        </button>
+                    </nav>
+
+                    <nav class="nav-section">
+                        <div class="nav-section-title">🚀 System Hub</div>
+                        <a href="/ai-analysis" class="system-link" target="_blank">
+                            🤖 AI Analysis Center
+                        </a>
+                        <a href="/ml-predictions" class="system-link" target="_blank">
+                            🔮 ML Predictions
+                        </a>
+                        <a href="/advanced-ml-dashboard" class="system-link" target="_blank">
+                            🧠 ML Dashboard
+                        </a>
+                        <a href="/api/debug/predictions" class="system-link" target="_blank">
+                            🔧 Debug API
+                        </a>
+                    </nav>
+                </aside>
+
+                <!-- Main Content -->
+                <main class="content">
+                    <!-- TradingView Chart -->
+                    <div class="chart-container">
+                        <div class="tradingview-widget-container" id="tradingview-chart">
+                            <!-- TradingView Widget will load here -->
                         </div>
                     </div>
-                </div>
-                
-                <div class="api-links">
-                    <a href="/api/health" class="api-link"><i class="fas fa-heartbeat"></i> API Health</a>
-                    <a href="/api/gold-price" class="api-link"><i class="fas fa-chart-line"></i> Live Price API</a>
-                    <a href="/api/ai-signals" class="api-link"><i class="fas fa-brain"></i> AI Signals API</a>
-                    <a href="/api/ml-predictions/XAUUSD" class="api-link"><i class="fas fa-robot"></i> ML Predictions API</a>
-                    <a href="/api/portfolio" class="api-link"><i class="fas fa-wallet"></i> Portfolio API</a>
-                    <a href="/ml-predictions-dashboard" class="api-link"><i class="fas fa-dashboard"></i> ML Dashboard</a>
-                </div>
+
+                    <!-- ML Dashboard Section -->
+                    <div class="ml-dashboard-section">
+                        <h3><i class="fas fa-brain"></i> ML Predictions Dashboard</h3>
+                        <div class="predictions-grid" id="predictions-grid">
+                            <!-- ML Predictions will load here -->
+                        </div>
+                    </div>
+                </main>
             </div>
-            
+
             <script>
-                // Auto-refresh every 30 seconds
-                setTimeout(() => location.reload(), 30000);
+                // Load TradingView Chart
+                function loadTradingViewChart() {{
+                    console.log('🚀 Loading TradingView chart...');
+                    
+                    if (typeof TradingView === 'undefined') {{
+                        console.log('⏳ TradingView not ready, retrying...');
+                        setTimeout(loadTradingViewChart, 500);
+                        return;
+                    }}
+                    
+                    try {{
+                        new TradingView.widget({{
+                            "width": "100%",
+                            "height": "100%",
+                            "symbol": "OANDA:XAUUSD",
+                            "interval": "60",
+                            "timezone": "Etc/UTC",
+                            "theme": "dark",
+                            "style": "1",
+                            "locale": "en",
+                            "toolbar_bg": "#1a1a1a",
+                            "enable_publishing": false,
+                            "hide_top_toolbar": false,
+                            "hide_legend": false,
+                            "save_image": false,
+                            "container_id": "tradingview-chart",
+                            "studies": [
+                                "Volume@tv-basicstudies",
+                                "RSI@tv-basicstudies",
+                                "MACD@tv-basicstudies"
+                            ],
+                            "allow_symbol_change": true,
+                            "details": true,
+                            "hotlist": true,
+                            "calendar": true,
+                            "overrides": {{
+                                "paneProperties.background": "#1a1a1a",
+                                "paneProperties.vertGridProperties.color": "#2a2a2a",
+                                "paneProperties.horzGridProperties.color": "#2a2a2a"
+                            }}
+                        }});
+                        
+                        console.log('✅ TradingView chart loaded successfully!');
+                    }} catch (error) {{
+                        console.error('❌ TradingView chart error:', error);
+                    }}
+                }}
+
+                // Load ML Predictions
+                function loadMLPredictions() {{
+                    console.log('🧠 Loading ML predictions...');
+                    
+                    fetch('/api/ml-predictions')
+                        .then(response => response.json())
+                        .then(data => {{
+                            console.log('✅ ML predictions loaded:', data);
+                            displayPredictions(data.predictions);
+                        }})
+                        .catch(error => {{
+                            console.error('❌ ML predictions error:', error);
+                            document.getElementById('predictions-grid').innerHTML = 
+                                '<div style="color: #ff4757;">Error loading predictions</div>';
+                        }});
+                }}
+
+                function displayPredictions(predictions) {{
+                    const container = document.getElementById('predictions-grid');
+                    container.innerHTML = '';
+                    
+                    Object.entries(predictions).forEach(([timeframe, pred]) => {{
+                        const card = document.createElement('div');
+                        card.className = 'prediction-card';
+                        
+                        const directionClass = pred.direction === 'bullish' ? 'bullish' : 
+                                             pred.direction === 'bearish' ? 'bearish' : 'neutral';
+                        
+                        card.innerHTML = `
+                            <div class="timeframe-badge">${{timeframe.toUpperCase()}}</div>
+                            <div class="prediction-value">${{pred.target}}</div>
+                            <div class="direction ${{directionClass}}">
+                                ${{pred.direction.toUpperCase()}} ${{pred.change_percent > 0 ? '+' : ''}}${{pred.change_percent}}%
+                            </div>
+                            <div style="font-size: 12px; color: #666;">
+                                Confidence: ${{(pred.confidence * 100).toFixed(1)}}%
+                            </div>
+                        `;
+                        
+                        container.appendChild(card);
+                    }});
+                }}
+
+                // Initialize everything
+                window.addEventListener('load', () => {{
+                    console.log('🚀 GoldGPT Dashboard initializing...');
+                    loadTradingViewChart();
+                    loadMLPredictions();
+                    
+                    // Auto-refresh ML predictions every 30 seconds
+                    setInterval(loadMLPredictions, 30000);
+                }});
             </script>
         </body>
         </html>
