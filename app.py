@@ -1339,6 +1339,9 @@ def dashboard():
 
             <script>
                 // Load TradingView Chart
+                let chartWidget = null;
+                let chartInitialized = false;
+                
                 function loadTradingViewChart() {{
                     console.log('🚀 Initializing TradingView chart...');
                     
@@ -1350,27 +1353,29 @@ def dashboard():
                         return;
                     }}
                     
+                    // Prevent multiple initializations
+                    if (chartInitialized) {{
+                        console.log('📊 Chart already initialized');
+                        return;
+                    }}
+                    
                     // Show loading state
                     if (loadingDiv) {{
                         loadingDiv.innerHTML = '<i class="fas fa-spinner fa-spin" style="margin-right: 10px;"></i>Loading TradingView Chart...';
+                        loadingDiv.style.display = 'flex';
                     }}
                     
                     function initChart() {{
                         try {{
                             if (typeof TradingView === 'undefined') {{
-                                console.log('⏳ TradingView not ready, retrying in 1 second...');
-                                setTimeout(initChart, 1000);
+                                console.log('⏳ TradingView not ready, retrying in 2 seconds...');
+                                setTimeout(initChart, 2000);
                                 return;
                             }}
                             
                             console.log('✅ TradingView library loaded, creating widget...');
                             
-                            // Clear loading state
-                            if (loadingDiv) {{
-                                loadingDiv.style.display = 'none';
-                            }}
-                            
-                            new TradingView.widget({{
+                            chartWidget = new TradingView.widget({{
                                 "width": "100%",
                                 "height": "100%",
                                 "symbol": "OANDA:XAUUSD",
@@ -1404,15 +1409,22 @@ def dashboard():
                                 "loading_screen": {{
                                     "backgroundColor": "#1a1a1a",
                                     "foregroundColor": "#00d4aa"
+                                }},
+                                "onChartReady": function() {{
+                                    console.log('🎉 TradingView chart is ready!');
+                                    chartInitialized = true;
+                                    if (loadingDiv) {{
+                                        loadingDiv.style.display = 'none';
+                                    }}
                                 }}
                             }});
                             
-                            console.log('🎉 TradingView chart widget created successfully!');
+                            console.log('📊 TradingView chart widget created successfully!');
                             
                         }} catch (error) {{
                             console.error('❌ TradingView chart error:', error);
                             if (loadingDiv) {{
-                                loadingDiv.innerHTML = '<i class="fas fa-exclamation-triangle" style="margin-right: 10px; color: #ff4757;"></i>Chart loading failed. <a href="javascript:loadTradingViewChart()" style="color: #00d4aa;">Retry</a>';
+                                loadingDiv.innerHTML = '<i class="fas fa-exclamation-triangle" style="margin-right: 10px; color: #ff4757;"></i>Chart loading failed. <a href="javascript:location.reload()" style="color: #00d4aa;">Refresh Page</a>';
                             }}
                         }}
                     }}
@@ -1429,34 +1441,45 @@ def dashboard():
                         .then(response => response.json())
                         .then(data => {{
                             console.log('✅ ML predictions loaded:', data);
-                            displayPredictions(data.predictions);
+                            if (data.predictions) {{
+                                displayPredictions(data.predictions);
+                            }}
                         }})
                         .catch(error => {{
                             console.error('❌ ML predictions error:', error);
-                            document.getElementById('predictions-grid').innerHTML = 
-                                '<div style="color: #ff4757;">Error loading predictions</div>';
+                            const container = document.getElementById('predictions-grid');
+                            if (container) {{
+                                container.innerHTML = 
+                                    '<div style="color: #ff4757; text-align: center; padding: 20px;">Error loading predictions</div>';
+                            }}
                         }});
                 }}
 
                 function displayPredictions(predictions) {{
                     const container = document.getElementById('predictions-grid');
+                    if (!container) return;
+                    
                     container.innerHTML = '';
                     
                     Object.entries(predictions).forEach(([timeframe, pred]) => {{
                         const card = document.createElement('div');
                         card.className = 'prediction-card';
+                        card.style.cssText = 'background: #2a2a2a; border-radius: 8px; padding: 15px; border: 1px solid #333; text-align: center;';
                         
                         const directionClass = pred.direction === 'bullish' ? 'bullish' : 
                                              pred.direction === 'bearish' ? 'bearish' : 'neutral';
                         
+                        const directionColor = pred.direction === 'bullish' ? '#00d084' : 
+                                             pred.direction === 'bearish' ? '#ff4757' : '#ffa500';
+                        
                         card.innerHTML = `
-                            <div class="timeframe-badge">${{timeframe.toUpperCase()}}</div>
-                            <div class="prediction-value">${{pred.target}}</div>
-                            <div class="direction ${{directionClass}}">
-                                ${{pred.direction.toUpperCase()}} ${{pred.change_percent > 0 ? '+' : ''}}${{pred.change_percent}}%
+                            <div class="timeframe-badge" style="background: #4285f4; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; margin-bottom: 10px;">${{timeframe.toUpperCase()}}</div>
+                            <div class="prediction-value" style="font-size: 18px; font-weight: bold; margin: 10px 0; color: #00d084;">${{pred.target || 'N/A'}}</div>
+                            <div class="direction" style="font-weight: bold; padding: 4px 8px; border-radius: 4px; text-align: center; margin: 8px 0; background: rgba(0,0,0,0.2); color: ${{directionColor}};">
+                                ${{pred.direction ? pred.direction.toUpperCase() : 'UNKNOWN'}} ${{pred.change_percent ? (pred.change_percent > 0 ? '+' : '') + pred.change_percent.toFixed(2) + '%' : ''}}
                             </div>
                             <div style="font-size: 12px; color: #666;">
-                                Confidence: ${{(pred.confidence * 100).toFixed(1)}}%
+                                Confidence: ${{pred.confidence ? (pred.confidence * 100).toFixed(1) : 'N/A'}}%
                             </div>
                         `;
                         
@@ -1501,14 +1524,12 @@ def dashboard():
                     // Load ML predictions
                     loadMLPredictions();
                     
-                    // Auto-refresh ML predictions every 30 seconds
-                    setInterval(loadMLPredictions, 30000);
+                    // Auto-refresh ML predictions every 60 seconds (reduced frequency)
+                    setInterval(loadMLPredictions, 60000);
                     
-                    // Auto-refresh page every 5 minutes to get fresh data
-                    setInterval(() => {{
-                        console.log('🔄 Auto-refreshing dashboard...');
-                        location.reload();
-                    }}, 300000);
+                    // Remove auto-refresh to prevent chart disappearing
+                    // Auto-refresh disabled to keep TradingView chart stable
+                    console.log('� Dashboard initialized with stable chart mode');
                 }});
             </script>
         </body>
