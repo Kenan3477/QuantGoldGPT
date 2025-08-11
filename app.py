@@ -1148,26 +1148,28 @@ def dashboard():
                 .content {{
                     grid-area: content;
                     background: #1a1a1a;
-                    display: flex;
-                    flex-direction: column;
-                    height: 100vh;
-                    overflow: hidden;
+                    padding: 20px;
+                    overflow-y: auto;
+                    height: calc(100vh - 64px);
                 }}
-                .chart-container {{
-                    flex: 1;
-                    background: #1a1a1a;
-                    position: relative;
+                .chart-section {{
+                    background: #141414;
+                    border: 1px solid #2a2a2a;
+                    border-radius: 12px;
+                    margin-bottom: 20px;
+                    height: 600px;
                 }}
                 .tradingview-widget-container {{
                     height: 100%;
                     width: 100%;
+                    background: #1a1a1a;
                 }}
                 .ml-dashboard-section {{
                     background: #141414;
-                    border-top: 1px solid #2a2a2a;
+                    border: 1px solid #2a2a2a;
+                    border-radius: 12px;
                     padding: 20px;
-                    max-height: 300px;
-                    overflow-y: auto;
+                    margin-top: 20px;
                 }}
                 .predictions-grid {{
                     display: grid;
@@ -1282,17 +1284,53 @@ def dashboard():
 
                 <!-- Main Content -->
                 <main class="content">
-                    <!-- TradingView Chart -->
-                    <div class="chart-container">
-                        <div class="tradingview-widget-container" id="tradingview-chart">
-                            <!-- TradingView Widget will load here -->
+                    <!-- Dashboard Header -->
+                    <div class="section-header">
+                        <h2><i class="fas fa-tachometer-alt"></i> Trading Dashboard</h2>
+                        <p>Real-time gold trading dashboard with AI-powered insights</p>
+                    </div>
+                    
+                    <!-- Quick Stats Cards -->
+                    <div class="dashboard-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 20px;">
+                        <div class="dashboard-card" style="background: var(--bg-secondary); border: 1px solid var(--border-primary); border-radius: 12px; padding: 20px;">
+                            <h3><i class="fas fa-coins"></i> Current Gold Price</h3>
+                            <div class="price-display" style="color: #00d088; font-size: 2rem; font-weight: bold;">${gold_data['price']}</div>
+                            <div style="color: #b0b0b0; margin-top: 10px;">
+                                Change: {gold_data['change']:+.2f} ({gold_data['change_percent']:+.2f}%)
+                            </div>
+                        </div>
+                        
+                        <div class="dashboard-card" style="background: var(--bg-secondary); border: 1px solid var(--border-primary); border-radius: 12px; padding: 20px;">
+                            <h3><i class="fas fa-brain"></i> AI Signals</h3>
+                            <div class="signal-badge" style="display: inline-block; background: #ffa502; color: white; padding: 4px 8px; border-radius: 4px; font-weight: bold;">{ai_data['signal']}</div>
+                            <div style="margin-top: 10px; color: #b0b0b0;">Confidence: {ai_data['confidence']*100:.1f}%</div>
+                        </div>
+                        
+                        <div class="dashboard-card" style="background: var(--bg-secondary); border: 1px solid var(--border-primary); border-radius: 12px; padding: 20px;">
+                            <h3><i class="fas fa-chart-line"></i> ML Predictions</h3>
+                            <div style="color: #00d4aa; font-size: 1.5rem; font-weight: bold;">{ml_data['ensemble']['direction']}</div>
+                            <div style="color: #b0b0b0; margin-top: 10px;">Confidence: {ml_data['ensemble']['confidence']*100:.1f}%</div>
+                        </div>
+                    </div>
+
+                    <!-- TradingView Chart Container -->
+                    <div class="chart-section" style="background: var(--bg-secondary); border: 1px solid var(--border-primary); border-radius: 12px; margin-bottom: 20px; height: 600px; position: relative;">
+                        <div class="chart-header" style="padding: 15px; border-bottom: 1px solid var(--border-primary); display: flex; justify-content: between; align-items: center;">
+                            <h3><i class="fas fa-chart-candlestick"></i> Live Gold Chart (XAU/USD)</h3>
+                            <div style="color: #00d088; font-weight: bold;">LIVE</div>
+                        </div>
+                        <div class="tradingview-widget-container" id="tradingview-chart" style="height: calc(100% - 60px); width: 100%;">
+                            <div id="chart-loading" style="display: flex; align-items: center; justify-content: center; height: 100%; color: #b0b0b0;">
+                                <i class="fas fa-spinner fa-spin" style="margin-right: 10px;"></i>
+                                Loading TradingView Chart...
+                            </div>
                         </div>
                     </div>
 
                     <!-- ML Dashboard Section -->
-                    <div class="ml-dashboard-section">
+                    <div class="ml-dashboard-section" style="background: var(--bg-secondary); border: 1px solid var(--border-primary); border-radius: 12px; padding: 20px;">
                         <h3><i class="fas fa-brain"></i> ML Predictions Dashboard</h3>
-                        <div class="predictions-grid" id="predictions-grid">
+                        <div class="predictions-grid" id="predictions-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 15px;">
                             <!-- ML Predictions will load here -->
                         </div>
                     </div>
@@ -1302,50 +1340,85 @@ def dashboard():
             <script>
                 // Load TradingView Chart
                 function loadTradingViewChart() {{
-                    console.log('🚀 Loading TradingView chart...');
+                    console.log('🚀 Initializing TradingView chart...');
                     
-                    if (typeof TradingView === 'undefined') {{
-                        console.log('⏳ TradingView not ready, retrying...');
-                        setTimeout(loadTradingViewChart, 500);
+                    const chartContainer = document.getElementById('tradingview-chart');
+                    const loadingDiv = document.getElementById('chart-loading');
+                    
+                    if (!chartContainer) {{
+                        console.error('❌ Chart container not found');
                         return;
                     }}
                     
-                    try {{
-                        new TradingView.widget({{
-                            "width": "100%",
-                            "height": "100%",
-                            "symbol": "OANDA:XAUUSD",
-                            "interval": "60",
-                            "timezone": "Etc/UTC",
-                            "theme": "dark",
-                            "style": "1",
-                            "locale": "en",
-                            "toolbar_bg": "#1a1a1a",
-                            "enable_publishing": false,
-                            "hide_top_toolbar": false,
-                            "hide_legend": false,
-                            "save_image": false,
-                            "container_id": "tradingview-chart",
-                            "studies": [
-                                "Volume@tv-basicstudies",
-                                "RSI@tv-basicstudies",
-                                "MACD@tv-basicstudies"
-                            ],
-                            "allow_symbol_change": true,
-                            "details": true,
-                            "hotlist": true,
-                            "calendar": true,
-                            "overrides": {{
-                                "paneProperties.background": "#1a1a1a",
-                                "paneProperties.vertGridProperties.color": "#2a2a2a",
-                                "paneProperties.horzGridProperties.color": "#2a2a2a"
-                            }}
-                        }});
-                        
-                        console.log('✅ TradingView chart loaded successfully!');
-                    }} catch (error) {{
-                        console.error('❌ TradingView chart error:', error);
+                    // Show loading state
+                    if (loadingDiv) {{
+                        loadingDiv.innerHTML = '<i class="fas fa-spinner fa-spin" style="margin-right: 10px;"></i>Loading TradingView Chart...';
                     }}
+                    
+                    function initChart() {{
+                        try {{
+                            if (typeof TradingView === 'undefined') {{
+                                console.log('⏳ TradingView not ready, retrying in 1 second...');
+                                setTimeout(initChart, 1000);
+                                return;
+                            }}
+                            
+                            console.log('✅ TradingView library loaded, creating widget...');
+                            
+                            // Clear loading state
+                            if (loadingDiv) {{
+                                loadingDiv.style.display = 'none';
+                            }}
+                            
+                            new TradingView.widget({{
+                                "width": "100%",
+                                "height": "100%",
+                                "symbol": "OANDA:XAUUSD",
+                                "interval": "60",
+                                "timezone": "Etc/UTC",
+                                "theme": "dark",
+                                "style": "1",
+                                "locale": "en",
+                                "toolbar_bg": "#1a1a1a",
+                                "enable_publishing": false,
+                                "hide_top_toolbar": false,
+                                "hide_legend": false,
+                                "save_image": false,
+                                "container_id": "tradingview-chart",
+                                "studies": [
+                                    "Volume@tv-basicstudies",
+                                    "RSI@tv-basicstudies", 
+                                    "MACD@tv-basicstudies"
+                                ],
+                                "allow_symbol_change": true,
+                                "details": true,
+                                "hotlist": true,
+                                "calendar": true,
+                                "overrides": {{
+                                    "paneProperties.background": "#1a1a1a",
+                                    "paneProperties.vertGridProperties.color": "#2a2a2a",
+                                    "paneProperties.horzGridProperties.color": "#2a2a2a",
+                                    "paneProperties.backgroundType": "solid",
+                                    "scalesProperties.textColor": "#b0b0b0"
+                                }},
+                                "loading_screen": {{
+                                    "backgroundColor": "#1a1a1a",
+                                    "foregroundColor": "#00d4aa"
+                                }}
+                            }});
+                            
+                            console.log('🎉 TradingView chart widget created successfully!');
+                            
+                        }} catch (error) {{
+                            console.error('❌ TradingView chart error:', error);
+                            if (loadingDiv) {{
+                                loadingDiv.innerHTML = '<i class="fas fa-exclamation-triangle" style="margin-right: 10px; color: #ff4757;"></i>Chart loading failed. <a href="javascript:loadTradingViewChart()" style="color: #00d4aa;">Retry</a>';
+                            }}
+                        }}
+                    }}
+                    
+                    // Start initialization
+                    initChart();
                 }}
 
                 // Load ML Predictions
@@ -1394,11 +1467,48 @@ def dashboard():
                 // Initialize everything
                 window.addEventListener('load', () => {{
                     console.log('🚀 GoldGPT Dashboard initializing...');
+                    
+                    // Load TradingView chart with timeout fallback
                     loadTradingViewChart();
+                    
+                    // Fallback: If TradingView doesn't load in 10 seconds, show alternative
+                    setTimeout(() => {{
+                        const loadingDiv = document.getElementById('chart-loading');
+                        if (loadingDiv && loadingDiv.style.display !== 'none') {{
+                            console.log('⚠️ TradingView taking too long, showing fallback...');
+                            loadingDiv.innerHTML = `
+                                <div style="text-align: center; padding: 40px;">
+                                    <h3 style="color: #00d4aa; margin-bottom: 20px;">📈 Live Gold Chart</h3>
+                                    <div style="font-size: 48px; font-weight: bold; color: #ffd700; margin-bottom: 10px;">
+                                        $${gold_data['price']}
+                                    </div>
+                                    <div style="color: #b0b0b0; margin-bottom: 20px;">
+                                        XAU/USD • Change: {gold_data['change']:+.2f} ({gold_data['change_percent']:+.2f}%)
+                                    </div>
+                                    <button onclick="loadTradingViewChart()" style="background: #00d4aa; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer;">
+                                        🔄 Load TradingView Chart
+                                    </button>
+                                    <div style="margin-top: 20px; font-size: 12px; color: #666;">
+                                        <a href="https://www.tradingview.com/chart/?symbol=OANDA:XAUUSD" target="_blank" style="color: #00d4aa;">
+                                            Open in TradingView →
+                                        </a>
+                                    </div>
+                                </div>
+                            `;
+                        }}
+                    }}, 10000);
+                    
+                    // Load ML predictions
                     loadMLPredictions();
                     
                     // Auto-refresh ML predictions every 30 seconds
                     setInterval(loadMLPredictions, 30000);
+                    
+                    // Auto-refresh page every 5 minutes to get fresh data
+                    setInterval(() => {{
+                        console.log('🔄 Auto-refreshing dashboard...');
+                        location.reload();
+                    }}, 300000);
                 }});
             </script>
         </body>
