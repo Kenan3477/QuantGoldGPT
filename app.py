@@ -1426,45 +1426,107 @@ def dashboard():
             <script>
                 console.log('🚀 GoldGPT Pro Dashboard Loading...');
 
-                // Initialize TradingView Chart
+                // BULLETPROOF TradingView Chart - NO INTERFERENCE ALLOWED
+                let chartWidget = null;
+                let chartInitialized = false;
+                let initAttempts = 0;
+                const maxAttempts = 3;
+
                 function initChart() {{
-                    console.log('📊 Initializing TradingView chart...');
+                    if (chartInitialized) return;
                     
-                    new TradingView.widget({{
-                        "width": "100%",
-                        "height": "100%",
-                        "symbol": "OANDA:XAUUSD",
-                        "interval": "15",
-                        "timezone": "Etc/UTC",
-                        "theme": "dark",
-                        "style": "1",
-                        "locale": "en",
-                        "toolbar_bg": "#141414",
-                        "enable_publishing": false,
-                        "hide_top_toolbar": false,
-                        "hide_legend": false,
-                        "save_image": false,
-                        "container_id": "tradingview-chart",
-                        "studies": ["Volume@tv-basicstudies", "RSI@tv-basicstudies", "MACD@tv-basicstudies"],
-                        "allow_symbol_change": true,
-                        "details": true,
-                        "hotlist": true,
-                        "calendar": true,
-                        "autosize": true,
-                        "overrides": {{
-                            "paneProperties.background": "#0a0a0a",
-                            "paneProperties.vertGridProperties.color": "#2a2a2a",
-                            "paneProperties.horzGridProperties.color": "#2a2a2a",
-                            "symbolWatermarkProperties.transparency": 90,
-                            "scalesProperties.textColor": "#b0b0b0"
-                        }},
-                        "onChartReady": function() {{
-                            console.log('✅ TradingView chart ready!');
+                    initAttempts++;
+                    console.log(`📊 Chart initialization attempt ${{initAttempts}}/${{maxAttempts}}`);
+                    
+                    try {{
+                        // Clear any existing chart first
+                        const chartContainer = document.getElementById('tradingview-chart');
+                        if (chartContainer) {{
+                            chartContainer.innerHTML = '';
                         }}
-                    }});
+                        
+                        // Create new TradingView widget with maximum protection
+                        chartWidget = new TradingView.widget({{
+                            "width": "100%",
+                            "height": "100%",
+                            "symbol": "OANDA:XAUUSD",
+                            "interval": "15",
+                            "timezone": "Etc/UTC",
+                            "theme": "dark",
+                            "style": "1",
+                            "locale": "en",
+                            "toolbar_bg": "#141414",
+                            "enable_publishing": false,
+                            "hide_top_toolbar": false,
+                            "hide_legend": false,
+                            "save_image": false,
+                            "container_id": "tradingview-chart",
+                            "studies": ["Volume@tv-basicstudies", "RSI@tv-basicstudies"],
+                            "allow_symbol_change": true,
+                            "details": true,
+                            "hotlist": false,
+                            "calendar": false,
+                            "autosize": true,
+                            "overrides": {{
+                                "paneProperties.background": "#0a0a0a",
+                                "paneProperties.vertGridProperties.color": "#2a2a2a",
+                                "paneProperties.horzGridProperties.color": "#2a2a2a",
+                                "symbolWatermarkProperties.transparency": 90,
+                                "scalesProperties.textColor": "#b0b0b0"
+                            }},
+                            "onChartReady": function() {{
+                                console.log('✅ TradingView chart fully loaded and locked!');
+                                chartInitialized = true;
+                                
+                                // LOCK THE CHART CONTAINER
+                                setTimeout(() => {{
+                                    const container = document.getElementById('tradingview-chart');
+                                    if (container) {{
+                                        container.style.minHeight = '400px';
+                                        container.style.height = '100%';
+                                        container.style.position = 'relative';
+                                        container.style.zIndex = '1000';
+                                        console.log('🔒 Chart container locked and protected');
+                                    }}
+                                }}, 1000);
+                            }}
+                        }});
+                        
+                    }} catch (error) {{
+                        console.error('❌ Chart initialization failed:', error);
+                        if (initAttempts < maxAttempts) {{
+                            console.log(`🔄 Retrying chart initialization in 2 seconds...`);
+                            setTimeout(initChart, 2000);
+                        }} else {{
+                            console.error('💥 Chart initialization failed after all attempts');
+                        }}
+                    }}
                 }}
 
-                // Load ML Predictions
+                // AGGRESSIVE PROTECTION - Prevent any modifications to chart
+                function protectChart() {{
+                    const chartSection = document.querySelector('.chart-section');
+                    const chartContainer = document.getElementById('tradingview-chart');
+                    
+                    if (chartSection && chartContainer) {{
+                        // Lock chart section dimensions
+                        chartSection.style.height = '60vh';
+                        chartSection.style.minHeight = '400px';
+                        chartSection.style.overflow = 'hidden';
+                        chartSection.style.position = 'relative';
+                        
+                        // Lock chart container
+                        chartContainer.style.width = '100%';
+                        chartContainer.style.height = '100%';
+                        chartContainer.style.minHeight = '400px';
+                        chartContainer.style.position = 'relative';
+                        chartContainer.style.zIndex = '1000';
+                        
+                        console.log('🛡️ Chart protection activated');
+                    }}
+                }}
+
+                // Load ML Predictions with error handling
                 async function loadMLPredictions() {{
                     try {{
                         const response = await fetch('/api/ml-predictions');
@@ -1503,7 +1565,7 @@ def dashboard():
                     }}
                 }}
 
-                // Load AI Signals
+                // Load AI Signals with error handling
                 async function loadAISignals() {{
                     try {{
                         const response = await fetch('/api/ai-analysis');
@@ -1549,7 +1611,7 @@ def dashboard():
                     }}
                 }}
 
-                // Load Portfolio Data
+                // Load Portfolio Data with error handling
                 async function loadPortfolio() {{
                     try {{
                         const response = await fetch('/api/portfolio');
@@ -1607,7 +1669,7 @@ def dashboard():
                     }}
                 }}
 
-                // Update price ticker
+                // Update price ticker with error handling
                 async function updatePriceTicker() {{
                     try {{
                         const response = await fetch('/api/price');
@@ -1624,28 +1686,52 @@ def dashboard():
                     }}
                 }}
 
-                // Initialize everything
+                // BULLETPROOF INITIALIZATION SEQUENCE
                 document.addEventListener('DOMContentLoaded', function() {{
-                    console.log('🎯 Dashboard loaded, initializing components...');
+                    console.log('🎯 Dashboard DOM loaded - starting bulletproof initialization...');
                     
-                    // Initialize chart immediately
-                    initChart();
+                    // Step 1: Protect chart area IMMEDIATELY
+                    protectChart();
                     
-                    // Load dashboard data
+                    // Step 2: Initialize chart with delay to ensure DOM is ready
+                    setTimeout(() => {{
+                        console.log('🚀 Starting bulletproof chart initialization...');
+                        initChart();
+                    }}, 500);
+                    
+                    // Step 3: Apply additional protection
+                    setTimeout(() => {{
+                        protectChart();
+                    }}, 1000);
+                    
+                    // Step 4: Load dashboard data after chart is secured
                     setTimeout(() => {{
                         loadMLPredictions();
                         loadAISignals();
                         loadPortfolio();
                         updatePriceTicker();
-                    }}, 1000);
+                    }}, 2000);
                     
-                    // Set up real-time updates
+                    // Step 5: Set up periodic updates (but never touch the chart)
                     setInterval(updatePriceTicker, 5000);
                     setInterval(loadMLPredictions, 30000);
                     setInterval(loadAISignals, 60000);
                 }});
 
-                console.log('✅ GoldGPT Pro Dashboard Ready!');
+                // PREVENT ANY WINDOW MODIFICATIONS THAT COULD AFFECT CHART
+                window.addEventListener('load', function() {{
+                    console.log('🔒 Window loaded - applying final chart protection...');
+                    setTimeout(protectChart, 1000);
+                }});
+
+                // PREVENT CHART DESTRUCTION ON ANY RESIZE
+                window.addEventListener('resize', function() {{
+                    if (chartInitialized && chartWidget) {{
+                        setTimeout(protectChart, 100);
+                    }}
+                }});
+
+                console.log('✅ Bulletproof GoldGPT Dashboard Ready - Chart Protected!');
             </script>
         </body>
         </html>
