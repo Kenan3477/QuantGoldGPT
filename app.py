@@ -8,6 +8,7 @@ import os
 import json
 import logging
 import sqlite3
+import traceback
 from datetime import datetime, timezone, timedelta
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for
 from flask_socketio import SocketIO, emit
@@ -1315,25 +1316,6 @@ def api_ai_signals():
             'success': False,
             'error': str(e)
         }), 500
-
-@app.route('/api/debug/predictions')
-def debug_predictions():
-    """Debug endpoint to test predictions"""
-    try:
-        predictions = get_ml_predictions()
-        return jsonify({
-            'debug': True,
-            'timestamp': datetime.now().isoformat(),
-            'predictions_data': predictions,
-            'api_working': True
-        })
-    except Exception as e:
-        return jsonify({
-            'debug': True,
-            'error': str(e),
-            'api_working': False,
-            'timestamp': datetime.now().isoformat()
-        })
 
 @app.route('/api/debug/predictions')
 def api_debug_predictions():
