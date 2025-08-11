@@ -1698,6 +1698,42 @@ def dashboard():
         </html>
         """
 
+@app.route('/chart-only')
+def chart_only():
+    """Isolated TradingView chart page"""
+    return '''
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>TradingView Chart - GoldGPT</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body style="margin:0;padding:0;background:#131722;">
+        <div id="tradingview_chart" style="width:100%;height:100vh;"></div>
+        <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+        <script type="text/javascript">
+            new TradingView.widget({
+                "width": "100%",
+                "height": "100%",
+                "symbol": "FX:XAUUSD",
+                "interval": "15",
+                "timezone": "Etc/UTC",
+                "theme": "dark",
+                "style": "1",
+                "locale": "en",
+                "toolbar_bg": "#f1f3f6",
+                "enable_publishing": false,
+                "hide_top_toolbar": false,
+                "hide_legend": false,
+                "save_image": false,
+                "container_id": "tradingview_chart"
+            });
+        </script>
+    </body>
+    </html>
+    '''
+
 @app.route('/ml-predictions-dashboard')
 @app.route('/advanced-ml-dashboard')  # Add route for advanced ML dashboard
 def ml_predictions_dashboard():
