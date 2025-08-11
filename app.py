@@ -1037,7 +1037,7 @@ def generate_chart_data(timeframe='1H', count=100):
 # Routes for the Advanced Dashboard
 @app.route('/')
 def dashboard():
-    """Main advanced dashboard"""
+    """Main advanced dashboard with integrated TradingView chart"""
     try:
         # Force template loading - check if template exists
         import os
@@ -1051,43 +1051,401 @@ def dashboard():
     except Exception as e:
         logger.error(f"Error loading dashboard template: {e}")
         
-        # SIMPLE EMBEDDED TRADINGVIEW CHART - NO FALLBACK BULLSHIT
+        # Complete GoldGPT Dashboard with integrated TradingView chart
         return f"""
         <!DOCTYPE html>
-        <html>
+        <html lang="en">
         <head>
-            <title>GoldGPT Pro - Live Chart</title>
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>GoldGPT Pro - Advanced AI Trading Platform</title>
+            <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
             <script src="https://s3.tradingview.com/tv.js"></script>
+            <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
             <style>
-                body {{ margin: 0; padding: 0; background: #0a0a0a; color: white; font-family: Arial, sans-serif; }}
-                .header {{ background: #141414; padding: 10px 20px; border-bottom: 1px solid #2a2a2a; }}
-                .chart-container {{ height: calc(100vh - 60px); width: 100%; }}
-                #tradingview-chart {{ height: 100%; width: 100%; }}
+                * {{ margin: 0; padding: 0; box-sizing: border-box; }}
+                body {{ 
+                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                    background: #0a0a0a; 
+                    color: #ffffff; 
+                    overflow-x: hidden;
+                }}
+                .main-layout {{
+                    display: grid;
+                    grid-template-columns: 280px 1fr;
+                    grid-template-rows: 64px 1fr;
+                    grid-template-areas: "header header" "sidebar content";
+                    height: 100vh;
+                    overflow: hidden;
+                }}
+                .header {{
+                    grid-area: header;
+                    background: #141414;
+                    border-bottom: 1px solid #2a2a2a;
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    padding: 0 20px;
+                }}
+                .logo {{
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    font-size: 18px;
+                    font-weight: bold;
+                }}
+                .logo i {{ color: #ffd700; }}
+                .price-ticker {{
+                    display: flex;
+                    align-items: center;
+                    gap: 20px;
+                    background: #1e1e1e;
+                    padding: 8px 16px;
+                    border-radius: 8px;
+                }}
+                .price-item {{
+                    text-align: center;
+                }}
+                .price-label {{
+                    font-size: 12px;
+                    color: #888;
+                }}
+                .price-value {{
+                    font-size: 16px;
+                    font-weight: bold;
+                }}
+                .price-positive {{ color: #26a69a; }}
+                .price-negative {{ color: #ef5350; }}
+                .sidebar {{
+                    grid-area: sidebar;
+                    background: #141414;
+                    border-right: 1px solid #2a2a2a;
+                    overflow-y: auto;
+                    padding: 20px 0;
+                }}
+                .nav-section {{
+                    margin-bottom: 30px;
+                    padding: 0 20px;
+                }}
+                .nav-section-title {{
+                    color: #666666;
+                    font-size: 12px;
+                    font-weight: 600;
+                    text-transform: uppercase;
+                    margin-bottom: 10px;
+                    letter-spacing: 0.5px;
+                }}
+                .nav-item {{
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    padding: 12px 16px;
+                    margin-bottom: 4px;
+                    border-radius: 8px;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                    color: #b0b0b0;
+                    text-decoration: none;
+                }}
+                .nav-item:hover, .nav-item.active {{
+                    background: #2a2a2a;
+                    color: #ffffff;
+                }}
+                .nav-item i {{
+                    width: 16px;
+                    text-align: center;
+                }}
+                .content {{
+                    grid-area: content;
+                    background: #0a0a0a;
+                    overflow-y: auto;
+                    display: flex;
+                    flex-direction: column;
+                }}
+                .chart-section {{
+                    height: 60vh;
+                    min-height: 400px;
+                    border-bottom: 1px solid #2a2a2a;
+                    position: relative;
+                }}
+                #tradingview-chart {{
+                    height: 100%;
+                    width: 100%;
+                }}
+                .dashboard-content {{
+                    flex: 1;
+                    padding: 20px;
+                    display: grid;
+                    grid-template-columns: 1fr 1fr 300px;
+                    gap: 20px;
+                    overflow-y: auto;
+                }}
+                .dashboard-card {{
+                    background: #141414;
+                    border: 1px solid #2a2a2a;
+                    border-radius: 12px;
+                    padding: 20px;
+                    overflow: hidden;
+                }}
+                .card-header {{
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    margin-bottom: 16px;
+                    padding-bottom: 12px;
+                    border-bottom: 1px solid #2a2a2a;
+                }}
+                .card-title {{
+                    font-size: 16px;
+                    font-weight: 600;
+                    color: #ffffff;
+                }}
+                .card-subtitle {{
+                    font-size: 12px;
+                    color: #888;
+                }}
+                .ml-prediction {{
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    padding: 12px 0;
+                    border-bottom: 1px solid #2a2a2a;
+                }}
+                .ml-prediction:last-child {{
+                    border-bottom: none;
+                }}
+                .prediction-timeframe {{
+                    font-weight: 600;
+                    color: #ffffff;
+                }}
+                .prediction-direction {{
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                }}
+                .direction-bullish {{ color: #26a69a; }}
+                .direction-bearish {{ color: #ef5350; }}
+                .direction-neutral {{ color: #888; }}
+                .confidence-bar {{
+                    width: 60px;
+                    height: 6px;
+                    background: #2a2a2a;
+                    border-radius: 3px;
+                    overflow: hidden;
+                }}
+                .confidence-fill {{
+                    height: 100%;
+                    background: linear-gradient(90deg, #ef5350, #ffc107, #26a69a);
+                    border-radius: 3px;
+                }}
+                .portfolio-stat {{
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    padding: 10px 0;
+                }}
+                .stat-label {{
+                    color: #888;
+                    font-size: 14px;
+                }}
+                .stat-value {{
+                    font-weight: 600;
+                    font-size: 16px;
+                }}
+                .position-item {{
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    padding: 12px 0;
+                    border-bottom: 1px solid #2a2a2a;
+                }}
+                .position-symbol {{
+                    font-weight: 600;
+                    color: #ffffff;
+                }}
+                .position-type {{
+                    font-size: 12px;
+                    color: #888;
+                }}
+                .position-pnl {{
+                    text-align: right;
+                }}
+                .ai-signal {{
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    padding: 16px;
+                    background: #1e1e1e;
+                    border-radius: 8px;
+                    margin-bottom: 12px;
+                }}
+                .signal-icon {{
+                    width: 40px;
+                    height: 40px;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 18px;
+                }}
+                .signal-buy {{ background: #26a69a; color: white; }}
+                .signal-sell {{ background: #ef5350; color: white; }}
+                .signal-hold {{ background: #ffc107; color: black; }}
+                .signal-content {{
+                    flex: 1;
+                }}
+                .signal-title {{
+                    font-weight: 600;
+                    margin-bottom: 4px;
+                }}
+                .signal-description {{
+                    font-size: 14px;
+                    color: #888;
+                }}
+                .loading {{
+                    text-align: center;
+                    padding: 20px;
+                    color: #888;
+                }}
+                @media (max-width: 1200px) {{
+                    .main-layout {{
+                        grid-template-columns: 1fr;
+                        grid-template-areas: "header" "content";
+                    }}
+                    .sidebar {{ display: none; }}
+                    .dashboard-content {{
+                        grid-template-columns: 1fr;
+                    }}
+                }}
             </style>
         </head>
         <body>
-            <div class="header">
-                <h1>🏆 GoldGPT Pro - Live Trading Chart</h1>
-                <span style="color: #00d088;">XAU/USD Live</span>
+            <div class="main-layout">
+                <header class="header">
+                    <div class="logo">
+                        <i class="fas fa-chart-line"></i>
+                        <span>GoldGPT Pro</span>
+                    </div>
+                    <div class="price-ticker" id="price-ticker">
+                        <div class="price-item">
+                            <div class="price-label">GOLD</div>
+                            <div class="price-value" id="gold-price">Loading...</div>
+                        </div>
+                        <div class="price-item">
+                            <div class="price-label">CHANGE</div>
+                            <div class="price-value" id="gold-change">--</div>
+                        </div>
+                        <div class="price-item">
+                            <div class="price-label">STATUS</div>
+                            <div class="price-value" style="color: #26a69a;">LIVE</div>
+                        </div>
+                    </div>
+                </header>
+
+                <nav class="sidebar">
+                    <div class="nav-section">
+                        <div class="nav-section-title">Trading</div>
+                        <a href="#" class="nav-item active">
+                            <i class="fas fa-chart-area"></i>
+                            <span>Dashboard</span>
+                        </a>
+                        <a href="#" class="nav-item">
+                            <i class="fas fa-exchange-alt"></i>
+                            <span>Trade</span>
+                        </a>
+                        <a href="#" class="nav-item">
+                            <i class="fas fa-wallet"></i>
+                            <span>Portfolio</span>
+                        </a>
+                    </div>
+                    <div class="nav-section">
+                        <div class="nav-section-title">Analysis</div>
+                        <a href="#" class="nav-item">
+                            <i class="fas fa-robot"></i>
+                            <span>AI Signals</span>
+                        </a>
+                        <a href="#" class="nav-item">
+                            <i class="fas fa-brain"></i>
+                            <span>ML Predictions</span>
+                        </a>
+                        <a href="#" class="nav-item">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Technical Analysis</span>
+                        </a>
+                    </div>
+                    <div class="nav-section">
+                        <div class="nav-section-title">Tools</div>
+                        <a href="#" class="nav-item">
+                            <i class="fas fa-history"></i>
+                            <span>History</span>
+                        </a>
+                        <a href="#" class="nav-item">
+                            <i class="fas fa-cog"></i>
+                            <span>Settings</span>
+                        </a>
+                    </div>
+                </nav>
+
+                <main class="content">
+                    <div class="chart-section">
+                        <div id="tradingview-chart"></div>
+                    </div>
+                    
+                    <div class="dashboard-content">
+                        <div class="dashboard-card">
+                            <div class="card-header">
+                                <div>
+                                    <div class="card-title">ML Predictions</div>
+                                    <div class="card-subtitle">AI-powered price forecasts</div>
+                                </div>
+                                <i class="fas fa-brain" style="color: #ffd700;"></i>
+                            </div>
+                            <div id="ml-predictions" class="loading">
+                                <i class="fas fa-spinner fa-spin"></i> Loading predictions...
+                            </div>
+                        </div>
+
+                        <div class="dashboard-card">
+                            <div class="card-header">
+                                <div>
+                                    <div class="card-title">AI Signals</div>
+                                    <div class="card-subtitle">Real-time trading signals</div>
+                                </div>
+                                <i class="fas fa-signal" style="color: #26a69a;"></i>
+                            </div>
+                            <div id="ai-signals" class="loading">
+                                <i class="fas fa-spinner fa-spin"></i> Analyzing market...
+                            </div>
+                        </div>
+
+                        <div class="dashboard-card">
+                            <div class="card-header">
+                                <div>
+                                    <div class="card-title">Portfolio</div>
+                                    <div class="card-subtitle">Account overview</div>
+                                </div>
+                                <i class="fas fa-wallet" style="color: #2196f3;"></i>
+                            </div>
+                            <div id="portfolio-data" class="loading">
+                                <i class="fas fa-spinner fa-spin"></i> Loading portfolio...
+                            </div>
+                        </div>
+                    </div>
+                </main>
             </div>
-            <div class="chart-container">
-                <div id="tradingview-chart"></div>
-            </div>
-            
+
             <script>
-                console.log('🚀 DIRECT CHART LOADING - NO INTERFERENCE');
-                
-                // Load immediately when DOM is ready
-                document.addEventListener('DOMContentLoaded', function() {{
-                    console.log('📊 Starting TradingView widget...');
+                console.log('🚀 GoldGPT Pro Dashboard Loading...');
+
+                // Initialize TradingView Chart
+                function initChart() {{
+                    console.log('📊 Initializing TradingView chart...');
                     
                     new TradingView.widget({{
                         "width": "100%",
                         "height": "100%",
                         "symbol": "OANDA:XAUUSD",
-                        "interval": "60",
+                        "interval": "15",
                         "timezone": "Etc/UTC",
                         "theme": "dark",
                         "style": "1",
@@ -1103,23 +1461,202 @@ def dashboard():
                         "details": true,
                         "hotlist": true,
                         "calendar": true,
+                        "autosize": true,
                         "overrides": {{
                             "paneProperties.background": "#0a0a0a",
                             "paneProperties.vertGridProperties.color": "#2a2a2a",
-                            "paneProperties.horzGridProperties.color": "#2a2a2a"
+                            "paneProperties.horzGridProperties.color": "#2a2a2a",
+                            "symbolWatermarkProperties.transparency": 90,
+                            "scalesProperties.textColor": "#b0b0b0"
                         }},
                         "onChartReady": function() {{
-                            console.log('✅ CHART READY AND LOCKED!');
+                            console.log('✅ TradingView chart ready!');
                         }}
                     }});
+                }}
+
+                // Load ML Predictions
+                async function loadMLPredictions() {{
+                    try {{
+                        const response = await fetch('/api/ml-predictions');
+                        const data = await response.json();
+                        
+                        if (data.success) {{
+                            const container = document.getElementById('ml-predictions');
+                            container.innerHTML = '';
+                            
+                            Object.entries(data.predictions).forEach(([timeframe, pred]) => {{
+                                const predElement = document.createElement('div');
+                                predElement.className = 'ml-prediction';
+                                
+                                const directionClass = pred.direction === 'bullish' ? 'direction-bullish' : 
+                                                     pred.direction === 'bearish' ? 'direction-bearish' : 'direction-neutral';
+                                
+                                predElement.innerHTML = `
+                                    <div class="prediction-timeframe">${{timeframe}}</div>
+                                    <div class="prediction-direction ${{directionClass}}">
+                                        <i class="fas fa-arrow-${{pred.direction === 'bullish' ? 'up' : pred.direction === 'bearish' ? 'down' : 'right'}}"></i>
+                                        ${{pred.direction.toUpperCase()}}
+                                    </div>
+                                    <div>
+                                        <div class="confidence-bar">
+                                            <div class="confidence-fill" style="width: ${{pred.confidence * 100}}%"></div>
+                                        </div>
+                                        <small>${{Math.round(pred.confidence * 100)}}%</small>
+                                    </div>
+                                `;
+                                container.appendChild(predElement);
+                            }});
+                        }}
+                    }} catch (error) {{
+                        console.error('Error loading ML predictions:', error);
+                        document.getElementById('ml-predictions').innerHTML = '<div style="color: #ef5350;">Error loading predictions</div>';
+                    }}
+                }}
+
+                // Load AI Signals
+                async function loadAISignals() {{
+                    try {{
+                        const response = await fetch('/api/ai-analysis');
+                        const data = await response.json();
+                        
+                        if (data.success) {{
+                            const container = document.getElementById('ai-signals');
+                            container.innerHTML = '';
+                            
+                            const signal = document.createElement('div');
+                            signal.className = 'ai-signal';
+                            
+                            const signalClass = data.recommendation.action === 'BUY' ? 'signal-buy' : 
+                                               data.recommendation.action === 'SELL' ? 'signal-sell' : 'signal-hold';
+                            
+                            signal.innerHTML = `
+                                <div class="signal-icon ${{signalClass}}">
+                                    <i class="fas fa-${{data.recommendation.action === 'BUY' ? 'arrow-up' : data.recommendation.action === 'SELL' ? 'arrow-down' : 'pause'}}"></i>
+                                </div>
+                                <div class="signal-content">
+                                    <div class="signal-title">${{data.recommendation.action}} Signal</div>
+                                    <div class="signal-description">Confidence: ${{Math.round(data.confidence * 100)}}% | Risk: ${{data.risk_level}}</div>
+                                </div>
+                            `;
+                            container.appendChild(signal);
+                            
+                            // Add reasoning
+                            if (data.detailed_analysis && data.detailed_analysis.length > 0) {{
+                                data.detailed_analysis.slice(0, 2).forEach(reason => {{
+                                    const reasonElement = document.createElement('div');
+                                    reasonElement.style.padding = '8px';
+                                    reasonElement.style.fontSize = '13px';
+                                    reasonElement.style.color = '#888';
+                                    reasonElement.style.borderTop = '1px solid #2a2a2a';
+                                    reasonElement.textContent = reason;
+                                    container.appendChild(reasonElement);
+                                }});
+                            }}
+                        }}
+                    }} catch (error) {{
+                        console.error('Error loading AI signals:', error);
+                        document.getElementById('ai-signals').innerHTML = '<div style="color: #ef5350;">Error loading signals</div>';
+                    }}
+                }}
+
+                // Load Portfolio Data
+                async function loadPortfolio() {{
+                    try {{
+                        const response = await fetch('/api/portfolio');
+                        const data = await response.json();
+                        
+                        if (data.success) {{
+                            const container = document.getElementById('portfolio-data');
+                            container.innerHTML = `
+                                <div class="portfolio-stat">
+                                    <span class="stat-label">Balance</span>
+                                    <span class="stat-value">$$${{data.balance.toLocaleString()}}</span>
+                                </div>
+                                <div class="portfolio-stat">
+                                    <span class="stat-label">Equity</span>
+                                    <span class="stat-value">$$${{data.equity.toLocaleString()}}</span>
+                                </div>
+                                <div class="portfolio-stat">
+                                    <span class="stat-label">P&L</span>
+                                    <span class="stat-value" style="color: ${{data.total_pnl >= 0 ? '#26a69a' : '#ef5350'}}">
+                                        $$${{data.total_pnl >= 0 ? '+' : ''}}${{data.total_pnl.toLocaleString()}}
+                                    </span>
+                                </div>
+                                <div class="portfolio-stat">
+                                    <span class="stat-label">Win Rate</span>
+                                    <span class="stat-value">${{Math.round(data.win_rate * 100)}}%</span>
+                                </div>
+                            `;
+                            
+                            // Add positions
+                            if (data.positions && data.positions.length > 0) {{
+                                data.positions.forEach(position => {{
+                                    const posElement = document.createElement('div');
+                                    posElement.className = 'position-item';
+                                    posElement.innerHTML = `
+                                        <div>
+                                            <div class="position-symbol">${{position.symbol}}</div>
+                                            <div class="position-type">${{position.type}} | ${{position.quantity}}</div>
+                                        </div>
+                                        <div class="position-pnl">
+                                            <div style="color: ${{position.pnl >= 0 ? '#26a69a' : '#ef5350'}}">
+                                                $$${{position.pnl >= 0 ? '+' : ''}}${{position.pnl}}
+                                            </div>
+                                            <div style="font-size: 12px; color: #888;">
+                                                ${{position.pnl_percent >= 0 ? '+' : ''}}${{position.pnl_percent}}%
+                                            </div>
+                                        </div>
+                                    `;
+                                    container.appendChild(posElement);
+                                }});
+                            }}
+                        }}
+                    }} catch (error) {{
+                        console.error('Error loading portfolio:', error);
+                        document.getElementById('portfolio-data').innerHTML = '<div style="color: #ef5350;">Error loading portfolio</div>';
+                    }}
+                }}
+
+                // Update price ticker
+                async function updatePriceTicker() {{
+                    try {{
+                        const response = await fetch('/api/price');
+                        const data = await response.json();
+                        
+                        if (data.success) {{
+                            document.getElementById('gold-price').textContent = `$$${{data.price}}`;
+                            const changeElement = document.getElementById('gold-change');
+                            changeElement.textContent = `${{data.change >= 0 ? '+' : ''}}${{data.change}} (${{data.change_percent}}%)`;
+                            changeElement.className = `price-value ${{data.change >= 0 ? 'price-positive' : 'price-negative'}}`;
+                        }}
+                    }} catch (error) {{
+                        console.error('Error updating price:', error);
+                    }}
+                }}
+
+                // Initialize everything
+                document.addEventListener('DOMContentLoaded', function() {{
+                    console.log('🎯 Dashboard loaded, initializing components...');
+                    
+                    // Initialize chart immediately
+                    initChart();
+                    
+                    // Load dashboard data
+                    setTimeout(() => {{
+                        loadMLPredictions();
+                        loadAISignals();
+                        loadPortfolio();
+                        updatePriceTicker();
+                    }}, 1000);
+                    
+                    // Set up real-time updates
+                    setInterval(updatePriceTicker, 5000);
+                    setInterval(loadMLPredictions, 30000);
+                    setInterval(loadAISignals, 60000);
                 }});
-                
-                // Prevent any page modifications
-                setTimeout(() => {{
-                    console.log('🔒 Locking page against modifications');
-                    document.body.style.pointerEvents = 'auto';
-                    document.documentElement.style.overflow = 'hidden';
-                }}, 2000);
+
+                console.log('✅ GoldGPT Pro Dashboard Ready!');
             </script>
         </body>
         </html>
