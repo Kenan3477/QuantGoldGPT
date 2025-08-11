@@ -1341,6 +1341,8 @@ def dashboard():
                 // Load TradingView Chart
                 let chartWidget = null;
                 let chartInitialized = false;
+                let initializationAttempts = 0;
+                const maxAttempts = 5;
                 
                 function loadTradingViewChart() {{
                     console.log('🚀 Initializing TradingView chart...');
@@ -1359,78 +1361,97 @@ def dashboard():
                         return;
                     }}
                     
+                    initializationAttempts++;
+                    if (initializationAttempts > maxAttempts) {{
+                        console.error('❌ Max initialization attempts reached');
+                        if (loadingDiv) {{
+                            loadingDiv.innerHTML = '<div style="text-align: center; color: #ff4757;"><i class="fas fa-exclamation-triangle"></i><br>Chart failed to load<br><button onclick="location.reload()" style="margin-top: 10px; background: #00d4aa; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">Reload Page</button></div>';
+                        }}
+                        return;
+                    }}
+                    
                     // Show loading state
                     if (loadingDiv) {{
-                        loadingDiv.innerHTML = '<i class="fas fa-spinner fa-spin" style="margin-right: 10px;"></i>Loading TradingView Chart...';
+                        loadingDiv.innerHTML = '<i class="fas fa-spinner fa-spin" style="margin-right: 10px;"></i>Loading TradingView Chart... (Attempt ' + initializationAttempts + ')';
                         loadingDiv.style.display = 'flex';
                     }}
                     
                     function initChart() {{
                         try {{
                             if (typeof TradingView === 'undefined') {{
-                                console.log('⏳ TradingView not ready, retrying in 2 seconds...');
-                                setTimeout(initChart, 2000);
+                                console.log('⏳ TradingView not ready, retrying in 3 seconds...');
+                                setTimeout(loadTradingViewChart, 3000);
                                 return;
                             }}
                             
                             console.log('✅ TradingView library loaded, creating widget...');
                             
-                            chartWidget = new TradingView.widget({{
-                                "width": "100%",
-                                "height": "100%",
-                                "symbol": "OANDA:XAUUSD",
-                                "interval": "60",
-                                "timezone": "Etc/UTC",
-                                "theme": "dark",
-                                "style": "1",
-                                "locale": "en",
-                                "toolbar_bg": "#1a1a1a",
-                                "enable_publishing": false,
-                                "hide_top_toolbar": false,
-                                "hide_legend": false,
-                                "save_image": false,
-                                "container_id": "tradingview-chart",
-                                "studies": [
-                                    "Volume@tv-basicstudies",
-                                    "RSI@tv-basicstudies", 
-                                    "MACD@tv-basicstudies"
-                                ],
-                                "allow_symbol_change": true,
-                                "details": true,
-                                "hotlist": true,
-                                "calendar": true,
-                                "overrides": {{
-                                    "paneProperties.background": "#1a1a1a",
-                                    "paneProperties.vertGridProperties.color": "#2a2a2a",
-                                    "paneProperties.horzGridProperties.color": "#2a2a2a",
-                                    "paneProperties.backgroundType": "solid",
-                                    "scalesProperties.textColor": "#b0b0b0"
-                                }},
-                                "loading_screen": {{
-                                    "backgroundColor": "#1a1a1a",
-                                    "foregroundColor": "#00d4aa"
-                                }},
-                                "onChartReady": function() {{
-                                    console.log('🎉 TradingView chart is ready!');
-                                    chartInitialized = true;
-                                    if (loadingDiv) {{
-                                        loadingDiv.style.display = 'none';
+                            // Clear any existing content in the container
+                            const container = document.getElementById('tradingview-chart');
+                            if (container && !chartInitialized) {{
+                                // Don't clear if chart is already initialized
+                                
+                                chartWidget = new TradingView.widget({{
+                                    "width": "100%",
+                                    "height": "100%",
+                                    "symbol": "OANDA:XAUUSD",
+                                    "interval": "60",
+                                    "timezone": "Etc/UTC",
+                                    "theme": "dark",
+                                    "style": "1",
+                                    "locale": "en",
+                                    "toolbar_bg": "#1a1a1a",
+                                    "enable_publishing": false,
+                                    "hide_top_toolbar": false,
+                                    "hide_legend": false,
+                                    "save_image": false,
+                                    "container_id": "tradingview-chart",
+                                    "studies": [
+                                        "Volume@tv-basicstudies",
+                                        "RSI@tv-basicstudies", 
+                                        "MACD@tv-basicstudies"
+                                    ],
+                                    "allow_symbol_change": true,
+                                    "details": true,
+                                    "hotlist": true,
+                                    "calendar": true,
+                                    "overrides": {{
+                                        "paneProperties.background": "#1a1a1a",
+                                        "paneProperties.vertGridProperties.color": "#2a2a2a",
+                                        "paneProperties.horzGridProperties.color": "#2a2a2a",
+                                        "paneProperties.backgroundType": "solid",
+                                        "scalesProperties.textColor": "#b0b0b0"
+                                    }},
+                                    "loading_screen": {{
+                                        "backgroundColor": "#1a1a1a",
+                                        "foregroundColor": "#00d4aa"
+                                    }},
+                                    "onChartReady": function() {{
+                                        console.log('🎉 TradingView chart is ready and stable!');
+                                        chartInitialized = true;
+                                        if (loadingDiv) {{
+                                            loadingDiv.style.display = 'none';
+                                        }}
+                                        
+                                        // Prevent the chart from being destroyed
+                                        window.chartWidget = chartWidget;
                                     }}
-                                }}
-                            }});
-                            
-                            console.log('📊 TradingView chart widget created successfully!');
+                                }});
+                                
+                                console.log('📊 TradingView chart widget created successfully!');
+                            }}
                             
                         }} catch (error) {{
                             console.error('❌ TradingView chart error:', error);
+                            chartInitialized = false;
                             if (loadingDiv) {{
-                                loadingDiv.innerHTML = '<i class="fas fa-exclamation-triangle" style="margin-right: 10px; color: #ff4757;"></i>Chart loading failed. <a href="javascript:location.reload()" style="color: #00d4aa;">Refresh Page</a>';
+                                loadingDiv.innerHTML = '<div style="text-align: center; color: #ff4757;"><i class="fas fa-exclamation-triangle"></i><br>Chart error: ' + error.message + '<br><button onclick="loadTradingViewChart()" style="margin-top: 10px; background: #00d4aa; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">Retry</button></div>';
                             }}
                         }}
                     }}
                     
-                    // Start initialization
-                    initChart();
+                    // Start initialization with delay to ensure DOM is ready
+                    setTimeout(initChart, 1000);
                 }}
 
                 // Load ML Predictions
@@ -1491,8 +1512,23 @@ def dashboard():
                 window.addEventListener('load', () => {{
                     console.log('🚀 GoldGPT Dashboard initializing...');
                     
-                    // Load TradingView chart with timeout fallback
+                    // Load TradingView chart with enhanced protection
                     loadTradingViewChart();
+                    
+                    // Add chart integrity monitoring
+                    setInterval(() => {{
+                        const chartContainer = document.getElementById('tradingview-chart');
+                        if (chartContainer && chartInitialized) {{
+                            // Check if TradingView iframe still exists
+                            const iframe = chartContainer.querySelector('iframe');
+                            if (!iframe) {{
+                                console.log('🔄 Chart iframe disappeared, reinitializing...');
+                                chartInitialized = false;
+                                initializationAttempts = 0;
+                                loadTradingViewChart();
+                            }}
+                        }}
+                    }}, 5000); // Check every 5 seconds
                     
                     // Fallback: If TradingView doesn't load in 10 seconds, show alternative
                     setTimeout(() => {{
