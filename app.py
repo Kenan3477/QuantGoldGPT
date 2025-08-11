@@ -1716,7 +1716,7 @@ def chart_only():
             new TradingView.widget({
                 "width": "100%",
                 "height": "100%",
-                "symbol": "FX:XAUUSD",
+                "symbol": "OANDA:XAUUSD",
                 "interval": "15",
                 "timezone": "Etc/UTC",
                 "theme": "dark",
