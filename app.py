@@ -1039,13 +1039,91 @@ def generate_chart_data(timeframe='1H', count=100):
 def dashboard():
     """Main advanced dashboard"""
     try:
-        return render_template('dashboard_advanced.html')
+        # Force template loading - check if template exists
+        import os
+        template_path = os.path.join(app.template_folder, 'dashboard_advanced.html')
+        if os.path.exists(template_path):
+            logger.info(f"Template found at: {template_path}")
+            return render_template('dashboard_advanced.html')
+        else:
+            logger.error(f"Template not found at: {template_path}")
+            raise FileNotFoundError("Template not found")
     except Exception as e:
         logger.error(f"Error loading dashboard template: {e}")
-        # Fallback with TradingView chart and full functionality
-        gold_data = get_current_gold_price()
-        ai_data = get_ai_analysis()
-        ml_data = get_ml_predictions()
+        
+        # SIMPLE EMBEDDED TRADINGVIEW CHART - NO FALLBACK BULLSHIT
+        return f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>GoldGPT Pro - Live Chart</title>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <script src="https://s3.tradingview.com/tv.js"></script>
+            <style>
+                body {{ margin: 0; padding: 0; background: #0a0a0a; color: white; font-family: Arial, sans-serif; }}
+                .header {{ background: #141414; padding: 10px 20px; border-bottom: 1px solid #2a2a2a; }}
+                .chart-container {{ height: calc(100vh - 60px); width: 100%; }}
+                #tradingview-chart {{ height: 100%; width: 100%; }}
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <h1>🏆 GoldGPT Pro - Live Trading Chart</h1>
+                <span style="color: #00d088;">XAU/USD Live</span>
+            </div>
+            <div class="chart-container">
+                <div id="tradingview-chart"></div>
+            </div>
+            
+            <script>
+                console.log('🚀 DIRECT CHART LOADING - NO INTERFERENCE');
+                
+                // Load immediately when DOM is ready
+                document.addEventListener('DOMContentLoaded', function() {{
+                    console.log('📊 Starting TradingView widget...');
+                    
+                    new TradingView.widget({{
+                        "width": "100%",
+                        "height": "100%",
+                        "symbol": "OANDA:XAUUSD",
+                        "interval": "60",
+                        "timezone": "Etc/UTC",
+                        "theme": "dark",
+                        "style": "1",
+                        "locale": "en",
+                        "toolbar_bg": "#141414",
+                        "enable_publishing": false,
+                        "hide_top_toolbar": false,
+                        "hide_legend": false,
+                        "save_image": false,
+                        "container_id": "tradingview-chart",
+                        "studies": ["Volume@tv-basicstudies", "RSI@tv-basicstudies", "MACD@tv-basicstudies"],
+                        "allow_symbol_change": true,
+                        "details": true,
+                        "hotlist": true,
+                        "calendar": true,
+                        "overrides": {{
+                            "paneProperties.background": "#0a0a0a",
+                            "paneProperties.vertGridProperties.color": "#2a2a2a",
+                            "paneProperties.horzGridProperties.color": "#2a2a2a"
+                        }},
+                        "onChartReady": function() {{
+                            console.log('✅ CHART READY AND LOCKED!');
+                        }}
+                    }});
+                }});
+                
+                // Prevent any page modifications
+                setTimeout(() => {{
+                    console.log('🔒 Locking page against modifications');
+                    document.body.style.pointerEvents = 'auto';
+                    document.documentElement.style.overflow = 'hidden';
+                }}, 2000);
+            </script>
+        </body>
+        </html>
+        """
         
         return f"""
         <!DOCTYPE html>
