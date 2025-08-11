@@ -1319,11 +1319,12 @@ def dashboard():
                             <h3 style="color: #ffffff;"><i class="fas fa-chart-candlestick"></i> Live Gold Chart (XAU/USD)</h3>
                             <div style="color: #00d088; font-weight: bold;">LIVE</div>
                         </div>
-                        <div class="tradingview-widget-container" id="tradingview-chart" style="height: calc(100% - 60px); width: 100%;">
-                            <div id="chart-loading" style="display: flex; align-items: center; justify-content: center; height: 100%; color: #b0b0b0;">
+                        <div class="tradingview-widget-container" id="tradingview-chart" style="height: calc(100% - 60px); width: 100%; position: relative;">
+                            <div id="chart-loading" style="display: flex; align-items: center; justify-content: center; height: 100%; color: #b0b0b0; position: absolute; top: 0; left: 0; width: 100%; z-index: 1000;">
                                 <i class="fas fa-spinner fa-spin" style="margin-right: 10px;"></i>
                                 Loading TradingView Chart...
                             </div>
+                            <!-- Chart will be injected here by TradingView widget -->
                         </div>
                     </div>
 
@@ -1429,12 +1430,32 @@ def dashboard():
                                     "onChartReady": function() {{
                                         console.log('🎉 TradingView chart is ready and stable!');
                                         chartInitialized = true;
+                                        
+                                        // Hide loading div
+                                        const loadingDiv = document.getElementById('chart-loading');
                                         if (loadingDiv) {{
                                             loadingDiv.style.display = 'none';
                                         }}
                                         
                                         // Prevent the chart from being destroyed
                                         window.chartWidget = chartWidget;
+                                        
+                                        // Lock the chart container to prevent innerHTML changes
+                                        const container = document.getElementById('tradingview-chart');
+                                        if (container) {{
+                                            // Override innerHTML setter to prevent chart destruction
+                                            Object.defineProperty(container, 'innerHTML', {{
+                                                set: function(value) {{
+                                                    console.log('⚠️ Attempted to modify chart container innerHTML - BLOCKED');
+                                                    return false;
+                                                }},
+                                                get: function() {{
+                                                    return this.childNodes;
+                                                }}
+                                            }});
+                                            
+                                            console.log('🔒 Chart container locked against modifications');
+                                        }}
                                     }}
                                 }});
                                 
@@ -1512,6 +1533,25 @@ def dashboard():
                 window.addEventListener('load', () => {{
                     console.log('🚀 GoldGPT Dashboard initializing...');
                     
+                    // IMMEDIATELY protect the chart container
+                    const chartContainer = document.getElementById('tradingview-chart');
+                    if (chartContainer) {{
+                        console.log('🛡️ Protecting chart container from modifications...');
+                        
+                        // Create a protective wrapper
+                        chartContainer.setAttribute('data-protected', 'true');
+                        
+                        // Block any attempts to replace content
+                        const originalSetAttribute = chartContainer.setAttribute;
+                        chartContainer.setAttribute = function(name, value) {{
+                            if (name === 'innerHTML' || name === 'textContent') {{
+                                console.log('🚫 Blocked attempt to modify chart container via setAttribute');
+                                return;
+                            }}
+                            return originalSetAttribute.call(this, name, value);
+                        }};
+                    }}
+                    
                     // Load TradingView chart with enhanced protection
                     loadTradingViewChart();
                     
@@ -1522,13 +1562,21 @@ def dashboard():
                             // Check if TradingView iframe still exists
                             const iframe = chartContainer.querySelector('iframe');
                             if (!iframe) {{
-                                console.log('🔄 Chart iframe disappeared, reinitializing...');
+                                console.log('� CRITICAL: Chart iframe disappeared, forcing reinitialize...');
                                 chartInitialized = false;
                                 initializationAttempts = 0;
-                                loadTradingViewChart();
+                                
+                                // Clear any conflicting content
+                                const loadingDiv = document.getElementById('chart-loading');
+                                if (loadingDiv) {{
+                                    loadingDiv.style.display = 'flex';
+                                    loadingDiv.innerHTML = '<i class="fas fa-sync fa-spin" style="margin-right: 10px;"></i>Chart disappeared - Recovering...';
+                                }}
+                                
+                                setTimeout(loadTradingViewChart, 1000);
                             }}
                         }}
-                    }}, 5000); // Check every 5 seconds
+                    }}, 2000); // Check every 2 seconds (more frequent)
                     
                     // Fallback: If TradingView doesn't load in 10 seconds, show alternative
                     setTimeout(() => {{
