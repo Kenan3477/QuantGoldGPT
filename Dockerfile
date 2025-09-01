@@ -26,8 +26,8 @@ ENV PYTHONUNBUFFERED=1
 ENV FLASK_ENV=production
 ENV FLASK_DEBUG=False
 
-# Expose port (Railway sets PORT dynamically)
-EXPOSE $PORT
+# Expose port 5000 (Railway will handle PORT mapping)
+EXPOSE 5000
 
 # Use our production WSGI server
 CMD ["sh", "-c", "gunicorn --worker-class eventlet -w 1 --bind 0.0.0.0:${PORT:-5000} wsgi:application"]
