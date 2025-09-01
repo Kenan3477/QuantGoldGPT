@@ -3,16 +3,11 @@
     "builder": "NIXPACKS"
   },
   "deploy": {
-    "startCommand": "gunicorn --worker-class eventlet -w 1 --bind 0.0.0.0:$PORT wsgi:application",
+    "startCommand": "python app.py",
     "restartPolicyType": "ON_FAILURE",
     "restartPolicyMaxRetries": 3
   },
   "variables": {
-    "RAILWAY_ENVIRONMENT": "production",
-    "FLASK_ENV": "production",
-    "FLASK_DEBUG": "False",
-    "ML_DASHBOARD_ENABLED": "True",
-    "ENHANCED_SOCKETIO_ENABLED": "True",
-    "REAL_TIME_UPDATES": "True"
+    "RAILWAY_ENVIRONMENT": "production"
   }
 }

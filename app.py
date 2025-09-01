@@ -44,24 +44,14 @@ except ImportError as e:
     logger.warning(f"⚠️ Enhanced SocketIO not available: {e}")
 
 # Enhanced Signal Tracker
-signal_tracker = None
-ENHANCED_SIGNAL_TRACKER_AVAILABLE = False
-
 try:
-    from enhanced_signal_tracker import SignalTracker
-    signal_tracker = SignalTracker()
+    from enhanced_signal_tracker import signal_tracker
     ENHANCED_SIGNAL_TRACKER_AVAILABLE = True
-    logger.info("✅ Enhanced Signal Tracker initialized")
+    logger.info("✅ Enhanced Signal Tracker available")
 except ImportError as e:
     ENHANCED_SIGNAL_TRACKER_AVAILABLE = False
     logger.warning(f"⚠️ Enhanced Signal Tracker not available: {e}")
-    # Try fallback to legacy tracker
-    try:
-        from signal_tracker import signal_tracker
-        logger.info("📦 Using legacy signal tracker")
-    except ImportError:
-        signal_tracker = None
-        logger.warning("⚠️ No signal tracker available")
+    signal_tracker = None
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -75,36 +65,6 @@ try:
     logger.info("✅ Real ML Trading Engine initialized")
 except Exception as e:
     logger.error(f"❌ Failed to initialize ML engine: {e}")
-
-# Initialize ML Prediction Accuracy Tracker
-ml_prediction_tracker = None
-try:
-    from ml_prediction_accuracy_tracker import ml_prediction_tracker
-    logger.info("✅ ML Prediction Accuracy Tracker initialized")
-    
-    # Start background evaluation task
-    import threading
-    import time
-    
-    def evaluate_predictions_periodically():
-        """Background task to evaluate predictions every 5 minutes"""
-        while True:
-            try:
-                time.sleep(300)  # 5 minutes
-                if ml_prediction_tracker:
-                    result = ml_prediction_tracker.evaluate_predictions()
-                    if result['success'] and result['evaluated_count'] > 0:
-                        logger.info(f"🔄 Evaluated {result['evaluated_count']} predictions")
-            except Exception as e:
-                logger.error(f"❌ Background prediction evaluation error: {e}")
-    
-    # Start background thread
-    eval_thread = threading.Thread(target=evaluate_predictions_periodically, daemon=True)
-    eval_thread.start()
-    logger.info("🔄 Started background prediction evaluation thread")
-    
-except Exception as e:
-    logger.error(f"❌ Failed to initialize ML prediction tracker: {e}")
 
 # Initialize SocketIO
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading')
@@ -1094,28 +1054,6 @@ def get_ml_predictions():
                     "signal_id": f"GOLD_{timeframe}_{random.randint(1000000, 9999999)}",
                     "real_analysis": True
                 }
-                
-                # Track this prediction for accuracy monitoring
-                if ml_prediction_tracker:
-                    try:
-                        tracking_result = ml_prediction_tracker.add_prediction(
-                            timeframe=timeframe,
-                            prediction_type=signal,
-                            target_price=target_price,
-                            entry_price=base_price,
-                            confidence=predictions_data[timeframe]['confidence'],
-                            reasoning=predictions_data[timeframe]['reasoning']
-                        )
-                        if tracking_result['success']:
-                            predictions_data[timeframe]['prediction_id'] = tracking_result['prediction_id']
-                            predictions_data[timeframe]['tracked'] = True
-                        else:
-                            predictions_data[timeframe]['tracked'] = False
-                    except Exception as track_e:
-                        logger.warning(f"⚠️ Failed to track {timeframe} prediction: {track_e}")
-                        predictions_data[timeframe]['tracked'] = False
-                else:
-                    predictions_data[timeframe]['tracked'] = False
             
             # Add timestamp
             current_time = datetime.now()
@@ -1154,7 +1092,6 @@ def api_timeframe_predictions():
     try:
         from real_ml_trading_engine import RealMLTradingEngine
         import random
-        import time
         
         current_price_data = get_current_gold_price()
         base_price = current_price_data['price']
@@ -1185,11 +1122,11 @@ def api_timeframe_predictions():
                 signal_result = ml_engine.generate_real_signal("GOLD", engine_tf)
                 
                 if signal_result['success']:
-                    # Signal data is directly in the result, not nested under 'data'
-                    signal_type = signal_result['signal_type']
-                    target_price = signal_result['target_price']
-                    confidence = signal_result['confidence']
-                    entry_price = signal_result['current_price']  # Use current_price as entry
+                    signal_data = signal_result['data']
+                    signal_type = signal_data['signal_type']
+                    target_price = signal_data['target_price']
+                    confidence = signal_data['confidence']
+                    entry_price = signal_data['entry_price']
                     
                     # Convert signal type to frontend format
                     if signal_type == 'BUY':
@@ -1212,23 +1149,6 @@ def api_timeframe_predictions():
                     
                     generated_signals.append(display_signal)
                     logger.info(f"✅ Generated REAL {display_tf} prediction: {display_signal} ({change_percent:+.2f}%)")
-                    
-                    # Add signal to tracking system if available
-                    if ENHANCED_SIGNAL_TRACKER_AVAILABLE and signal_tracker:
-                        try:
-                            signal_data = {
-                                'signal_type': signal_type,
-                                'entry_price': entry_price,
-                                'take_profit': target_price if signal_type in ['BUY', 'BULLISH'] else entry_price,
-                                'stop_loss': signal_result.get('stop_loss', entry_price * 0.99),
-                                'risk_amount': 1000,
-                                'confidence_score': confidence,
-                                'macro_indicators': f"{display_tf} ML prediction: {display_signal}"
-                            }
-                            tracking_result = signal_tracker.add_signal(signal_data)
-                            logger.info(f"📊 {display_tf} signal added to tracking: {tracking_result}")
-                        except Exception as tracking_error:
-                            logger.warning(f"⚠️ Signal tracking error for {display_tf}: {str(tracking_error)}")
                 
                 else:
                     # Fallback if ML engine fails for this timeframe
@@ -1388,32 +1308,6 @@ def generate_advanced_signal():
         if signal_result['success'] and signal_result['signal_generated']:
             logger.info(f"✅ Signal generated: {signal_result['signal_type']} at ${signal_result['entry_price']:.2f}")
             
-            # Add signal to tracking system if available
-            if ENHANCED_SIGNAL_TRACKER_AVAILABLE and signal_tracker:
-                try:
-                    tracking_result = signal_tracker.add_signal(
-                        signal_id=signal_result['signal_id'],
-                        signal_type=signal_result['signal_type'],
-                        entry_price=signal_result['entry_price'],
-                        take_profit=signal_result['take_profit'],
-                        stop_loss=signal_result['stop_loss'],
-                        risk_amount=1000,  # Default position size
-                        confidence_score=signal_result.get('confidence', 0.75),
-                        macro_indicators=signal_result.get('reasoning', 'Technical analysis signal')
-                    )
-                    if tracking_result['success']:
-                        logger.info(f"📊 Signal added to tracking system: {signal_result['signal_id']}")
-                        signal_result['tracking_enabled'] = True
-                    else:
-                        logger.warning(f"⚠️ Failed to add signal to tracking: {tracking_result.get('error', 'Unknown error')}")
-                        signal_result['tracking_enabled'] = False
-                except Exception as e:
-                    logger.error(f"❌ Error adding signal to tracker: {e}")
-                    signal_result['tracking_enabled'] = False
-            else:
-                signal_result['tracking_enabled'] = False
-                logger.warning("⚠️ Signal tracker not available - signal won't be tracked")
-            
             # Emit real-time signal to connected clients
             socketio.emit('new_trading_signal', {
                 'signal': signal_result,
@@ -1455,117 +1349,52 @@ def generate_ai_signal():
             except Exception as advanced_error:
                 logger.warning(f"⚠️ Advanced signal system failed, using simple fallback: {advanced_error}")
                 
-        # Use enhanced technical analysis instead of fake signals
+        # Use simple signal generator as fallback
         if not signal_result or not signal_result.get('success', False):
-            logger.info("✅ Using ENHANCED technical analysis signal generator")
+            logger.info("✅ Using simple signal generator for AI signal")
             try:
-                from enhanced_technical_signal_generator import generate_enhanced_signal
-                real_signal = generate_enhanced_signal(symbol, timeframe)
+                from simple_signal_generator import generate_signal_now
+                simple_signal = generate_signal_now(symbol, timeframe)
                 
-                if real_signal and real_signal.get('success', False):
+                if simple_signal:
                     signal_result = {
                         'success': True,
-                        'signal': real_signal,
-                        'generated_by': 'Enhanced Technical Analysis',
+                        'signal': simple_signal,
+                        'generated_by': 'Simple AI Generator',
                         'timestamp': datetime.now().isoformat(),
                         'symbol': symbol,
                         'timeframe': timeframe
                     }
                 else:
-                    # If no strong technical signal, fall back to simple generator but log it
-                    logger.warning("⚠️ No enhanced technical signal detected, using simple fallback")
-                    from simple_signal_generator import generate_signal_now
-                    simple_signal = generate_signal_now(symbol, timeframe)
-                    
-                    if simple_signal:
-                        # Mark it as fallback
-                        simple_signal['is_fallback'] = True
-                        simple_signal['reasoning'] = f"⚠️ FALLBACK SIGNAL (RANDOM): {simple_signal.get('reasoning', 'Technical analysis inconclusive')} - NOT BASED ON REAL ANALYSIS"
-                        
-                        signal_result = {
-                            'success': True,
-                            'signal': simple_signal,
-                            'generated_by': '⚠️ Random Fallback Generator',
-                            'timestamp': datetime.now().isoformat(),
-                            'symbol': symbol,
-                            'timeframe': timeframe
-                        }
-                    else:
-                        raise Exception("All signal generation methods failed")
-            except Exception as tech_error:
-                logger.error(f"❌ Real technical analysis failed: {tech_error}")
+                    raise Exception("Simple signal generator returned empty result")
+            except Exception as simple_error:
+                logger.error(f"❌ Simple signal generator failed: {simple_error}")
                 raise Exception("All signal generation methods failed")
         
         if signal_result and signal_result.get('success', False):
             # Add signal to enhanced tracking system
             try:
                 if ENHANCED_SIGNAL_TRACKER_AVAILABLE and signal_tracker:
-                    # Handle different signal generators
-                    generated_by = signal_result.get('generated_by', 'Unknown')
                     signal_data = signal_result.get('signal', {})
                     
-                    if generated_by in ['Enhanced Technical Analysis', 'Real Technical Analysis']:
-                        # Real technical analysis signal - use data directly
-                        enhanced_signal_data = {
-                            'signal_type': 'long' if signal_data.get('signal_type', '').upper() in ['BUY', 'BULLISH', 'LONG'] else 'short',
-                            'entry_price': signal_data.get('entry_price', 3400),
-                            'take_profit': signal_data.get('take_profit', 3420),
-                            'stop_loss': signal_data.get('stop_loss', 3380),
-                            'risk_amount': 100,
-                            'confidence_score': signal_data.get('confidence', 0.75),
-                            'macro_indicators': {
-                                'timeframe': timeframe,
-                                'symbol': symbol,
-                                'reasoning': signal_data.get('reasoning', 'Real technical analysis'),
-                                'win_probability': signal_data.get('win_probability', 0.7),
-                                'risk_reward_ratio': signal_data.get('risk_reward_ratio', 2.0),
-                                'signal_strength': signal_data.get('signal_strength', 3.0),
-                                'technical_indicators': signal_data.get('technical_indicators', {}),
-                                'generator': generated_by,
-                                'analysis_type': signal_data.get('analysis_type', 'REAL_TECHNICAL')
-                            }
+                    # Get current gold price for entry
+                    current_price = get_current_gold_price()
+                    
+                    enhanced_signal_data = {
+                        'signal_type': signal_data.get('signal_type', 'long'),
+                        'entry_price': current_price if current_price > 0 else signal_data.get('entry_price', 3380),
+                        'take_profit': signal_data.get('take_profit', current_price * 1.006 if current_price > 0 else 3400),
+                        'stop_loss': signal_data.get('stop_loss', current_price * 0.994 if current_price > 0 else 3360),
+                        'risk_amount': signal_data.get('risk_amount', 100),
+                        'confidence_score': signal_data.get('confidence', 0.75),
+                        'macro_indicators': {
+                            'timeframe': timeframe,
+                            'symbol': symbol,
+                            'reasoning': signal_data.get('reasoning', 'AI generated signal'),
+                            'win_probability': signal_data.get('win_probability', 0.7),
+                            'risk_reward_ratio': signal_data.get('risk_reward_ratio', 2.0)
                         }
-                    elif generated_by in ['Simple AI Generator', 'Simple Fallback Generator', '⚠️ Random Fallback Generator']:
-                        # Simple/fallback generator - get current price
-                        price_data = get_current_gold_price()
-                        current_price = price_data.get('price', 0) if isinstance(price_data, dict) else price_data
-                        
-                        enhanced_signal_data = {
-                            'signal_type': 'long' if signal_data.get('signal_type', '').upper() in ['BUY', 'BULLISH', 'LONG'] else 'short',
-                            'entry_price': current_price if current_price > 0 else signal_data.get('entry_price', 3380),
-                            'take_profit': signal_data.get('take_profit', current_price * 1.006 if current_price > 0 else 3400),
-                            'stop_loss': signal_data.get('stop_loss', current_price * 0.994 if current_price > 0 else 3360),
-                            'risk_amount': signal_data.get('risk_amount', 100),
-                            'confidence_score': signal_data.get('confidence', 0.75),
-                            'macro_indicators': {
-                                'timeframe': timeframe,
-                                'symbol': symbol,
-                                'reasoning': signal_data.get('reasoning', '⚠️ RANDOM FALLBACK - NOT REAL ANALYSIS'),
-                                'win_probability': signal_data.get('win_probability', 0.7),
-                                'risk_reward_ratio': signal_data.get('risk_reward_ratio', 2.0),
-                                'is_fallback': signal_data.get('is_fallback', True),
-                                'generator': generated_by
-                            }
-                        }
-                    else:
-                        # For advanced signal system, use the direct signal result data
-                        enhanced_signal_data = {
-                            'signal_type': 'long' if signal_result.get('signal_type', '').upper() in ['BUY', 'BULLISH', 'LONG'] else 'short',
-                            'entry_price': signal_result.get('entry_price', 3380),
-                            'take_profit': signal_result.get('take_profit', 3400),
-                            'stop_loss': signal_result.get('stop_loss', 3360),
-                            'risk_amount': 100,
-                            'confidence_score': signal_result.get('confidence', 0.75),
-                            'macro_indicators': {
-                                'timeframe': timeframe,
-                                'symbol': symbol,
-                                'reasoning': signal_result.get('reasoning', 'Advanced AI signal'),
-                                'win_probability': signal_result.get('win_probability', 0.7),
-                                'risk_reward_ratio': signal_result.get('risk_reward_ratio', 2.0),
-                                'signal_strength': signal_result.get('signal_strength', 0.5),
-                                'expected_roi': signal_result.get('expected_roi', 0.6)
-                            }
-                        }
+                    }
                     
                     signal_id = signal_tracker.add_signal(enhanced_signal_data)
                     if signal_id:
@@ -1574,8 +1403,23 @@ def generate_ai_signal():
                     else:
                         logger.warning("⚠️ Failed to get signal ID from enhanced tracker")
                 else:
-                    # No enhanced tracker, skip tracking for now
-                    logger.info("📝 No enhanced signal tracker available, signal will be generated without tracking")
+                    # Fallback to old tracking system
+                    from signal_tracker import signal_tracker
+                    signal_data = signal_result.get('signal', {})
+                    signal_tracker.add_signal({
+                        'signal_id': signal_data.get('signal_id'),
+                        'symbol': symbol,
+                        'signal_type': signal_data.get('signal_type'),
+                        'entry_price': signal_data.get('entry_price'),
+                        'take_profit': signal_data.get('take_profit'),
+                        'stop_loss': signal_data.get('stop_loss'),
+                        'confidence': signal_data.get('confidence', 0.7),
+                        'timeframe': timeframe,
+                        'reasoning': signal_data.get('reasoning', 'AI generated signal'),
+                        'win_probability': signal_data.get('win_probability', 0.7),
+                        'risk_reward_ratio': signal_data.get('risk_reward_ratio', 2.0)
+                    })
+                    logger.info(f"✅ Signal added to legacy tracking system")
             except Exception as tracking_error:
                 logger.warning(f"⚠️ Failed to add signal to tracking: {tracking_error}")
             
@@ -1789,91 +1633,24 @@ def get_tracked_signals():
                 'tracking_type': 'enhanced'
             })
         else:
-            # Fallback: return empty signals if no tracker available
-            logger.warning("⚠️ No signal tracker available, returning empty signals")
+            # Fallback to legacy tracker
+            from signal_tracker import signal_tracker
+            active_signals = signal_tracker.get_active_signals()
             
             return jsonify({
                 'success': True,
-                'signals': {},
-                'count': 0,
+                'signals': active_signals,
+                'count': len(active_signals),
                 'timestamp': datetime.now().isoformat(),
-                'tracking_type': 'fallback',
-                'message': 'Signal tracking not available'
+                'tracking_type': 'legacy'
             })
-            
-    except Exception as e:
-        logger.error(f"❌ Error getting tracked signals: {e}")
-        return jsonify({
-            'success': False,
-            'error': str(e),
-            'signals': {},
-            'count': 0
-        }), 500
-
-@app.route('/api/prediction-accuracy', methods=['GET'])
-def get_prediction_accuracy():
-    """Get ML prediction accuracy statistics"""
-    logger.info("📈 Prediction accuracy stats requested")
-    
-    try:
-        if ml_prediction_tracker:
-            # Evaluate recent predictions first
-            eval_result = ml_prediction_tracker.evaluate_predictions()
-            
-            # Get accuracy stats
-            accuracy_stats = ml_prediction_tracker.get_accuracy_stats()
-            
-            return jsonify({
-                'success': True,
-                'accuracy_stats': accuracy_stats,
-                'recent_evaluations': eval_result,
-                'timestamp': datetime.now().isoformat()
-            })
-        else:
-            return jsonify({
-                'success': False,
-                'error': 'ML prediction tracker not available',
-                'accuracy_stats': {},
-                'timestamp': datetime.now().isoformat()
-            })
-            
-    except Exception as e:
-        logger.error(f"❌ Error getting prediction accuracy: {e}")
-        return jsonify({
-            'success': False,
-            'error': str(e),
-            'accuracy_stats': {}
-        }), 500
-
-@app.route('/api/prediction-insights', methods=['GET'])
-def get_prediction_insights():
-    """Get detailed prediction performance insights"""
-    logger.info("🔍 Prediction insights requested")
-    
-    try:
-        timeframe = request.args.get('timeframe')
         
-        if ml_prediction_tracker:
-            insights = ml_prediction_tracker.get_prediction_insights(timeframe)
-            
-            return jsonify({
-                'success': True,
-                'insights': insights,
-                'timestamp': datetime.now().isoformat()
-            })
-        else:
-            return jsonify({
-                'success': False,
-                'error': 'ML prediction tracker not available',
-                'insights': {}
-            })
-            
     except Exception as e:
-        logger.error(f"❌ Error getting prediction insights: {e}")
+        logger.error(f"❌ Failed to get tracked signals: {e}")
         return jsonify({
             'success': False,
-            'error': str(e),
-            'insights': {}
+            'signals': [],
+            'error': str(e)
         }), 500
 
 @app.route('/api/signals/statistics', methods=['GET'])
@@ -1892,19 +1669,15 @@ def get_enhanced_signal_statistics():
                 'tracking_type': 'enhanced'
             })
         else:
-            # Return default stats if no tracker available
+            # Fallback to legacy tracker
+            from signal_tracker import signal_tracker
+            stats = signal_tracker.get_trade_statistics()
+            
             return jsonify({
                 'success': True,
-                'statistics': {
-                    'total_signals': 0,
-                    'active_signals': 0,
-                    'win_rate': 0,
-                    'total_pnl': 0,
-                    'best_performing_signal': None,
-                    'worst_performing_signal': None
-                },
+                'statistics': stats,
                 'timestamp': datetime.now().isoformat(),
-                'tracking_type': 'none'
+                'tracking_type': 'legacy'
             })
         
     except Exception as e:
@@ -1914,11 +1687,6 @@ def get_enhanced_signal_statistics():
             'statistics': {},
             'error': str(e)
         }), 500
-
-@app.route('/api/signals/stats', methods=['GET'])
-def get_signal_stats():
-    """Alias endpoint for signal statistics (frontend compatibility)"""
-    return get_enhanced_signal_statistics()
 
 @app.route('/api/signals/close/<signal_id>', methods=['POST'])
 def close_signal_manually(signal_id):
@@ -1936,14 +1704,39 @@ def close_signal_manually(signal_id):
                 'tracking_type': 'enhanced'
             })
         else:
-            # No tracker available
-            logger.warning("⚠️ No signal tracker available, cannot close signal")
+            # Fallback to legacy tracker
+            from signal_tracker import signal_tracker
             
-            return jsonify({
-                'success': False,
-                'message': 'Signal tracking not available',
-                'tracking_type': 'none'
-            }), 503
+            # Update signal status to closed
+            import sqlite3
+            conn = sqlite3.connect(signal_tracker.db_path)
+            cursor = conn.cursor()
+            
+            cursor.execute("""
+                UPDATE signals SET 
+                status = 'CLOSED_MANUAL',
+                closed_timestamp = ?,
+                close_reason = 'MANUAL_CLOSE'
+                WHERE signal_id = ? AND status = 'ACTIVE'
+            """, (datetime.now().isoformat(), signal_id))
+            
+            if cursor.rowcount > 0:
+                conn.commit()
+                logger.info(f"✅ Signal {signal_id} manually closed")
+                result = {
+                    'success': True, 
+                    'message': f'Signal {signal_id} closed successfully',
+                    'tracking_type': 'legacy'
+                }
+            else:
+                result = {
+                    'success': False, 
+                    'message': 'Signal not found or already closed',
+                    'tracking_type': 'legacy'
+                }
+            
+            conn.close()
+            return jsonify(result)
         
     except Exception as e:
         logger.error(f"❌ Failed to close signal {signal_id}: {e}")
@@ -2440,28 +2233,74 @@ def tradingview_test():
 
 # API Endpoints
 @app.route('/api/health')
+@app.route('/health')
+@app.route('/healthz') 
 def health_check():
-    """Comprehensive health check"""
+    """Comprehensive health check for Railway monitoring"""
     import sys
-    return jsonify({
-        'success': True,
-        'status': 'healthy',
-        'timestamp': datetime.now().isoformat(),
-        'version': '2.0.0',
-        'environment': os.environ.get('RAILWAY_ENVIRONMENT', 'development'),
-        'python_version': sys.version,
-        'app_file': __file__,
-        'working_directory': os.getcwd(),
-        'available_files': [f for f in os.listdir('.') if f.endswith('.py')],
-        'features': {
-            'advanced_dashboard': True,
-            'ml_predictions': True,
-            'ai_analysis': True,
-            'real_time_updates': True,
-            'portfolio_management': True
-        },
-        'message': 'GoldGPT Advanced Dashboard is running successfully on Railway!'
-    })
+    import platform
+    
+    try:
+        # Test database connection
+        try:
+            current_price = get_current_gold_price()
+            price_status = f"OK - ${current_price.get('price', 'N/A')}"
+        except Exception as e:
+            price_status = f"Error: {str(e)}"
+        
+        # Test template loading
+        try:
+            import os
+            template_path = os.path.join(app.template_folder, 'quantgold_dashboard_fixed.html')
+            template_exists = os.path.exists(template_path)
+        except Exception as e:
+            template_exists = f"Error: {str(e)}"
+        
+        health_data = {
+            'success': True,
+            'status': 'healthy',
+            'timestamp': datetime.now().isoformat(),
+            'version': '2.0.0',
+            'environment': os.environ.get('RAILWAY_ENVIRONMENT', 'development'),
+            'platform': platform.platform(),
+            'python_version': sys.version.split()[0],
+            'app_file': __file__,
+            'working_directory': os.getcwd(),
+            'available_files': [f for f in os.listdir('.') if f.endswith('.py')][:10],  # Limit to 10 files
+            'port': os.environ.get('PORT', '5000'),
+            'features': {
+                'advanced_dashboard': True,
+                'ai_analysis': True,
+                'real_time_updates': True,
+                'portfolio_management': True,
+                'enhanced_signal_tracker': ENHANCED_SIGNAL_TRACKER_AVAILABLE,
+                'ml_predictions': 'disabled',
+                'websocket': True
+            },
+            'system_checks': {
+                'price_data': price_status,
+                'template_exists': template_exists,
+                'signal_tracker': 'OK' if ENHANCED_SIGNAL_TRACKER_AVAILABLE else 'Unavailable',
+                'socketio': 'OK'
+            },
+            'message': 'GoldGPT QuantGold Dashboard is running successfully on Railway!',
+            'deployment_info': {
+                'build_date': datetime.now().strftime('%Y-%m-%d %H:%M:%S UTC'),
+                'service_type': 'web_application',
+                'railway_ready': True
+            }
+        }
+        
+        return jsonify(health_data)
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'status': 'unhealthy',
+            'error': str(e),
+            'timestamp': datetime.now().isoformat(),
+            'message': 'Health check failed'
+        }), 500
 
 @app.route('/api/gold-price')
 @app.route('/api/gold/price')  # Add alternate endpoint for advanced dashboard
@@ -2643,76 +2482,45 @@ def enhanced_ml_predictions_with_analytics():
 
 @app.route('/api/market-news')
 def api_market_news():
-    """Market news API for dashboard - Live News"""
+    """Market news API for dashboard"""
     try:
-        import requests
-        from datetime import datetime, timedelta
-        
-        # Get current gold price for context
-        current_price = 3397.5  # Will be updated dynamically
-        try:
-            price_response = requests.get("https://api.gold-api.com/price/XAU", timeout=5)
-            if price_response.status_code == 200:
-                price_data = price_response.json()
-                current_price = price_data.get('price', 3397.5)
-        except:
-            pass
-        
-        # Generate AI-powered market analysis with real context
+        # Generate realistic market news
         news_items = [
             {
                 'id': 1,
-                'title': f'Live Gold Analysis: Trading at ${current_price:.2f}',
-                'summary': f'Current gold price at ${current_price:.2f} shows {"bullish momentum" if current_price > 3390 else "bearish pressure" if current_price < 3380 else "sideways consolidation"}. Real-time technical indicators suggest {"continued upward movement" if current_price > 3395 else "potential reversal patterns"}.',
+                'title': 'Gold Reaches New Highs Above $3330',
+                'summary': 'Gold prices continue their upward trajectory amid economic uncertainty and safe-haven demand.',
                 'timestamp': datetime.now().isoformat(),
-                'source': 'GoldGPT Real-Time Analysis',
-                'impact': 'bullish' if current_price > 3390 else 'bearish' if current_price < 3380 else 'neutral',
-                'category': 'live_analysis'
+                'source': 'GoldGPT Market Analysis',
+                'impact': 'bullish',
+                'category': 'market'
             },
             {
                 'id': 2,
-                'title': 'Federal Reserve Monetary Policy Impact',
-                'summary': 'Current Fed policy stance continues to influence precious metals markets. Interest rate expectations and dollar strength remain key drivers for gold price movements.',
-                'timestamp': (datetime.now() - timedelta(minutes=30)).isoformat(),
-                'source': 'Federal Reserve Watch',
+                'title': 'Federal Reserve Policy Impact on Precious Metals',
+                'summary': 'Recent Fed commentary suggests potential shifts in monetary policy affecting gold valuations.',
+                'timestamp': (datetime.now() - timedelta(hours=2)).isoformat(),
+                'source': 'Economic Times',
                 'impact': 'neutral',
-                'category': 'monetary_policy'
+                'category': 'economic'
             },
             {
                 'id': 3,
-                'title': 'Global Economic Uncertainty Drives Safe-Haven Demand',
-                'summary': 'Ongoing geopolitical tensions and economic uncertainties continue to support gold as a safe-haven asset. Institutional and retail demand remains elevated.',
-                'timestamp': (datetime.now() - timedelta(hours=1)).isoformat(),
-                'source': 'Global Markets Report',
-                'impact': 'bullish',
-                'category': 'fundamental'
-            },
-            {
-                'id': 4,
-                'title': f'Technical Outlook: Key Levels to Watch',
-                'summary': f'Gold trading at ${current_price:.2f} faces key resistance at $3400-3420 zone. Support levels identified at $3380-3370. Volume and momentum indicators suggest {"bullish continuation" if current_price > 3395 else "potential consolidation"}.',
-                'timestamp': (datetime.now() - timedelta(hours=2)).isoformat(),
-                'source': 'GoldGPT Technical Analysis',
-                'impact': 'bullish' if current_price > 3395 else 'neutral',
-                'category': 'technical'
-            },
-            {
-                'id': 5,
-                'title': 'Asian Session Trading Activity',
-                'summary': 'Asian markets showing strong interest in precious metals. Chinese and Japanese investors continue accumulating gold positions amid regional economic dynamics.',
+                'title': 'Asian Markets Drive Gold Demand',
+                'summary': 'Strong buying interest from Asian markets continues to support gold price momentum.',
                 'timestamp': (datetime.now() - timedelta(hours=4)).isoformat(),
-                'source': 'Asian Markets Desk',
+                'source': 'Asia Gold Report',
                 'impact': 'bullish',
                 'category': 'regional'
             },
             {
-                'id': 6,
-                'title': 'Dollar Index and Gold Correlation',
-                'summary': 'US Dollar strength continues to be inversely correlated with gold prices. Current DXY levels suggest potential relief for precious metals if dollar weakening continues.',
+                'id': 4,
+                'title': 'Technical Analysis: Gold Breaks Key Resistance',
+                'summary': 'Chart patterns suggest further upside potential as gold clears major technical levels.',
                 'timestamp': (datetime.now() - timedelta(hours=6)).isoformat(),
-                'source': 'Currency Analysis',
-                'impact': 'neutral',
-                'category': 'correlation'
+                'source': 'Technical Analysis Today',
+                'impact': 'bullish',
+                'category': 'technical'
             }
         ]
         
@@ -3416,26 +3224,69 @@ def after_request(response):
     return response
 
 if __name__ == '__main__':
-    # Debug info for Railway
-    print("🔍 DEBUG: Starting GoldGPT Advanced Dashboard")
-    print(f"🔍 DEBUG: Current working directory: {os.getcwd()}")
-    print(f"🔍 DEBUG: Current file: {__file__}")
-    print(f"🔍 DEBUG: Available Python files: {[f for f in os.listdir('.') if f.endswith('.py')]}")
-    print(f"🔍 DEBUG: Railway environment: {os.environ.get('RAILWAY_ENVIRONMENT', 'Not set')}")
-    print(f"🔍 DEBUG: Port: {os.environ.get('PORT', 'Not set')}")
+    # Debug info for Railway deployment
+    print("� STARTING GOLDGPT QUANTGOLD DASHBOARD")
+    print(f"🔍 Current working directory: {os.getcwd()}")
+    print(f"🔍 Current file: {__file__}")
+    print(f"🔍 Available Python files: {[f for f in os.listdir('.') if f.endswith('.py')][:10]}")
+    print(f"🔍 Railway environment: {os.environ.get('RAILWAY_ENVIRONMENT', 'local')}")
+    print(f"🔍 Raw PORT variable: '{os.environ.get('PORT', 'not-set')}'")
     
-    # Start background tasks
-    start_background_updates()
+    # Start background tasks for real-time updates
+    try:
+        start_background_updates()
+        print("✅ Background update tasks started")
+    except Exception as e:
+        print(f"⚠️ Background tasks failed to start: {e}")
     
-    # Railway configuration with robust port handling
+    # Railway-optimized port configuration
     try:
         port_env = os.environ.get('PORT', '5000')
-        print(f"🔍 DEBUG: Raw PORT environment variable: '{port_env}'")
+        print(f"🔍 Processing PORT variable: '{port_env}'")
         
-        # Handle cases where PORT might be '$PORT' or other invalid values
-        if port_env.startswith('$') or not port_env.strip().isdigit():
-            print(f"⚠️  Invalid PORT environment variable: {port_env}")
-            port = 5000  # Default fallback
+        # Handle various PORT environment formats
+        if port_env.startswith('$') or not str(port_env).strip().isdigit():
+            print(f"⚠️ Invalid PORT format '{port_env}', using default 5000")
+            port = 5000
+        else:
+            port = int(port_env)
+            print(f"✅ Using PORT: {port}")
+        
+        # Host configuration for Railway
+        host = '0.0.0.0'  # Required for Railway
+        
+        print(f"🌐 Starting server on {host}:{port}")
+        print("📊 Dashboard URL: https://your-app-name.railway.app")
+        print("🎯 Health check: https://your-app-name.railway.app/health")
+        
+        # Start the Flask-SocketIO server with Railway-optimized settings
+        socketio.run(
+            app, 
+            host=host, 
+            port=port, 
+            debug=False,  # Disable debug in production
+            use_reloader=False,  # Prevent Railway deployment issues
+            log_output=True,  # Enable logging for Railway
+            allow_unsafe_werkzeug=True  # Allow Railway environment
+        )
+        
+    except ValueError as ve:
+        print(f"❌ PORT configuration error: {ve}")
+        print(f"❌ Raw PORT value: '{os.environ.get('PORT')}'")
+        # Emergency fallback
+        socketio.run(app, host='0.0.0.0', port=5000, debug=False)
+        
+    except Exception as e:
+        print(f"❌ Server startup failed: {e}")
+        print(f"❌ Full error details: {type(e).__name__}: {str(e)}")
+        
+        # Final fallback attempt
+        try:
+            print("🔄 Attempting emergency fallback startup...")
+            app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)), debug=False)
+        except Exception as final_error:
+            print(f"💥 Emergency fallback failed: {final_error}")
+            exit(1)
         else:
             port = int(port_env.strip())
     except (ValueError, TypeError) as e:

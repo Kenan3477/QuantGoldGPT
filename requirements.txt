@@ -1,40 +1,13 @@
-# GoldGPT Production Requirements - Railway Deployment
-# Core Flask Framework
+# Production requirements for GoldGPT minimal app
 Flask==3.0.0
 Flask-SocketIO==5.3.6
 gunicorn==21.2.0
-
-# Database - Railway PostgreSQL compatible
-SQLAlchemy==2.0.21
 psycopg2-binary==2.9.7
-
-# Real-time WebSocket features
+requests==2.31.0
 python-socketio==5.10.0
 eventlet==0.36.1
-
-# Data fetching and APIs
-requests==2.31.0
-beautifulsoup4==4.12.2
-
-# Data analysis and ML capabilities
+python-dotenv==1.0.0
 numpy==1.24.3
 pandas==2.0.3
 scikit-learn==1.3.0
-
-# Technical analysis for trading signals
-ta==0.10.2
-
-# Sentiment analysis for news
-textblob==0.17.1
-
-# Environment and configuration
-python-dotenv==1.0.0
-
-# Date/time handling
-python-dateutil==2.8.2
-
-# Static file serving
-whitenoise==6.6.0
-
-# Scheduling for background tasks
-APScheduler==3.10.4
+yfinance==0.2.18

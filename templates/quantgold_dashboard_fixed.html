@@ -1020,17 +1020,12 @@ ${signal.key_factors ? signal.key_factors.join(', ') : 'Multi-factor analysis co
                 return;
             }
 
-            container.innerHTML = signals.map(signal => {
-                // Calculate P&L percentage
-                const pnlPercent = ((signal.current_pnl / signal.risk_amount) * 100);
-                const pnlStatus = signal.current_pnl > 0.1 ? 'profit' : signal.current_pnl < -0.1 ? 'loss' : 'neutral';
-                
-                return `
+            container.innerHTML = signals.map(signal => `
                 <div class="signal-item" data-signal-id="${signal.id}">
                     <div class="signal-header">
                         <div class="signal-type ${signal.signal_type.toLowerCase()}">${signal.signal_type.toUpperCase()}</div>
-                        <div class="signal-time">${formatSignalTime(signal.created_at)}</div>
-                        <div class="signal-confidence">${(signal.confidence_score * 100).toFixed(0)}%</div>
+                        <div class="signal-time">${formatSignalTime(signal.timestamp)}</div>
+                        <div class="signal-confidence">${(signal.confidence * 100).toFixed(0)}%</div>
                     </div>
                     <div class="signal-details">
                         <div class="signal-price">Entry: $${parseFloat(signal.entry_price).toLocaleString()}</div>
@@ -1040,21 +1035,17 @@ ${signal.key_factors ? signal.key_factors.join(', ') : 'Multi-factor analysis co
                         </div>
                         <div class="signal-current">Current: $${parseFloat(signal.current_price).toLocaleString()}</div>
                     </div>
-                    <div class="signal-pnl ${signal.current_pnl >= 0 ? 'positive' : 'negative'}">
-                        Live P&L: ${signal.current_pnl >= 0 ? '+' : ''}$${Math.abs(signal.current_pnl).toFixed(2)} (${pnlPercent >= 0 ? '+' : ''}${pnlPercent.toFixed(2)}%)
+                    <div class="signal-pnl ${signal.live_pnl >= 0 ? 'positive' : 'negative'}">
+                        Live P&L: ${signal.live_pnl >= 0 ? '+' : ''}$${Math.abs(signal.live_pnl).toFixed(2)} (${signal.live_pnl_pct >= 0 ? '+' : ''}${signal.live_pnl_pct.toFixed(2)}%)
                     </div>
-                    <div class="signal-status ${pnlStatus}">
-                        Status: ${pnlStatus === 'profit' ? '📈 Profit' : pnlStatus === 'loss' ? '📉 Loss' : '⚖️ Break Even'}
-                    </div>
-                    <div class="signal-stats">
-                        <small>Max Profit: $${signal.max_profit.toFixed(2)} | Max Drawdown: $${signal.max_drawdown.toFixed(2)}</small>
+                    <div class="signal-status ${signal.pnl_status}">
+                        Status: ${signal.pnl_status === 'profit' ? '📈 Profit' : signal.pnl_status === 'loss' ? '📉 Loss' : '⚖️ Break Even'}
                     </div>
                     <button class="close-signal-btn" onclick="closeSignal(${signal.id})">
                         <i class="fas fa-times"></i> Close Position
                     </button>
                 </div>
-            `;
-            }).join('');
+            `).join('');
         }
 
         function closeSignal(signalId) {

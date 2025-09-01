@@ -110,34 +110,34 @@ class RealMarketDataFetcher:
             # Clean and format data
             data = data.reset_index()
             
-            # Handle yfinance column structure (which includes Dividends, Stock Splits)
-            # Keep only the columns we need: Datetime, Open, High, Low, Close, Volume
-            required_cols = ['Datetime', 'Open', 'High', 'Low', 'Close', 'Volume']
-            available_cols = [col for col in required_cols if col in data.columns]
+            # Handle different column structures from yfinance
+            expected_cols = ['timestamp', 'open', 'high', 'low', 'close', 'volume']
             
-            if len(available_cols) >= 5:  # We need at least OHLC + Datetime
-                data = data[available_cols].copy()
+            if len(data.columns) == len(expected_cols):
+                data.columns = expected_cols
+            elif len(data.columns) == 6:
+                # Standard yfinance format: Datetime, Open, High, Low, Close, Volume
+                data.columns = expected_cols
+            else:
+                # Handle other formats - rename what we have
+                current_cols = list(data.columns)
+                logger.warning(f"⚠️ Unexpected column structure: {current_cols}")
                 
-                # Add Volume if missing
-                if 'Volume' not in data.columns:
-                    data['Volume'] = 1000
-                
-                # Rename to our expected format
-                expected_cols = ['timestamp', 'open', 'high', 'low', 'close', 'volume']
-                col_mapping = {
-                    'Datetime': 'timestamp',
-                    'Open': 'open', 
-                    'High': 'high',
-                    'Low': 'low',
-                    'Close': 'close',
-                    'Volume': 'volume'
-                }
+                # Try to map common column names
+                col_mapping = {}
+                for i, col in enumerate(current_cols):
+                    if i < len(expected_cols):
+                        col_mapping[col] = expected_cols[i]
                 
                 data = data.rename(columns=col_mapping)
                 
-            else:
-                logger.warning(f"⚠️ Insufficient columns: {list(data.columns)}")
-                return self._generate_realistic_gold_data(days)
+                # Ensure we have all required columns
+                for col in expected_cols:
+                    if col not in data.columns:
+                        if col == 'volume':
+                            data[col] = 1000  # Default volume
+                        else:
+                            data[col] = data.get('close', 2050.0)  # Use close price as fallback
             
             logger.info(f"✅ Fetched {len(data)} real gold data points")
             return data

@@ -394,22 +394,7 @@ class EnhancedRealTimeAnalyzer:
             
             if not data.empty:
                 data = data.reset_index()
-                # Defensively handle column assignment based on actual columns
-                expected_columns = ['timestamp', 'open', 'high', 'low', 'close', 'volume']
-                if len(data.columns) == len(expected_columns):
-                    data.columns = expected_columns
-                elif len(data.columns) == 6:  # Standard case
-                    data.columns = expected_columns
-                else:
-                    # Map columns by position, fill missing with NaN
-                    column_mapping = {}
-                    for i, col in enumerate(expected_columns[:len(data.columns)]):
-                        column_mapping[data.columns[i]] = col
-                    data = data.rename(columns=column_mapping)
-                    # Add missing columns
-                    for col in expected_columns:
-                        if col not in data.columns:
-                            data[col] = np.nan
+                data.columns = ['timestamp', 'open', 'high', 'low', 'close', 'volume']
                 return data
             
         except Exception as e:

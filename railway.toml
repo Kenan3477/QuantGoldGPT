@@ -1,0 +1,24 @@
+[build]
+builder = "nixpacks"
+
+[deploy]
+healthcheckPath = "/"
+healthcheckTimeout = 60
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 3
+
+[[services]]
+name = "quantgold-web"
+source = "."
+
+[services.variables]
+PORT = "${{ RAILWAY_PUBLIC_PORT }}"
+RAILWAY_ENVIRONMENT = "production"
+FLASK_ENV = "production"
+PYTHONPATH = "."
+
+[[services.healthcheck]]
+path = "/"
+interval = 30
+timeout = 10
+retries = 3

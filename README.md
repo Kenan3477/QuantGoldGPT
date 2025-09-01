@@ -6,24 +6,14 @@
 
 A sophisticated Trading 212-inspired web platform featuring advanced AI trading capabilities, real-time market analysis, and comprehensive portfolio management.
 
-[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/B5zL4w?referralCode=alphasec)
-
 [![Python](https://img.shields.io/badge/Python-3.8+-blue?style=flat-square&logo=python)](https://python.org)
 [![Flask](https://img.shields.io/badge/Flask-2.3+-green?style=flat-square&logo=flask)](https://flask.palletsprojects.com)
 [![WebSocket](https://img.shields.io/badge/WebSocket-Real--time-orange?style=flat-square)](https://socket.io)
 [![AI/ML](https://img.shields.io/badge/AI%2FML-Advanced-purple?style=flat-square&logo=tensorflow)](https://tensorflow.org)
-[![Railway](https://img.shields.io/badge/Deploy-Railway-blueviolet?style=flat-square&logo=railway)](https://railway.app)
 
 </div>
 
-## 🚀 Quick Deploy
-
-### One-Click Railway Deployment
-[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/new/github?template=https://github.com/Kenan3477/QuantGoldGPT)
-
-**Ready to deploy!** All configuration files included. Just add your environment variables and go live in minutes!
-
-## 🎯 Features
+## 🚀 Features
 
 ### 📊 Trading Dashboard
 - **Trading 212-inspired interface** with modern, responsive design
