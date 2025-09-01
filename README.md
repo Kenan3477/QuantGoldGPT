@@ -6,14 +6,24 @@
 
 A sophisticated Trading 212-inspired web platform featuring advanced AI trading capabilities, real-time market analysis, and comprehensive portfolio management.
 
+[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/B5zL4w?referralCode=alphasec)
+
 [![Python](https://img.shields.io/badge/Python-3.8+-blue?style=flat-square&logo=python)](https://python.org)
 [![Flask](https://img.shields.io/badge/Flask-2.3+-green?style=flat-square&logo=flask)](https://flask.palletsprojects.com)
 [![WebSocket](https://img.shields.io/badge/WebSocket-Real--time-orange?style=flat-square)](https://socket.io)
 [![AI/ML](https://img.shields.io/badge/AI%2FML-Advanced-purple?style=flat-square&logo=tensorflow)](https://tensorflow.org)
+[![Railway](https://img.shields.io/badge/Deploy-Railway-blueviolet?style=flat-square&logo=railway)](https://railway.app)
 
 </div>
 
-## 🚀 Features
+## 🚀 Quick Deploy
+
+### One-Click Railway Deployment
+[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/new/github?template=https://github.com/Kenan3477/QuantGoldGPT)
+
+**Ready to deploy!** All configuration files included. Just add your environment variables and go live in minutes!
+
+## 🎯 Features
 
 ### 📊 Trading Dashboard
 - **Trading 212-inspired interface** with modern, responsive design
@@ -281,5 +291,6 @@ This project is proprietary software owned by Kenan Davies. All rights reserved.
 *GoldGPT - Where AI meets Trading Excellence*
 
 </div>
-#   N a v i g a t i o n   f i x   d e p l o y e d   2 0 2 5 - 0 8 - 0 1   2 0 : 4 2 : 0 2  
+#   N a v i g a t i o n   f i x   d e p l o y e d   2 0 2 5 - 0 8 - 0 1   2 0 : 4 2 : 0 2 
+ 
  
