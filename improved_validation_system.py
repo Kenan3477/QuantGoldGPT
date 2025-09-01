@@ -68,11 +68,11 @@ class ImprovedValidationSystem:
         try:
             # Import existing ML and AI systems
             from ai_analysis_api import AdvancedAIAnalyzer
-            from enhanced_signal_generator import EnhancedAISignalGenerator
+            from enhanced_signal_generator import quantgold_analyzer
             from price_storage_manager import get_current_gold_price, get_historical_prices
             
             self.ai_analyzer = AdvancedAIAnalyzer()
-            self.signal_generator = EnhancedAISignalGenerator()
+            self.signal_generator = quantgold_analyzer
             
             self.logger.info("✅ Component imports successful")
             

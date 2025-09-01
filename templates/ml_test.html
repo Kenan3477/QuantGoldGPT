@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ML Predictions Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #fff;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .prediction-card {
+            background: #2a2a2a;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            border-left: 4px solid #00ff88;
+        }
+        .timeframe {
+            font-size: 18px;
+            font-weight: bold;
+            color: #00ff88;
+        }
+        .signal {
+            font-size: 16px;
+            margin: 5px 0;
+        }
+        .bullish { color: #00ff88; }
+        .bearish { color: #ff4444; }
+        .neutral { color: #ffaa00; }
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #aaa;
+        }
+        .error {
+            color: #ff4444;
+            padding: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 ML Predictions Test</h1>
+        <div id="status" class="loading">Loading ML predictions...</div>
+        <div id="predictions"></div>
+    </div>
+
+    <script>
+        function loadMLPredictions() {
+            const statusDiv = document.getElementById('status');
+            const predictionsDiv = document.getElementById('predictions');
+            
+            console.log('🔄 Loading ML predictions...');
+            statusDiv.textContent = 'Loading ML predictions...';
+            
+            fetch('/api/ml-predictions')
+                .then(response => {
+                    console.log('📡 Response status:', response.status);
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('✅ ML predictions loaded:', data);
+                    statusDiv.style.display = 'none';
+                    
+                    if (data.success && data.predictions) {
+                        displayPredictions(data);
+                    } else {
+                        throw new Error(data.error || 'No predictions data');
+                    }
+                })
+                .catch(error => {
+                    console.error('❌ Error loading ML predictions:', error);
+                    statusDiv.className = 'error';
+                    statusDiv.textContent = `Error: ${error.message}`;
+                });
+        }
+        
+        function displayPredictions(data) {
+            const predictionsDiv = document.getElementById('predictions');
+            const predictions = data.predictions;
+            
+            let html = `
+                <div class="prediction-card">
+                    <div style="color: #00ff88; font-size: 20px; margin-bottom: 10px;">
+                        💰 Current Price: $${data.current_price}
+                    </div>
+                </div>
+            `;
+            
+            Object.keys(predictions).forEach(timeframe => {
+                const pred = predictions[timeframe];
+                const signalClass = pred.signal.toLowerCase();
+                
+                html += `
+                    <div class="prediction-card">
+                        <div class="timeframe">${timeframe.toUpperCase()}</div>
+                        <div class="signal ${signalClass}">
+                            Signal: ${pred.signal} (${pred.confidence}% confidence)
+                        </div>
+                        <div>Target: $${pred.target}</div>
+                        <div>Change: ${pred.change_percent}%</div>
+                        ${pred.technical_analysis ? `
+                            <div style="margin-top: 10px; font-size: 14px; color: #ccc;">
+                                Trend: ${pred.technical_analysis.trend} | 
+                                RSI: ${pred.technical_analysis.rsi} | 
+                                MACD: ${pred.technical_analysis.macd_signal}
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            });
+            
+            predictionsDiv.innerHTML = html;
+        }
+        
+        // Load predictions when page loads
+        window.addEventListener('DOMContentLoaded', loadMLPredictions);
+        
+        // Refresh every 30 seconds
+        setInterval(loadMLPredictions, 30000);
+    </script>
+</body>
+</html>

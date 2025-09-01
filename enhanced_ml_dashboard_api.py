@@ -958,8 +958,30 @@ def get_market_context():
 # Legacy endpoint aliases for compatibility with existing JavaScript
 @enhanced_ml_dashboard_bp.route('/ml-predictions', methods=['GET', 'POST'])
 def legacy_ml_predictions():
-    """Legacy endpoint alias for /ml-dashboard/predictions"""
-    return get_ml_dashboard_predictions()
+    """Legacy endpoint alias - use real technical analysis from main app"""
+    try:
+        # Import the real ML predictions function from the main app
+        import sys
+        import os
+        
+        # Add the current directory to sys.path to import from app.py
+        current_dir = os.path.dirname(__file__)
+        if current_dir not in sys.path:
+            sys.path.insert(0, current_dir)
+        
+        # Import the real get_ml_predictions function
+        from app import get_ml_predictions
+        
+        # Get real predictions
+        predictions_data = get_ml_predictions()
+        
+        # Return in the format expected by the frontend
+        return jsonify(predictions_data)
+        
+    except Exception as e:
+        logging.error(f"❌ Error in legacy_ml_predictions: {e}")
+        # Fallback to mock data if real predictions fail
+        return get_ml_dashboard_predictions()
 
 @enhanced_ml_dashboard_bp.route('/ml-predictions/<symbol>', methods=['GET'])
 def legacy_ml_predictions_symbol(symbol):

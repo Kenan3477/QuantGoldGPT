@@ -32,7 +32,7 @@ except ImportError as e:
     ML_SYSTEM_AVAILABLE = False
 
 try:
-    from enhanced_signal_generator import EnhancedAISignalGenerator
+    from enhanced_signal_generator import quantgold_analyzer
     SIGNAL_GENERATOR_AVAILABLE = True
 except ImportError as e:
     print(f"⚠️ Signal generator not available: {e}")
@@ -135,7 +135,7 @@ class IntegratedStrategyEngine:
 
         if SIGNAL_GENERATOR_AVAILABLE:
             try:
-                self.signal_generator = EnhancedAISignalGenerator()
+                self.signal_generator = quantgold_analyzer
                 logger.info("✅ Signal generator initialized")
             except Exception as e:
                 logger.error(f"❌ Signal generator initialization failed: {e}")

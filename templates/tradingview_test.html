@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TradingView Test</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .chart-container {
+            width: 100%;
+            height: 600px;
+            background: #2a2a2a;
+            border: 1px solid #444;
+            border-radius: 8px;
+            position: relative;
+        }
+        .status {
+            background: #333;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #555;
+            border-top: 3px solid #00d4aa;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .error {
+            color: #ff6b6b;
+        }
+        .success {
+            color: #00d4aa;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>TradingView Integration Test</h1>
+        
+        <div class="status" id="status">
+            <strong>Status:</strong> <span id="status-text">Initializing...</span>
+        </div>
+        
+        <div class="chart-container">
+            <div id="tradingview-chart" style="width: 100%; height: 100%;"></div>
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <div>Loading TradingView Chart...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TradingView Script -->
+    <script src="https://s3.tradingview.com/tv.js"></script>
+    
+    <script>
+        const statusText = document.getElementById('status-text');
+        const loading = document.getElementById('loading');
+        
+        function updateStatus(message, type = 'info') {
+            statusText.textContent = message;
+            statusText.className = type;
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        }
+        
+        function hideLoading() {
+            if (loading) {
+                loading.style.display = 'none';
+            }
+        }
+        
+        function showError(message) {
+            hideLoading();
+            document.getElementById('tradingview-chart').innerHTML = `
+                <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #ff6b6b; text-align: center;">
+                    <div>
+                        <div style="font-size: 24px; margin-bottom: 10px;">⚠️</div>
+                        <div style="font-size: 16px; margin-bottom: 5px;">Chart Loading Failed</div>
+                        <div style="font-size: 14px; opacity: 0.8;">${message}</div>
+                        <button onclick="loadChart()" style="margin-top: 15px; background: #00d4aa; color: #000; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">
+                            Retry
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function loadChart() {
+            updateStatus('Checking TradingView availability...');
+            
+            if (typeof TradingView === 'undefined') {
+                updateStatus('TradingView script not loaded. Retrying in 1 second...', 'error');
+                setTimeout(loadChart, 1000);
+                return;
+            }
+            
+            updateStatus('TradingView script loaded. Creating widget...', 'success');
+            
+            try {
+                // Clear container
+                const container = document.getElementById('tradingview-chart');
+                container.innerHTML = '<div class="loading" id="loading"><div class="spinner"></div><div>Loading Chart...</div></div>';
+                
+                // Create widget
+                const widget = new TradingView.widget({
+                    width: "100%",
+                    height: "100%",
+                    symbol: "OANDA:XAUUSD",
+                    interval: "60",
+                    timezone: "Etc/UTC",
+                    theme: "dark",
+                    style: "1",
+                    locale: "en",
+                    toolbar_bg: "#1a1a1a",
+                    enable_publishing: false,
+                    hide_top_toolbar: false,
+                    hide_legend: false,
+                    save_image: false,
+                    container_id: "tradingview-chart",
+                    studies: [
+                        "Volume@tv-basicstudies",
+                        "RSI@tv-basicstudies",
+                        "MACD@tv-basicstudies"
+                    ],
+                    overrides: {
+                        "paneProperties.background": "#1a1a1a",
+                        "paneProperties.backgroundType": "solid",
+                        "mainSeriesProperties.candleStyle.upColor": "#00d084",
+                        "mainSeriesProperties.candleStyle.downColor": "#ff6b6b"
+                    },
+                    onChartReady: function() {
+                        updateStatus('TradingView chart loaded successfully!', 'success');
+                        hideLoading();
+                        console.log('✅ Chart is ready!');
+                    }
+                });
+                
+                updateStatus('Widget created, waiting for chart to load...', 'success');
+                
+            } catch (error) {
+                updateStatus(`Failed to create widget: ${error.message}`, 'error');
+                showError(error.message);
+            }
+        }
+        
+        // Test network connectivity
+        updateStatus('Testing network connectivity...');
+        fetch('https://s3.tradingview.com/tv.js', { method: 'HEAD' })
+            .then(() => {
+                updateStatus('Network connectivity OK. Starting chart load...', 'success');
+                setTimeout(loadChart, 1000);
+            })
+            .catch(error => {
+                updateStatus(`Network connectivity issue: ${error.message}`, 'error');
+                showError('Network connectivity issue. Please check your internet connection.');
+            });
+    </script>
+</body>
+</html>

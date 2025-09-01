@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TradingView Chart Test</title>
+    <style>
+        body { 
+            margin: 0; 
+            padding: 20px; 
+            background: #1a1a1a; 
+            color: white; 
+            font-family: Arial, sans-serif; 
+        }
+        .chart-container { 
+            width: 100%; 
+            height: 600px; 
+            background: #2a2a2a; 
+            border-radius: 8px; 
+            margin: 20px 0; 
+            position: relative;
+        }
+        #tradingview-chart {
+            width: 100%;
+            height: 100%;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            background: #333;
+        }
+        .error { background: #d32f2f; }
+        .success { background: #388e3c; }
+        .warning { background: #f57c00; }
+    </style>
+</head>
+<body>
+    <h1>🔍 TradingView Chart Debug Test</h1>
+    
+    <div id="status-log"></div>
+    
+    <div class="chart-container">
+        <div id="tradingview-chart"></div>
+    </div>
+    
+    <!-- TradingView Script -->
+    <script src="https://s3.tradingview.com/tv.js"></script>
+    
+    <script>
+        function logStatus(message, type = 'info') {
+            const log = document.getElementById('status-log');
+            const statusDiv = document.createElement('div');
+            statusDiv.className = `status ${type}`;
+            statusDiv.innerHTML = `${new Date().toLocaleTimeString()}: ${message}`;
+            log.appendChild(statusDiv);
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        }
+        
+        function initTradingViewChart() {
+            logStatus('🔄 Starting TradingView chart initialization...');
+            
+            // Check if TradingView is loaded
+            if (typeof TradingView === 'undefined') {
+                logStatus('❌ TradingView library not loaded! Retrying in 1 second...', 'error');
+                setTimeout(initTradingViewChart, 1000);
+                return;
+            }
+            
+            logStatus('✅ TradingView library loaded successfully', 'success');
+            
+            try {
+                logStatus('🚀 Creating TradingView widget...');
+                
+                new TradingView.widget({
+                    "width": "100%",
+                    "height": "100%",
+                    "symbol": "OANDA:XAUUSD",
+                    "interval": "60",
+                    "timezone": "Etc/UTC",
+                    "theme": "dark",
+                    "style": "1",
+                    "locale": "en",
+                    "toolbar_bg": "#1a1a1a",
+                    "enable_publishing": false,
+                    "hide_top_toolbar": false,
+                    "hide_legend": false,
+                    "save_image": false,
+                    "container_id": "tradingview-chart",
+                    "studies": [
+                        "RSI@tv-basicstudies",
+                        "MACD@tv-basicstudies"
+                    ],
+                    "overrides": {
+                        "paneProperties.background": "#1a1a1a",
+                        "paneProperties.backgroundType": "solid"
+                    },
+                    onChartReady: function() {
+                        logStatus('🎉 TradingView chart loaded successfully!', 'success');
+                    }
+                });
+                
+                logStatus('✅ TradingView widget creation completed', 'success');
+                
+            } catch (error) {
+                logStatus(`❌ Error creating TradingView widget: ${error.message}`, 'error');
+                console.error('TradingView Error:', error);
+            }
+        }
+        
+        // Wait for DOM to be ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initTradingViewChart);
+        } else {
+            initTradingViewChart();
+        }
+        
+        // Also try after a delay
+        setTimeout(initTradingViewChart, 2000);
+    </script>
+</body>
+</html>

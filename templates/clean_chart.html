@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GoldGPT - Clean Chart</title>
+    <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a0a0a;
+            color: #ffffff;
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: #1a1a1a;
+            padding: 20px;
+            border-bottom: 2px solid #00d4aa;
+            text-align: center;
+        }
+        
+        .header h1 {
+            color: #00d4aa;
+            margin-bottom: 8px;
+        }
+        
+        .header p {
+            color: #b0b0b0;
+            font-size: 14px;
+        }
+        
+        .chart-container {
+            width: 100%;
+            height: calc(100vh - 100px);
+            background: #1a1a1a;
+            border: 1px solid #333;
+        }
+        
+        .status {
+            position: absolute;
+            top: 120px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 10px 15px;
+            border-radius: 6px;
+            border: 1px solid #00d4aa;
+            z-index: 1000;
+        }
+        
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            flex-direction: column;
+            gap: 15px;
+            color: #00d4aa;
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #333;
+            border-top: 3px solid #00d4aa;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .error {
+            color: #ff4757;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .retry-btn {
+            background: #00d4aa;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+        
+        .retry-btn:hover {
+            background: #00b894;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🏆 GoldGPT - Clean Chart View</h1>
+        <p>Simple, interference-free TradingView chart for XAUUSD</p>
+    </div>
+    
+    <div class="status" id="status">
+        <div id="status-text">Initializing...</div>
+    </div>
+    
+    <div class="chart-container" id="clean-tradingview-chart">
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <div>Loading TradingView Chart...</div>
+            <div style="font-size: 12px; opacity: 0.7;">Clean environment - no interference</div>
+        </div>
+    </div>
+
+    <script>
+        console.log('🚀 Starting CLEAN TradingView chart...');
+        
+        let chart = null;
+        let attempts = 0;
+        const maxAttempts = 30;
+        
+        function updateStatus(message, type = 'info') {
+            const statusEl = document.getElementById('status-text');
+            const colors = {
+                info: '#00d4aa',
+                error: '#ff4757',
+                success: '#00d084'
+            };
+            statusEl.textContent = message;
+            statusEl.style.color = colors[type];
+        }
+        
+        function loadCleanChart() {
+            attempts++;
+            console.log(`🔄 Attempt ${attempts}/${maxAttempts}: Loading clean TradingView chart...`);
+            updateStatus(`Loading attempt ${attempts}/${maxAttempts}...`);
+            
+            if (typeof TradingView === 'undefined') {
+                if (attempts < maxAttempts) {
+                    console.log('⏳ TradingView library not ready, retrying in 500ms...');
+                    updateStatus(`Waiting for TradingView library... (${attempts}/${maxAttempts})`);
+                    setTimeout(loadCleanChart, 500);
+                } else {
+                    console.error('❌ TradingView library failed to load after maximum attempts');
+                    updateStatus('Failed to load TradingView library', 'error');
+                    showError('TradingView library could not be loaded. Please check your internet connection.');
+                }
+                return;
+            }
+            
+            try {
+                console.log('✅ Creating clean TradingView widget...');
+                updateStatus('Creating TradingView widget...');
+                
+                // Clear any existing chart
+                if (chart) {
+                    try {
+                        chart.remove();
+                        console.log('🗑️ Removed previous chart instance');
+                    } catch (e) {
+                        console.log('Previous chart cleanup completed');
+                    }
+                }
+                
+                chart = new TradingView.widget({
+                    "width": "100%",
+                    "height": "100%",
+                    "symbol": "OANDA:XAUUSD",
+                    "interval": "60",
+                    "timezone": "Etc/UTC",
+                    "theme": "dark",
+                    "style": "1",
+                    "locale": "en",
+                    "toolbar_bg": "#1a1a1a",
+                    "enable_publishing": false,
+                    "hide_top_toolbar": false,
+                    "hide_legend": false,
+                    "save_image": false,
+                    "container_id": "clean-tradingview-chart",
+                    "studies": [
+                        "Volume@tv-basicstudies",
+                        "RSI@tv-basicstudies",
+                        "MACD@tv-basicstudies",
+                        "BB@tv-basicstudies"
+                    ],
+                    "allow_symbol_change": true,
+                    "details": true,
+                    "hotlist": true,
+                    "calendar": true,
+                    "studies_overrides": {
+                        "volume.volume.color.1": "#00d084",
+                        "volume.volume.color.0": "#ff6b6b"
+                    },
+                    "overrides": {
+                        "symbolWatermarkProperties.transparency": 90,
+                        "scalesProperties.textColor": "#ffffff",
+                        "paneProperties.background": "#1a1a1a",
+                        "paneProperties.vertGridProperties.color": "#2a2a2a",
+                        "paneProperties.horzGridProperties.color": "#2a2a2a"
+                    }
+                });
+                
+                chart.onChartReady(() => {
+                    console.log('🎉 CLEAN TradingView chart ready!');
+                    updateStatus('Chart loaded successfully!', 'success');
+                    
+                    // Hide loading screen
+                    const loadingEl = document.getElementById('loading');
+                    if (loadingEl) {
+                        loadingEl.style.display = 'none';
+                    }
+                    
+                    // Hide status after success
+                    setTimeout(() => {
+                        document.getElementById('status').style.display = 'none';
+                    }, 3000);
+                });
+                
+                window.cleanTradingViewChart = chart;
+                console.log('✅ Clean TradingView widget created successfully');
+                
+            } catch (error) {
+                console.error('❌ Error creating clean TradingView widget:', error);
+                updateStatus(`Error: ${error.message}`, 'error');
+                
+                if (attempts < maxAttempts) {
+                    console.log('🔄 Retrying in 2 seconds...');
+                    updateStatus(`Error occurred, retrying in 2 seconds... (${attempts}/${maxAttempts})`, 'error');
+                    setTimeout(loadCleanChart, 2000);
+                } else {
+                    showError(`Failed to create TradingView chart after ${maxAttempts} attempts: ${error.message}`);
+                }
+            }
+        }
+        
+        function showError(message) {
+            const container = document.getElementById('clean-tradingview-chart');
+            container.innerHTML = `
+                <div class="error">
+                    <div style="font-size: 48px; margin-bottom: 20px;">⚠️</div>
+                    <h3>Chart Loading Failed</h3>
+                    <p style="margin: 15px 0;">${message}</p>
+                    <button class="retry-btn" onclick="location.reload()">
+                        🔄 Reload Page
+                    </button>
+                    <button class="retry-btn" onclick="loadCleanChart(); attempts = 0;" style="margin-left: 10px;">
+                        🎯 Retry Chart
+                    </button>
+                </div>
+            `;
+        }
+        
+        // Start loading immediately
+        console.log('🚀 Initializing clean chart environment...');
+        loadCleanChart();
+        
+        // Backup triggers
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(loadCleanChart, 100);
+        });
+        
+        window.addEventListener('load', () => {
+            setTimeout(loadCleanChart, 200);
+        });
+        
+        // Monitor chart health
+        setInterval(() => {
+            const container = document.getElementById('clean-tradingview-chart');
+            if (container && !container.querySelector('iframe') && !container.querySelector('[id*="tradingview"]') && !document.getElementById('loading')) {
+                console.log('🔍 Chart health check: No chart detected, attempting recovery...');
+                loadCleanChart();
+            }
+        }, 10000); // Check every 10 seconds
+    </script>
+</body>
+</html>

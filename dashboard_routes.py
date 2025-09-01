@@ -221,39 +221,7 @@ def get_market_context():
         logger.error(f"❌ Error getting market context: {e}")
         return jsonify({'error': str(e)}), 500
 
-@dashboard_bp.route('/api/correlation')
-def get_timeframe_correlation():
-    """Get timeframe correlation analysis"""
-    try:
-        primary_tf = request.args.get('primary', '1h')
-        compare_tfs = request.args.getlist('compare') or ['4h', '1d', '1w']
-        
-        # Generate correlation matrix
-        correlation_matrix = generate_correlation_matrix(primary_tf, compare_tfs)
-        
-        # Calculate overall metrics
-        overall_correlation = sum(correlation_matrix.values()) / len(correlation_matrix)
-        divergences = [k for k, v in correlation_matrix.items() if abs(v) < 0.3]
-        alignment_score = calculate_alignment_score(correlation_matrix)
-        trade_confidence = calculate_trade_confidence(overall_correlation, len(divergences))
-        
-        return jsonify({
-            'success': True,
-            'correlation_matrix': correlation_matrix,
-            'overview': {
-                'overall_correlation': round(overall_correlation, 2),
-                'divergence_count': len(divergences),
-                'alignment_score': round(alignment_score, 1),
-                'trade_confidence': round(trade_confidence * 100)
-            },
-            'divergences': generate_divergence_alerts(divergences),
-            'confidence_breakdown': generate_confidence_breakdown(correlation_matrix),
-            'timestamp': datetime.now().isoformat()
-        })
-        
-    except Exception as e:
-        logger.error(f"❌ Error getting correlation analysis: {e}")
-        return jsonify({'error': str(e)}), 500
+
 
 @dashboard_bp.route('/api/validation-status')
 def get_validation_status():
@@ -614,102 +582,7 @@ def generate_trading_implications() -> List[Dict]:
     
     return implications
 
-def generate_correlation_matrix(primary_tf: str, compare_tfs: List[str]) -> Dict[str, float]:
-    """Generate correlation matrix between timeframes"""
-    import random
-    
-    matrix = {}
-    all_tfs = [primary_tf] + [tf for tf in compare_tfs if tf != primary_tf]
-    
-    for i, tf1 in enumerate(all_tfs):
-        for tf2 in all_tfs[i+1:]:
-            # Higher correlation for closer timeframes
-            base_correlation = 0.8 if abs(all_tfs.index(tf1) - all_tfs.index(tf2)) == 1 else 0.6
-            correlation = base_correlation + random.uniform(-0.2, 0.2)
-            correlation = max(-1, min(1, correlation))
-            
-            matrix[f"{tf1}_{tf2}"] = round(correlation, 2)
-    
-    return matrix
 
-def calculate_alignment_score(correlation_matrix: Dict[str, float]) -> float:
-    """Calculate overall alignment score from correlation matrix"""
-    if not correlation_matrix:
-        return 0.0
-    
-    # Weight positive correlations more heavily
-    total_score = 0
-    for correlation in correlation_matrix.values():
-        if correlation > 0:
-            total_score += correlation * 2
-        else:
-            total_score += abs(correlation)
-    
-    return (total_score / len(correlation_matrix)) * 10
-
-def calculate_trade_confidence(overall_correlation: float, divergence_count: int) -> float:
-    """Calculate trade confidence based on correlations and divergences"""
-    base_confidence = abs(overall_correlation)
-    divergence_penalty = divergence_count * 0.1
-    
-    confidence = max(0, min(1, base_confidence - divergence_penalty))
-    return confidence
-
-def generate_divergence_alerts(divergences: List[str]) -> List[Dict]:
-    """Generate divergence alert details"""
-    alerts = []
-    
-    for div in divergences:
-        timeframes = div.split('_')
-        alerts.append({
-            'type': 'divergence',
-            'severity': 'medium',
-            'title': f'{timeframes[0].upper()} vs {timeframes[1].upper()} Divergence',
-            'description': f'Predictions between {timeframes[0]} and {timeframes[1]} timeframes are conflicting.',
-            'suggestion': 'Wait for alignment or reduce position size',
-            'timeframes': timeframes
-        })
-    
-    return alerts
-
-def generate_confidence_breakdown(correlation_matrix: Dict[str, float]) -> List[Dict]:
-    """Generate confidence breakdown factors"""
-    factors = []
-    
-    # Timeframe alignment factor
-    avg_correlation = sum(correlation_matrix.values()) / len(correlation_matrix) if correlation_matrix else 0
-    factors.append({
-        'factor': 'Timeframe Alignment',
-        'value': round(abs(avg_correlation) * 100),
-        'weight': 0.4,
-        'description': 'How well predictions align across timeframes'
-    })
-    
-    # Prediction consistency factor
-    factors.append({
-        'factor': 'Prediction Consistency',
-        'value': 75,
-        'weight': 0.3,
-        'description': 'Consistency of ML model predictions'
-    })
-    
-    # Market conditions factor
-    factors.append({
-        'factor': 'Market Conditions',
-        'value': 82,
-        'weight': 0.2,
-        'description': 'Favorability of current market conditions'
-    })
-    
-    # Technical setup factor
-    factors.append({
-        'factor': 'Technical Setup',
-        'value': 68,
-        'weight': 0.1,
-        'description': 'Quality of technical analysis setup'
-    })
-    
-    return factors
 
 def generate_mock_signal(symbol: str, timeframe: str) -> Dict:
     """Generate mock trading signal"""

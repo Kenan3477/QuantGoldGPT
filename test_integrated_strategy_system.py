@@ -76,7 +76,7 @@ def test_component_imports():
     
     # Test signal generator
     try:
-        from enhanced_signal_generator import EnhancedAISignalGenerator
+        from enhanced_signal_generator import quantgold_analyzer
         components.append(("Enhanced Signal Generator", "✅"))
     except Exception as e:
         components.append(("Enhanced Signal Generator", f"❌ {e}"))

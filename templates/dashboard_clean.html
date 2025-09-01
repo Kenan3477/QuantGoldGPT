@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GoldGPT - Live Trading Dashboard</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: #0d1421; 
+            color: #ffffff; 
+            overflow-x: hidden;
+        }
+        
+        .header { 
+            background: linear-gradient(135deg, #1e2a47 0%, #2d3a5f 100%);
+            padding: 15px 30px; 
+            border-bottom: 2px solid #00d4aa;
+            box-shadow: 0 2px 20px rgba(0, 212, 170, 0.3);
+        }
+        .header h1 { 
+            color: #00d4aa; 
+            font-size: 28px; 
+            font-weight: 700;
+            text-shadow: 0 0 10px rgba(0, 212, 170, 0.5);
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+        
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .card {
+            background: linear-gradient(145deg, #1a2332 0%, #242b3d 100%);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid #334155;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0, 212, 170, 0.15);
+            border-color: #00d4aa;
+        }
+        
+        .card h3 {
+            color: #00d4aa;
+            margin-bottom: 15px;
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .price-display {
+            font-size: 42px;
+            font-weight: 700;
+            color: #ffffff;
+            text-align: center;
+            margin: 20px 0;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+        }
+        
+        .price-change {
+            text-align: center;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        
+        .positive { color: #00ff88; }
+        .negative { color: #ff4757; }
+        
+        .signal-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 25px;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 12px;
+            margin: 5px 0;
+        }
+        
+        .buy { background: #00ff88; color: #000; }
+        .sell { background: #ff4757; color: #fff; }
+        .hold { background: #ffa502; color: #000; }
+        
+        .loading {
+            text-align: center;
+            color: #64748b;
+            font-style: italic;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #00d4aa 0%, #00a085 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-top: 15px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 212, 170, 0.4);
+        }
+        
+        .chart-container {
+            grid-column: 1 / -1;
+            background: linear-gradient(145deg, #1a2332 0%, #242b3d 100%);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid #334155;
+            min-height: 500px;
+            position: relative;
+        }
+        
+        .tradingview-widget {
+            width: 100%;
+            height: 450px;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .status-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #00ff88;
+            color: #000;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 12px;
+            z-index: 1000;
+        }
+        
+        .error-state {
+            color: #ff4757;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .success-state {
+            color: #00ff88;
+            text-align: center;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="status-indicator" id="status">🔴 Connecting...</div>
+    
+    <div class="header">
+        <h1>🏆 GoldGPT - Live Trading Dashboard</h1>
+    </div>
+    
+    <div class="container">
+        <div class="dashboard-grid">
+            <!-- Live Gold Price -->
+            <div class="card">
+                <h3>💰 Live Gold Price</h3>
+                <div id="price-display" class="price-display">Loading...</div>
+                <div id="price-change" class="price-change">Fetching live data...</div>
+                <div id="last-updated" style="font-size: 12px; color: #64748b; text-align: center; margin-top: 10px;"></div>
+            </div>
+            
+            <!-- AI Signal -->
+            <div class="card">
+                <h3>🤖 AI Trading Signal</h3>
+                <div id="signal-display">
+                    <div class="loading">Loading AI analysis...</div>
+                </div>
+                <button class="btn" onclick="generateSignal()">Generate New Signal</button>
+            </div>
+            
+            <!-- Market Status -->
+            <div class="card">
+                <h3>📊 Market Status</h3>
+                <div id="market-status">
+                    <div class="loading">Analyzing market...</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- TradingView Chart -->
+        <div class="chart-container">
+            <h3>📈 Live Gold Chart (XAU/USD)</h3>
+            <div class="tradingview-widget" id="tradingview-chart">
+                <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #64748b;">
+                    <div>
+                        <div style="font-size: 48px; margin-bottom: 20px;">📈</div>
+                        <div>Loading TradingView Chart...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TradingView Widget Script -->
+    <script src="https://s3.tradingview.com/tv.js"></script>
+    
+    <script>
+        console.log('🚀 GoldGPT Clean Dashboard Initializing...');
+        
+        // Update status indicator
+        function updateStatus(message, color = '#00ff88') {
+            const status = document.getElementById('status');
+            if (status) {
+                status.textContent = message;
+                status.style.background = color;
+                status.style.color = color === '#00ff88' ? '#000' : '#fff';
+            }
+        }
+        
+        // Fetch live gold price
+        async function fetchGoldPrice() {
+            try {
+                console.log('💰 Fetching live gold price...');
+                const response = await fetch('/api/live-gold-price');
+                const data = await response.json();
+                
+                if (data && data.price) {
+                    const price = parseFloat(data.price).toFixed(2);
+                    document.getElementById('price-display').textContent = `$${price}`;
+                    document.getElementById('price-change').innerHTML = '<span class="positive">🟢 Live Market Price</span>';
+                    document.getElementById('last-updated').textContent = `Updated: ${new Date().toLocaleTimeString()}`;
+                    console.log(`💰 Gold price updated: $${price}`);
+                    return true;
+                } else {
+                    throw new Error('Invalid price data');
+                }
+            } catch (error) {
+                console.error('❌ Error fetching gold price:', error);
+                document.getElementById('price-display').innerHTML = '<span style="color: #ff4757;">Price Error</span>';
+                document.getElementById('price-change').innerHTML = '<span class="negative">Failed to load</span>';
+                return false;
+            }
+        }
+        
+        // Fetch AI signal
+        async function fetchSignal() {
+            try {
+                console.log('🤖 Fetching AI signal...');
+                const response = await fetch('/api/signals/active');
+                const data = await response.json();
+                
+                if (data && data.success) {
+                    const signalType = data.signal || 'HOLD';
+                    const confidence = data.confidence ? (data.confidence * 100).toFixed(1) : '0.0';
+                    
+                    document.getElementById('signal-display').innerHTML = `
+                        <div class="signal-badge ${signalType.toLowerCase()}">${signalType}</div>
+                        <div style="margin-top: 10px; font-size: 14px;">
+                            Confidence: ${confidence}%
+                        </div>
+                        <div style="margin-top: 5px; font-size: 12px; color: #64748b;">
+                            ${data.analysis || 'AI analysis complete'}
+                        </div>
+                    `;
+                    console.log(`🤖 Signal updated: ${signalType} (${confidence}%)`);
+                } else {
+                    document.getElementById('signal-display').innerHTML = `
+                        <div style="text-align: center; color: #64748b;">
+                            <div style="font-size: 24px; margin-bottom: 10px;">🤖</div>
+                            <div>No active signals</div>
+                            <div style="font-size: 12px; margin-top: 5px;">Generate your first AI signal</div>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('❌ Error fetching signal:', error);
+                document.getElementById('signal-display').innerHTML = '<div class="error-state">Signal Error</div>';
+            }
+        }
+        
+        // Generate new AI signal
+        async function generateSignal() {
+            document.getElementById('signal-display').innerHTML = `
+                <div style="text-align: center; color: #00d4aa;">
+                    <div style="font-size: 24px; margin-bottom: 10px;">⚡</div>
+                    <div>Generating AI signal...</div>
+                </div>
+            `;
+            
+            try {
+                const response = await fetch('/api/signals/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({})
+                });
+                
+                const data = await response.json();
+                console.log('🚀 Signal generated:', data);
+                
+                // Refresh signals after generation
+                setTimeout(fetchSignal, 1000);
+                
+            } catch (error) {
+                console.error('❌ Error generating signal:', error);
+                document.getElementById('signal-display').innerHTML = '<div class="error-state">Generation Failed</div>';
+            }
+        }
+        
+        // Initialize TradingView chart
+        function initTradingViewChart() {
+            if (typeof TradingView === 'undefined') {
+                console.log('⏳ Waiting for TradingView library...');
+                setTimeout(initTradingViewChart, 1000);
+                return;
+            }
+            
+            try {
+                console.log('📈 Initializing TradingView chart...');
+                new TradingView.widget({
+                    width: "100%",
+                    height: "450",
+                    symbol: "OANDA:XAUUSD",
+                    interval: "15",
+                    timezone: "Etc/UTC",
+                    theme: "dark",
+                    style: "1",
+                    locale: "en",
+                    toolbar_bg: "#1a2332",
+                    enable_publishing: false,
+                    hide_top_toolbar: false,
+                    save_image: false,
+                    container_id: "tradingview-chart",
+                    autosize: true,
+                    studies: ["RSI@tv-basicstudies", "MACD@tv-basicstudies"],
+                    overrides: {
+                        "paneProperties.background": "#1a2332",
+                        "paneProperties.vertGridProperties.color": "#334155",
+                        "paneProperties.horzGridProperties.color": "#334155",
+                        "scalesProperties.textColor": "#ffffff",
+                        "mainSeriesProperties.candleStyle.upColor": "#00ff88",
+                        "mainSeriesProperties.candleStyle.downColor": "#ff4757",
+                        "mainSeriesProperties.candleStyle.borderUpColor": "#00ff88",
+                        "mainSeriesProperties.candleStyle.borderDownColor": "#ff4757",
+                        "mainSeriesProperties.candleStyle.wickUpColor": "#00ff88",
+                        "mainSeriesProperties.candleStyle.wickDownColor": "#ff4757"
+                    },
+                    onChartReady: function() {
+                        console.log('✅ TradingView chart loaded successfully');
+                    }
+                });
+            } catch (error) {
+                console.error('❌ Error loading TradingView chart:', error);
+            }
+        }
+        
+        // Update market status
+        function updateMarketStatus() {
+            const now = new Date();
+            const dayOfWeek = now.getDay(); // 0 = Sunday, 6 = Saturday
+            const hour = now.getHours();
+            
+            let status = '';
+            let statusColor = '#00ff88';
+            
+            if (dayOfWeek === 0 || dayOfWeek === 6) {
+                status = '🔴 Market Closed (Weekend)';
+                statusColor = '#ff4757';
+            } else if (hour >= 22 || hour < 2) {
+                status = '🟡 After Hours Trading';
+                statusColor = '#ffa502';
+            } else {
+                status = '🟢 Market Open';
+                statusColor = '#00ff88';
+            }
+            
+            document.getElementById('market-status').innerHTML = `
+                <div style="text-align: center;">
+                    <div style="font-size: 18px; color: ${statusColor}; margin-bottom: 10px;">${status}</div>
+                    <div style="font-size: 12px; color: #64748b;">
+                        ${now.toLocaleString()}
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Main initialization
+        async function initialize() {
+            console.log('🚀 Initializing GoldGPT Dashboard...');
+            updateStatus('🔄 Loading...', '#ffa502');
+            
+            // Update market status
+            updateMarketStatus();
+            
+            // Fetch initial data
+            const priceSuccess = await fetchGoldPrice();
+            await fetchSignal();
+            
+            // Initialize chart
+            initTradingViewChart();
+            
+            // Update status
+            if (priceSuccess) {
+                updateStatus('🟢 Live Data Active');
+            } else {
+                updateStatus('🔴 Data Error', '#ff4757');
+            }
+            
+            console.log('✅ Dashboard initialization complete');
+        }
+        
+        // Auto-refresh data
+        function startAutoRefresh() {
+            // Refresh gold price every 10 seconds
+            setInterval(fetchGoldPrice, 10000);
+            
+            // Refresh market status every minute
+            setInterval(updateMarketStatus, 60000);
+            
+            // Refresh signals every 30 seconds
+            setInterval(fetchSignal, 30000);
+        }
+        
+        // Start everything when page loads
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', function() {
+                initialize();
+                startAutoRefresh();
+            });
+        } else {
+            initialize();
+            startAutoRefresh();
+        }
+        
+        console.log('✅ GoldGPT Clean Dashboard script loaded');
+    </script>
+</body>
+</html>

@@ -15,7 +15,6 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/chart-system.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/predictions-panel.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/market-context.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/correlation-analyzer.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/responsive-themes.css') }}">
     
     <!-- Critical CSS - Inline fallback for Railway deployment -->
@@ -648,12 +647,6 @@
                                 </a>
                             </li>
                             <li class="sidebar-nav-item">
-                                <a href="#correlation" class="sidebar-nav-link" data-section="correlation">
-                                    <span class="sidebar-nav-icon">🔗</span>
-                                    Timeframe Correlation
-                                </a>
-                            </li>
-                            <li class="sidebar-nav-item">
                                 <a href="#context" class="sidebar-nav-link" data-section="context">
                                     <span class="sidebar-nav-icon">🌍</span>
                                     Market Context
@@ -1087,11 +1080,9 @@
             </div>
         </section>
         
-        <!-- Analysis Panel (Correlation Analyzer) -->
-        <section class="dashboard-analysis" role="region" aria-label="Timeframe Analysis">
-            <div class="timeframe-correlation-analyzer" id="timeframeCorrelationAnalyzer">
+
                 
-                <!-- Analyzer Controls -->
+
                 <div class="analyzer-controls">
                     <div class="controls-left">
                         <div class="timeframe-selector-group">
@@ -1236,14 +1227,7 @@
                     
                 </div>
                 
-                <!-- Correlation Loading -->
-                <div class="correlation-loading d-none" id="correlationLoading">
-                    <div class="correlation-loading-spinner"></div>
-                    <div>Analyzing timeframe correlations...</div>
-                </div>
-                
-            </div>
-        </section>
+
         
     </div>
     
@@ -1883,7 +1867,7 @@
                 // Initialize Predictions Panel
                 this.components.predictionsPanel = new AdvancedPredictionsPanel('advancedPredictionsPanel', {
                     socket: this.socket,
-                    apiEndpoint: '/api/predictions'
+                    apiEndpoint: '/api/ml-predictions'
                 });
                 
                 // Initialize Correlation Analyzer

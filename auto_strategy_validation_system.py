@@ -34,7 +34,7 @@ from concurrent.futures import ThreadPoolExecutor
 # Import existing GoldGPT components
 from advanced_ml_prediction_engine import AdvancedMLPredictionEngine, PredictionResult
 from ai_analysis_api import AdvancedAIAnalyzer
-from enhanced_signal_generator import EnhancedAISignalGenerator
+from enhanced_signal_generator import quantgold_analyzer
 from enhanced_backtesting_system_v2 import (
     AdvancedMarketRegimeAnalyzer,
     AdvancedRiskManager,
@@ -97,7 +97,7 @@ class AutoStrategyValidationSystem:
         # Initialize ML strategy components
         self.ml_engine = AdvancedMLPredictionEngine()
         self.ai_analysis = AdvancedAIAnalyzer()
-        self.signal_generator = EnhancedAISignalGenerator()
+        self.signal_generator = quantgold_analyzer
         
         # Validation system state
         self.is_running = False

@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>QuantGold API Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-result { margin: 10px 0; padding: 10px; border-radius: 5px; }
+        .success { background-color: #d4edda; border: 1px solid #c3e6cb; }
+        .error { background-color: #f8d7da; border: 1px solid #f5c6cb; }
+        .info { background-color: #d1ecf1; border: 1px solid #bee5eb; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 5px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>🧪 QuantGold API Test</h1>
+    <div id="testResults"></div>
+    
+    <script>
+        console.log('🧪 Starting QuantGold API tests...');
+        
+        async function testAPI() {
+            const resultsDiv = document.getElementById('testResults');
+            
+            // Test ML Predictions
+            try {
+                console.log('🔍 Testing ML Predictions API...');
+                const mlResponse = await fetch('/api/ml-predictions');
+                const mlStatus = mlResponse.status;
+                console.log(`📊 ML Predictions Status: ${mlStatus}`);
+                
+                if (mlStatus === 200) {
+                    const mlData = await mlResponse.json();
+                    console.log('📊 ML Predictions Data:', mlData);
+                    resultsDiv.innerHTML += `
+                        <div class="test-result success">
+                            <h3>✅ ML Predictions API - Success</h3>
+                            <p>Status: ${mlStatus}</p>
+                            <p>Keys: ${Object.keys(mlData).join(', ')}</p>
+                            <pre>${JSON.stringify(mlData, null, 2).substring(0, 500)}...</pre>
+                        </div>
+                    `;
+                } else {
+                    resultsDiv.innerHTML += `
+                        <div class="test-result error">
+                            <h3>❌ ML Predictions API - Failed</h3>
+                            <p>Status: ${mlStatus}</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('❌ ML Predictions Error:', error);
+                resultsDiv.innerHTML += `
+                    <div class="test-result error">
+                        <h3>❌ ML Predictions API - Error</h3>
+                        <p>Error: ${error.message}</p>
+                    </div>
+                `;
+            }
+            
+            // Test Market News
+            try {
+                console.log('🔍 Testing Market News API...');
+                const newsResponse = await fetch('/api/market-news');
+                const newsStatus = newsResponse.status;
+                console.log(`📰 Market News Status: ${newsStatus}`);
+                
+                if (newsStatus === 200) {
+                    const newsData = await newsResponse.json();
+                    console.log('📰 Market News Data:', newsData);
+                    resultsDiv.innerHTML += `
+                        <div class="test-result success">
+                            <h3>✅ Market News API - Success</h3>
+                            <p>Status: ${newsStatus}</p>
+                            <p>Type: ${Array.isArray(newsData) ? 'Array' : 'Object'}</p>
+                            <p>Length/Keys: ${Array.isArray(newsData) ? newsData.length : Object.keys(newsData).join(', ')}</p>
+                            <pre>${JSON.stringify(newsData, null, 2).substring(0, 500)}...</pre>
+                        </div>
+                    `;
+                } else {
+                    resultsDiv.innerHTML += `
+                        <div class="test-result error">
+                            <h3>❌ Market News API - Failed</h3>
+                            <p>Status: ${newsStatus}</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('❌ Market News Error:', error);
+                resultsDiv.innerHTML += `
+                    <div class="test-result error">
+                        <h3>❌ Market News API - Error</h3>
+                        <p>Error: ${error.message}</p>
+                    </div>
+                `;
+            }
+            
+            // Test Live Gold Price
+            try {
+                console.log('🔍 Testing Live Gold Price API...');
+                const priceResponse = await fetch('/api/live-gold-price');
+                const priceStatus = priceResponse.status;
+                console.log(`💰 Live Gold Price Status: ${priceStatus}`);
+                
+                if (priceStatus === 200) {
+                    const priceData = await priceResponse.json();
+                    console.log('💰 Live Gold Price Data:', priceData);
+                    resultsDiv.innerHTML += `
+                        <div class="test-result success">
+                            <h3>✅ Live Gold Price API - Success</h3>
+                            <p>Status: ${priceStatus}</p>
+                            <pre>${JSON.stringify(priceData, null, 2)}</pre>
+                        </div>
+                    `;
+                } else {
+                    resultsDiv.innerHTML += `
+                        <div class="test-result error">
+                            <h3>❌ Live Gold Price API - Failed</h3>
+                            <p>Status: ${priceStatus}</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('❌ Live Gold Price Error:', error);
+                resultsDiv.innerHTML += `
+                    <div class="test-result error">
+                        <h3>❌ Live Gold Price API - Error</h3>
+                        <p>Error: ${error.message}</p>
+                    </div>
+                `;
+            }
+            
+            // Test Signal Generation
+            try {
+                console.log('🔍 Testing Signal Generation API...');
+                const signalResponse = await fetch('/api/generate-signal');
+                const signalStatus = signalResponse.status;
+                console.log(`🎯 Signal Generation Status: ${signalStatus}`);
+                
+                if (signalStatus === 200) {
+                    const signalData = await signalResponse.json();
+                    console.log('🎯 Signal Generation Data:', signalData);
+                    resultsDiv.innerHTML += `
+                        <div class="test-result success">
+                            <h3>✅ Signal Generation API - Success</h3>
+                            <p>Status: ${signalStatus}</p>
+                            <p>Signal Type: ${signalData.signal_type || 'N/A'}</p>
+                            <p>Entry Price: $${signalData.entry_price || 'N/A'}</p>
+                            <pre>${JSON.stringify(signalData, null, 2).substring(0, 500)}...</pre>
+                        </div>
+                    `;
+                } else {
+                    resultsDiv.innerHTML += `
+                        <div class="test-result error">
+                            <h3>❌ Signal Generation API - Failed</h3>
+                            <p>Status: ${signalStatus}</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('❌ Signal Generation Error:', error);
+                resultsDiv.innerHTML += `
+                    <div class="test-result error">
+                        <h3>❌ Signal Generation API - Error</h3>
+                        <p>Error: ${error.message}</p>
+                    </div>
+                `;
+            }
+            
+            // Test Active Signals
+            try {
+                console.log('🔍 Testing Active Signals API...');
+                const activeResponse = await fetch('/api/signals/active');
+                const activeStatus = activeResponse.status;
+                console.log(`📊 Active Signals Status: ${activeStatus}`);
+                
+                if (activeStatus === 200) {
+                    const activeData = await activeResponse.json();
+                    console.log('📊 Active Signals Data:', activeData);
+                    resultsDiv.innerHTML += `
+                        <div class="test-result success">
+                            <h3>✅ Active Signals API - Success</h3>
+                            <p>Status: ${activeStatus}</p>
+                            <p>Signal Count: ${activeData.count || 0}</p>
+                            <pre>${JSON.stringify(activeData, null, 2).substring(0, 500)}...</pre>
+                        </div>
+                    `;
+                } else {
+                    resultsDiv.innerHTML += `
+                        <div class="test-result error">
+                            <h3>❌ Active Signals API - Failed</h3>
+                            <p>Status: ${activeStatus}</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('❌ Active Signals Error:', error);
+                resultsDiv.innerHTML += `
+                    <div class="test-result error">
+                        <h3>❌ Active Signals API - Error</h3>
+                        <p>Error: ${error.message}</p>
+                    </div>
+                `;
+            }
+            
+            // Test Real-Time Factors
+            try {
+                console.log('🔍 Testing Real-Time Factors API...');
+                const factorsResponse = await fetch('/api/real-time-factors');
+                const factorsStatus = factorsResponse.status;
+                console.log(`⚡ Real-Time Factors Status: ${factorsStatus}`);
+                
+                if (factorsStatus === 200) {
+                    const factorsData = await factorsResponse.json();
+                    console.log('⚡ Real-Time Factors Data:', factorsData);
+                    resultsDiv.innerHTML += `
+                        <div class="test-result success">
+                            <h3>✅ Real-Time Factors API - Success</h3>
+                            <p>Status: ${factorsStatus}</p>
+                            <p>Enhanced Analysis: ${factorsData.enhanced_analysis || false}</p>
+                            <p>Impact Level: ${factorsData.data?.impact_level || 'unknown'}</p>
+                            <pre>${JSON.stringify(factorsData, null, 2).substring(0, 500)}...</pre>
+                        </div>
+                    `;
+                } else {
+                    resultsDiv.innerHTML += `
+                        <div class="test-result error">
+                            <h3>❌ Real-Time Factors API - Failed</h3>
+                            <p>Status: ${factorsStatus}</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('❌ Real-Time Factors Error:', error);
+                resultsDiv.innerHTML += `
+                    <div class="test-result error">
+                        <h3>❌ Real-Time Factors API - Error</h3>
+                        <p>Error: ${error.message}</p>
+                    </div>
+                `;
+            }
+            
+            // Test Live Gold Price
+            try {
+                console.log('🔍 Testing Live Gold Price API...');
+                const priceResponse = await fetch('/api/live-gold-price');
+                const priceStatus = priceResponse.status;
+                console.log(`💰 Live Gold Price Status: ${priceStatus}`);
+                
+                if (priceStatus === 200) {
+                    const priceData = await priceResponse.json();
+                    console.log('💰 Live Gold Price Data:', priceData);
+                    resultsDiv.innerHTML += `
+                        <div class="test-result success">
+                            <h3>✅ Live Gold Price API - Success</h3>
+                            <p>Status: ${priceStatus}</p>
+                            <pre>${JSON.stringify(priceData, null, 2)}</pre>
+                        </div>
+                    `;
+                } else {
+                    resultsDiv.innerHTML += `
+                        <div class="test-result error">
+                            <h3>❌ Live Gold Price API - Failed</h3>
+                            <p>Status: ${priceStatus}</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('❌ Live Gold Price Error:', error);
+                resultsDiv.innerHTML += `
+                    <div class="test-result error">
+                        <h3>❌ Live Gold Price API - Error</h3>
+                        <p>Error: ${error.message}</p>
+                    </div>
+                `;
+            }
+            
+            console.log('🧪 All API tests completed!');
+        }
+        
+        // Run tests when page loads
+        document.addEventListener('DOMContentLoaded', testAPI);
+    </script>
+</body>
+</html>

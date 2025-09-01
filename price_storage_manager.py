@@ -122,7 +122,11 @@ class PriceStorageManager:
         try:
             # Check cache first
             if symbol in self.cache:
-                cache_age = time.time() - self.cache[symbol]['timestamp']
+                cache_timestamp = self.cache[symbol].get('timestamp', 0)
+                # Ensure timestamp is a number
+                if isinstance(cache_timestamp, str):
+                    cache_timestamp = float(cache_timestamp)
+                cache_age = time.time() - cache_timestamp
                 if cache_age < self.cache_timeout:
                     logger.info(f"📋 Using cached price for {symbol}")
                     return self.cache[symbol]
@@ -143,9 +147,22 @@ class PriceStorageManager:
             conn.close()
             
             if row:
+                # Convert datetime string to Unix timestamp
+                timestamp_value = row[1]
+                if isinstance(timestamp_value, str):
+                    # Parse datetime string to timestamp
+                    try:
+                        from datetime import datetime
+                        dt = datetime.fromisoformat(timestamp_value.replace('Z', '+00:00'))
+                        timestamp_float = dt.timestamp()
+                    except:
+                        timestamp_float = time.time()  # Fallback to current time
+                else:
+                    timestamp_float = float(timestamp_value) if timestamp_value else time.time()
+                
                 result = {
                     'price': row[0],
-                    'timestamp': row[1],
+                    'timestamp': timestamp_float,
                     'source': row[2],
                     'high_24h': row[3],
                     'low_24h': row[4],
@@ -385,6 +402,41 @@ def get_current_gold_price():
             
         # Ultimate fallback
         return 3429.50
+    except Exception as e:
+        logger.error(f"❌ Error getting current gold price: {e}")
+        return 3429.50
+
+def get_comprehensive_price_data(symbol: str = "XAUUSD") -> dict:
+    """Get comprehensive price data for ML systems"""
+    try:
+        manager = PriceStorageManager()
+        latest_data = manager.get_latest_price(symbol)
+        
+        if latest_data:
+            return {
+                'price': latest_data['price'],
+                'timestamp': latest_data['timestamp'],
+                'source': latest_data.get('source', 'unknown'),
+                'high_24h': latest_data.get('high_24h'),
+                'low_24h': latest_data.get('low_24h'),
+                'change_24h': latest_data.get('change_24h'),
+                'change_percent': latest_data.get('change_percent')
+            }
+        else:
+            # Fallback to basic price
+            current_price = get_current_gold_price()
+            return {
+                'price': current_price,
+                'timestamp': time.time(),
+                'source': 'fallback'
+            }
+    except Exception as e:
+        logger.error(f"❌ Error getting comprehensive price data: {e}")
+        return {
+            'price': 3429.50,
+            'timestamp': time.time(),
+            'source': 'fallback_error'
+        }
         
     except Exception as e:
         logger.error(f"❌ Error getting current gold price: {e}")
