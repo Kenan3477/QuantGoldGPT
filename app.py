@@ -1271,7 +1271,7 @@ except ImportError as e:
 # Advanced signal generation endpoint
 @app.route('/api/generate-signal', methods=['GET', 'POST'])
 def generate_advanced_signal():
-    """Generate high-quality trading signal with realistic TP/SL"""
+    """Generate high-quality trading signal with realistic TP/SL - FIXED VERSION"""
     logger.info("🎯 Advanced trading signal generation requested")
     
     try:
@@ -1299,14 +1299,39 @@ def generate_advanced_signal():
                 logger.info("✅ Using simple signal generator")
             except Exception as simple_error:
                 logger.error(f"❌ Simple signal generation also failed: {simple_error}")
-                return jsonify({
-                    'success': False,
-                    'error': 'All signal systems failed',
-                    'message': 'Signal generation temporarily unavailable'
-                }), 503
+                
+                # Final fallback to emergency generator
+                logger.info("🚨 Using emergency signal generator")
+                try:
+                    from emergency_signal_generator import generate_working_signal
+                    emergency_signal = generate_working_signal()
+                    
+                    signal_result = {
+                        'success': True,
+                        'signal_generated': True,
+                        'signal_type': emergency_signal['signal_type'],
+                        'entry_price': emergency_signal['entry_price'],
+                        'take_profit': emergency_signal['take_profit'],
+                        'stop_loss': emergency_signal['stop_loss'],
+                        'confidence': emergency_signal['confidence'],
+                        'risk_reward_ratio': emergency_signal['risk_reward_ratio'],
+                        'reasoning': emergency_signal['reasoning'],
+                        'generated_by': 'Emergency Signal Generator',
+                        'timestamp': emergency_signal['timestamp'],
+                        'symbol': symbol,
+                        'timeframe': timeframe
+                    }
+                    logger.info("✅ Emergency signal generated successfully")
+                except Exception as emergency_error:
+                    logger.error(f"❌ Emergency signal generator failed: {emergency_error}")
+                    return jsonify({
+                        'success': False,
+                        'error': 'All signal systems failed',
+                        'message': 'Signal generation temporarily unavailable'
+                    }), 503
         
-        if signal_result['success'] and signal_result['signal_generated']:
-            logger.info(f"✅ Signal generated: {signal_result['signal_type']} at ${signal_result['entry_price']:.2f}")
+        if signal_result and signal_result.get('success', False) and signal_result.get('signal_generated', False):
+            logger.info(f"✅ Signal generated: {signal_result.get('signal_type', 'UNKNOWN')} at ${signal_result.get('entry_price', 0):.2f}")
             
             # Emit real-time signal to connected clients
             socketio.emit('new_trading_signal', {
@@ -1356,7 +1381,7 @@ def generate_ai_signal():
                 from simple_signal_generator import generate_signal_now
                 simple_signal = generate_signal_now(symbol, timeframe)
                 
-                if simple_signal:
+                if simple_signal and simple_signal.get('success', False):
                     signal_result = {
                         'success': True,
                         'signal': simple_signal,
@@ -1369,7 +1394,25 @@ def generate_ai_signal():
                     raise Exception("Simple signal generator returned empty result")
             except Exception as simple_error:
                 logger.error(f"❌ Simple signal generator failed: {simple_error}")
-                raise Exception("All signal generation methods failed")
+                
+                # Final fallback to emergency generator
+                logger.info("🚨 Using emergency signal generator")
+                try:
+                    from emergency_signal_generator import generate_working_signal
+                    emergency_signal = generate_working_signal()
+                    
+                    signal_result = {
+                        'success': True,
+                        'signal': emergency_signal,
+                        'generated_by': 'Emergency Signal Generator',
+                        'timestamp': datetime.now().isoformat(),
+                        'symbol': symbol,
+                        'timeframe': timeframe
+                    }
+                    logger.info("✅ Emergency signal generated successfully")
+                except Exception as emergency_error:
+                    logger.error(f"❌ Emergency signal generator failed: {emergency_error}")
+                    raise Exception("All signal generation methods failed")
         
         if signal_result and signal_result.get('success', False):
             # Add signal to enhanced tracking system
@@ -1378,13 +1421,14 @@ def generate_ai_signal():
                     signal_data = signal_result.get('signal', {})
                     
                     # Get current gold price for entry
-                    current_price = get_current_gold_price()
+                    current_price_data = get_current_gold_price()
+                    current_price = current_price_data.get('price', 3477.0)
                     
                     enhanced_signal_data = {
-                        'signal_type': signal_data.get('signal_type', 'long'),
-                        'entry_price': current_price if current_price > 0 else signal_data.get('entry_price', 3380),
-                        'take_profit': signal_data.get('take_profit', current_price * 1.006 if current_price > 0 else 3400),
-                        'stop_loss': signal_data.get('stop_loss', current_price * 0.994 if current_price > 0 else 3360),
+                        'signal_type': signal_data.get('signal_type', 'BUY'),
+                        'entry_price': signal_data.get('entry_price', current_price),
+                        'take_profit': signal_data.get('take_profit', current_price * 1.006),
+                        'stop_loss': signal_data.get('stop_loss', current_price * 0.994),
                         'risk_amount': signal_data.get('risk_amount', 100),
                         'confidence_score': signal_data.get('confidence', 0.75),
                         'macro_indicators': {
