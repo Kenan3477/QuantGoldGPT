@@ -1448,22 +1448,27 @@ def generate_ai_signal():
                         logger.warning("⚠️ Failed to get signal ID from enhanced tracker")
                 else:
                     # Fallback to old tracking system
-                    from signal_tracker import signal_tracker
-                    signal_data = signal_result.get('signal', {})
-                    signal_tracker.add_signal({
-                        'signal_id': signal_data.get('signal_id'),
-                        'symbol': symbol,
-                        'signal_type': signal_data.get('signal_type'),
-                        'entry_price': signal_data.get('entry_price'),
-                        'take_profit': signal_data.get('take_profit'),
-                        'stop_loss': signal_data.get('stop_loss'),
-                        'confidence': signal_data.get('confidence', 0.7),
+                    try:
+                        from signal_tracker import signal_tracker
+                        signal_data = signal_result.get('signal', {})
+                        signal_tracker.add_signal({
+                            'signal_id': signal_data.get('signal_id'),
+                            'symbol': symbol,
+                            'signal_type': signal_data.get('signal_type'),
+                            'entry_price': signal_data.get('entry_price'),
+                            'take_profit': signal_data.get('take_profit'),
+                            'stop_loss': signal_data.get('stop_loss'),
+                            'confidence': signal_data.get('confidence', 0.7),
                         'timeframe': timeframe,
                         'reasoning': signal_data.get('reasoning', 'AI generated signal'),
                         'win_probability': signal_data.get('win_probability', 0.7),
                         'risk_reward_ratio': signal_data.get('risk_reward_ratio', 2.0)
                     })
                     logger.info(f"✅ Signal added to legacy tracking system")
+                    except ImportError as tracker_error:
+                        logger.warning(f"⚠️ Signal tracker not available: {tracker_error}")
+                    except Exception as tracker_error:
+                        logger.warning(f"⚠️ Failed to use signal tracker: {tracker_error}")
             except Exception as tracking_error:
                 logger.warning(f"⚠️ Failed to add signal to tracking: {tracking_error}")
             
@@ -1678,16 +1683,27 @@ def get_tracked_signals():
             })
         else:
             # Fallback to legacy tracker
-            from signal_tracker import signal_tracker
-            active_signals = signal_tracker.get_active_signals()
-            
-            return jsonify({
-                'success': True,
+            try:
+                from signal_tracker import signal_tracker
+                active_signals = signal_tracker.get_active_signals()
+                
+                return jsonify({
+                    'success': True,
                 'signals': active_signals,
                 'count': len(active_signals),
                 'timestamp': datetime.now().isoformat(),
                 'tracking_type': 'legacy'
             })
+            except ImportError:
+                # No signal tracker available, return empty list
+                return jsonify({
+                    'success': True,
+                    'signals': [],
+                    'count': 0,
+                    'timestamp': datetime.now().isoformat(),
+                    'tracking_type': 'none',
+                    'message': 'Signal tracking not available'
+                })
         
     except Exception as e:
         logger.error(f"❌ Failed to get tracked signals: {e}")
