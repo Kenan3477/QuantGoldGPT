@@ -18,6 +18,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy essential application files only
 COPY app.py .
 COPY simple_start.py .
+COPY emergency_start.py .
 COPY emergency_signal_generator.py .
 COPY error_handling_system.py .
 COPY database_config.py .
@@ -35,4 +36,4 @@ ENV PYTHONUNBUFFERED=1
 ENV FLASK_ENV=production
 
 # Run the application
-CMD ["python", "simple_start.py"]
+CMD ["python", "emergency_start.py"]
