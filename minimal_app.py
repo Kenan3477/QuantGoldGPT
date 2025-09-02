@@ -1,9 +1,19 @@
 #!/usr/bin/env python3
 """
-Ultra-Minimal Railway Test - Basic Flask Only
+Ultra-Minimal Railway Test - Basic Flask Only with Debug
 """
 import os
+import sys
 from flask import Flask, jsonify
+
+print("🚀 STARTING MINIMAL APP")
+print(f"Python version: {sys.version}")
+print(f"Working directory: {os.getcwd()}")
+print(f"Files available: {os.listdir('.')}")
+print(f"Environment variables:")
+for key, value in os.environ.items():
+    if 'PORT' in key or 'RAILWAY' in key or 'HOST' in key:
+        print(f"  {key} = {value}")
 
 # Create the most basic Flask app possible
 app = Flask(__name__)
@@ -11,15 +21,18 @@ app = Flask(__name__)
 @app.route('/')
 def health():
     """Basic health check for Railway"""
+    print("🎯 Health check endpoint accessed!")
     return jsonify({
         "status": "healthy",
         "service": "goldgpt",
-        "message": "Basic server running"
+        "message": "Basic server running",
+        "port": os.environ.get('PORT', 'not-set')
     })
 
 @app.route('/api/signals/generate')
 def basic_signal():
     """Ultra-basic signal generation"""
+    print("📡 Signal generation endpoint accessed!")
     import random
     signal_type = random.choice(["BUY", "SELL"])
     price = round(3500 + random.uniform(-50, 50), 2)
@@ -38,6 +51,21 @@ def basic_signal():
     })
 
 if __name__ == "__main__":
-    port = int(os.environ.get('PORT', 5000))
-    print(f"🚀 Starting ultra-minimal server on port {port}")
-    app.run(host='0.0.0.0', port=port, debug=False)
+    try:
+        port = int(os.environ.get('PORT', 5000))
+        print(f"🌐 Starting server on 0.0.0.0:{port}")
+        print("🔄 Starting Flask app...")
+        
+        # Force threading to True for Railway
+        app.run(
+            host='0.0.0.0', 
+            port=port, 
+            debug=False, 
+            threaded=True,
+            use_reloader=False
+        )
+    except Exception as e:
+        print(f"❌ Failed to start: {e}")
+        import traceback
+        traceback.print_exc()
+        sys.exit(1)

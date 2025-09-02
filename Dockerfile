@@ -29,5 +29,5 @@ EXPOSE 5000
 ENV PYTHONUNBUFFERED=1
 ENV FLASK_ENV=production
 
-# Run the application
-CMD ["python", "minimal_app.py"]
+# Run the application with gunicorn
+CMD ["sh", "-c", "gunicorn --bind 0.0.0.0:${PORT:-5000} --workers 1 --timeout 120 minimal_app:app"]
