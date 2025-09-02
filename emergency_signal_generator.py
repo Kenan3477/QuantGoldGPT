@@ -40,6 +40,7 @@ def generate_working_signal():
         'symbol': 'GOLD'
     }
 
-if __name__ == "__main__":
-    signal = generate_working_signal()
-    print(f"✅ Signal generated: {signal['signal_type']} at ${signal['entry_price']}")
+# Disabled to prevent interference with terminal commands
+# if __name__ == "__main__":
+#     signal = generate_working_signal()
+#     print(f"✅ Signal generated: {signal['signal_type']} at ${signal['entry_price']}")

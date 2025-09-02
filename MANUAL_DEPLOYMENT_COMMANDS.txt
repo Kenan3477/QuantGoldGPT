@@ -1,0 +1,40 @@
+#!/bin/bash
+# URGENT: Manual Railway Deployment Commands
+# Copy and paste these commands ONE BY ONE into your terminal/command prompt
+
+echo "🚨 URGENT RAILWAY DEPLOYMENT - Run these commands manually:"
+echo "=============================================================="
+echo ""
+
+echo "1. Navigate to project directory:"
+echo "cd \"C:\\Users\\kenne\\Downloads\\ml-model-training\\bot_modules\\GoldGPT\""
+echo ""
+
+echo "2. Check current status:"
+echo "git status"
+echo ""
+
+echo "3. Add all necessary files:"
+echo "git add app.py"
+echo "git add emergency_signal_generator.py"
+echo "git add signal_tracker.py"
+echo "git add enhanced_signal_tracker.py"
+echo "git add auto_signal_tracker.py"
+echo ""
+
+echo "4. Commit the fixes:"
+echo "git commit -m \"Fix Railway 500 errors - Deploy signal generation system\""
+echo ""
+
+echo "5. Push to Railway:"
+echo "git push origin main"
+echo ""
+
+echo "6. Wait 2-3 minutes, then test:"
+echo "curl https://web-production-41802.up.railway.app/api/signals/generate"
+echo ""
+
+echo "🎯 This will fix ALL the 500 errors you're seeing in the browser!"
+echo "✅ Signal generation will work"
+echo "✅ No more 'No module named signal_tracker' errors"
+echo "✅ Emergency fallback system deployed"

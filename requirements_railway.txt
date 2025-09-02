@@ -1,0 +1,32 @@
+# Railway Production Requirements for GoldGPT Signal Generation Fix
+# Core Flask framework
+Flask==3.0.0
+Flask-SocketIO==5.3.6
+gunicorn==21.2.0
+
+# Web server
+waitress==2.1.2
+
+# Database support  
+SQLAlchemy==2.0.21
+psycopg2-binary==2.9.7
+
+# HTTP requests
+requests==2.31.0
+
+# Data processing (minimal versions)
+numpy==1.24.3
+pandas==2.0.3
+
+# Real-time features
+python-socketio==5.10.0
+eventlet==0.36.1
+
+# Configuration
+python-dotenv==1.0.0
+
+# Date/time handling
+python-dateutil==2.8.2
+
+# JSON handling
+simplejson==3.19.1

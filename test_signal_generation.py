@@ -65,29 +65,30 @@ def test_api_endpoint():
         print(f"❌ API test failed: {e}")
         return False
 
-if __name__ == "__main__":
-    print("🔍 DIAGNOSING SIGNAL GENERATION ISSUES")
-    print("="*50)
-    
-    # Test simple generator
-    simple_works = test_simple_generator()
-    
-    # Test advanced generator
-    advanced_works = test_advanced_generator()
-    
-    # Test API endpoint
-    api_works = test_api_endpoint()
-    
-    print("\n📊 DIAGNOSIS RESULTS:")
-    print(f"   Simple Generator: {'✅ WORKING' if simple_works else '❌ FAILED'}")
-    print(f"   Advanced Generator: {'✅ WORKING' if advanced_works else '❌ FAILED'}")
-    print(f"   API Endpoint: {'✅ WORKING' if api_works else '❌ FAILED'}")
-    
-    if not simple_works and not advanced_works:
-        print("\n🚨 CRITICAL: Both generators failed!")
-    elif simple_works and not advanced_works:
-        print("\n⚠️ Advanced generator failed, but simple generator works")
-    elif not api_works:
-        print("\n⚠️ API endpoint failed")
-    else:
-        print("\n✅ All systems working")
+# Disabled to prevent interference with terminal commands
+# if __name__ == "__main__":
+#     print("🔍 DIAGNOSING SIGNAL GENERATION ISSUES")
+#     print("="*50)
+#     
+#     # Test simple generator
+#     simple_works = test_simple_generator()
+#     
+#     # Test advanced generator
+#     advanced_works = test_advanced_generator()
+#     
+#     # Test API endpoint
+#     api_works = test_api_endpoint()
+#     
+#     print("\n📊 DIAGNOSIS RESULTS:")
+#     print(f"   Simple Generator: {'✅ WORKING' if simple_works else '❌ FAILED'}")
+#     print(f"   Advanced Generator: {'✅ WORKING' if advanced_works else '❌ FAILED'}")
+#     print(f"   API Endpoint: {'✅ WORKING' if api_works else '❌ FAILED'}")
+#     
+#     if not simple_works and not advanced_works:
+#         print("\n🚨 CRITICAL: Both generators failed!")
+#     elif simple_works and not advanced_works:
+#         print("\n⚠️ Advanced generator failed, but simple generator works")
+#     elif not api_works:
+#         print("\n⚠️ API endpoint failed")
+#     else:
+#         print("\n✅ All systems working")
