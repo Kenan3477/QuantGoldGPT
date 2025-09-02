@@ -10,20 +10,14 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements first for better caching
-COPY requirements.txt .
+COPY requirements-ultra-minimal.txt .
 
 # Install Python dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements-ultra-minimal.txt
 
-# Copy essential application files only
-COPY app.py .
-COPY simple_start.py .
-COPY emergency_start.py .
+# Copy minimal application files only
+COPY minimal_app.py .
 COPY emergency_signal_generator.py .
-COPY error_handling_system.py .
-COPY database_config.py .
-COPY templates/ ./templates/
-COPY static/ ./static/
 
 # Create necessary directories
 RUN mkdir -p logs
@@ -36,4 +30,4 @@ ENV PYTHONUNBUFFERED=1
 ENV FLASK_ENV=production
 
 # Run the application
-CMD ["python", "emergency_start.py"]
+CMD ["python", "minimal_app.py"]

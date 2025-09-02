@@ -1,0 +1,2 @@
+# Ultra-minimal requirements - Flask only
+Flask==3.0.0
