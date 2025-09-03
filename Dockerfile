@@ -1,33 +1,13 @@
-# Dockerfile for GoldGPT Railway Deployment
-FROM python:3.11-slim
+FROM python:3.9-slim
 
-# Set working directory
 WORKDIR /app
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    gcc \
-    && rm -rf /var/lib/apt/lists/*
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy requirements first for better caching
-COPY requirements-basic.txt .
+COPY app.py .
+COPY templates/ templates/
 
-# Install Python dependencies (none needed)
-RUN pip install --no-cache-dir -r requirements-basic.txt
+EXPOSE $PORT
 
-# Copy minimal application files only
-COPY basic_server.py .
-COPY emergency_signal_generator.py .
-
-# Create necessary directories
-RUN mkdir -p logs
-
-# Expose port
-EXPOSE 5000
-
-# Set environment variables
-ENV PYTHONUNBUFFERED=1
-ENV FLASK_ENV=production
-
-# Run the application with gunicorn
-CMD ["python", "basic_server.py"]
+CMD ["python", "app.py"]
