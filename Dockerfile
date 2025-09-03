@@ -10,13 +10,13 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements first for better caching
-COPY requirements-ultra-minimal.txt .
+COPY requirements-basic.txt .
 
-# Install Python dependencies
-RUN pip install --no-cache-dir -r requirements-ultra-minimal.txt
+# Install Python dependencies (none needed)
+RUN pip install --no-cache-dir -r requirements-basic.txt
 
 # Copy minimal application files only
-COPY minimal_app.py .
+COPY basic_server.py .
 COPY emergency_signal_generator.py .
 
 # Create necessary directories
@@ -30,4 +30,4 @@ ENV PYTHONUNBUFFERED=1
 ENV FLASK_ENV=production
 
 # Run the application with gunicorn
-CMD ["sh", "-c", "gunicorn --bind 0.0.0.0:${PORT:-5000} --workers 1 --timeout 120 minimal_app:app"]
+CMD ["python", "basic_server.py"]
