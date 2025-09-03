@@ -1,0 +1,42 @@
+# QuantGold Complete - Railway Dockerfile
+# Production deployment with all features working
+
+FROM python:3.9-slim
+
+# Set working directory
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements and install Python dependencies
+COPY requirements_complete.txt requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy application files
+COPY quantgold_complete_app.py app.py
+COPY templates/ templates/
+COPY static/ static/
+
+# Copy all Python files (including optional modules)
+COPY *.py ./
+
+# Create necessary directories
+RUN mkdir -p static/css static/js static/images
+
+# Set environment variables
+ENV FLASK_APP=app.py
+ENV FLASK_ENV=production
+ENV PORT=8080
+
+# Expose port
+EXPOSE 8080
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s \
+  CMD curl -f http://localhost:8080/health || exit 1
+
+# Start application
+CMD ["python", "app.py"]
