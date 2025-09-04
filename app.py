@@ -119,6 +119,7 @@ def generate_signal():
         'key_factors': ['Technical Analysis', 'Market Sentiment'],
         'status': 'active',
         'pnl': 0.0,
+        'base_pnl': 0.0,  # Add base_pnl for consistency
         'timestamp': datetime.now().isoformat()
     }
     
@@ -129,7 +130,8 @@ def generate_signal():
     if len(active_signals) > 10:
         active_signals.pop(0)
     
-    logger.info(f"✅ Generated signal: {signal['signal_id']} - {signal['signal_type']}")
+    logger.info(f"✅ Generated signal: {signal['signal_id']} - {signal['signal_type']} at ${signal['entry_price']}")
+    logger.info(f"📊 Total active signals now: {len(active_signals)}")
     
     return jsonify({'success': True, 'signal': signal})
 
@@ -211,23 +213,48 @@ def get_tracked_signals():
     """Get tracked signals with live P&L"""
     # Return the dynamically generated active signals
     # Update P&L to simulate live trading
-    for signal in active_signals:
-        # Simulate live P&L movement based on current time
-        time_factor = datetime.now().second / 60.0  # Changes every second
-        base_pnl = signal.get('base_pnl', random.uniform(-50.0, 100.0))
-        signal['base_pnl'] = base_pnl  # Store original for consistency
-        
-        # Add live fluctuation
-        live_variation = random.uniform(-15.0, 15.0) * time_factor
-        signal['pnl'] = round(base_pnl + live_variation, 2)
-        
-        # Update status based on P&L
-        if signal['pnl'] > 0:
-            signal['status'] = 'active'
-        else:
-            signal['status'] = 'active'
+    try:
+        # Get current gold price for P&L calculation
+        current_gold_response = get_gold_price()
+        current_gold_data = current_gold_response.get_json()
+        current_price = current_gold_data.get('price', 3560.0)
+    except:
+        current_price = 3560.0
     
-    logger.info(f"📊 Returning {len(active_signals)} active signals")
+    for signal in active_signals:
+        # Calculate live P&L based on current price vs entry price
+        entry_price = signal.get('entry_price', 3500.0)
+        signal_type = signal.get('signal_type', 'BUY')
+        
+        if signal_type == 'BUY':
+            pnl = current_price - entry_price
+        else:  # SELL
+            pnl = entry_price - current_price
+            
+        # Add some random variation to make it more realistic
+        pnl += random.uniform(-10.0, 10.0)
+        
+        # Calculate percentage
+        pnl_pct = (pnl / entry_price) * 100
+        
+        # Add frontend-expected fields
+        signal['id'] = signal.get('signal_id', 'QG_000')  # Add id field
+        signal['current_price'] = current_price
+        signal['live_pnl'] = round(pnl, 2)
+        signal['live_pnl_pct'] = round(pnl_pct, 2)
+        signal['pnl'] = round(pnl, 2)  # Keep existing pnl field
+        
+        # Determine status
+        if pnl > 5:
+            signal['pnl_status'] = 'profit'
+        elif pnl < -5:
+            signal['pnl_status'] = 'loss'
+        else:
+            signal['pnl_status'] = 'neutral'
+        
+        signal['status'] = 'active'
+    
+    logger.info(f"📊 Returning {len(active_signals)} active signals with live P&L")
     return jsonify({'success': True, 'signals': active_signals})
 
 @app.route('/api/signals/stats')
