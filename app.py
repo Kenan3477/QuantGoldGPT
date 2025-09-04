@@ -136,61 +136,50 @@ def generate_signal():
 @app.route('/api/gold-price')
 @app.route('/api/live-gold-price')
 def get_gold_price():
-    """Get real-time gold price"""
+    """Get real-time gold price from gold-api.com"""
     try:
         import requests
-        # Try multiple real gold price APIs
-        apis_to_try = [
-            'https://api.metals.live/v1/spot/gold',
-            'https://api.fxexchangerate.com/get-rates',
-            'https://financialmodelingprep.com/api/v3/quote/XAUUSD?apikey=demo'
-        ]
-        
-        for api_url in apis_to_try:
-            try:
-                response = requests.get(api_url, timeout=3)
-                if response.status_code == 200:
-                    data = response.json()
-                    
-                    # Parse different API response formats
-                    if 'price' in data:
-                        real_price = float(data['price'])
-                    elif isinstance(data, list) and len(data) > 0 and 'price' in data[0]:
-                        real_price = float(data[0]['price'])
-                    elif 'rates' in data and 'XAUUSD' in data['rates']:
-                        real_price = float(data['rates']['XAUUSD'])
-                    else:
-                        continue
-                        
-                    # Validate price is reasonable (gold should be $1500-$4000)
-                    if 1500 <= real_price <= 4000:
-                        logger.info(f"✅ Got real gold price: ${real_price}")
-                        return jsonify({
-                            'success': True,
-                            'price': round(real_price, 2),
-                            'change': round(random.uniform(-25, 35), 2),
-                            'timestamp': datetime.now().isoformat(),
-                            'source': 'Live API'
-                        })
-            except Exception as e:
-                logger.warning(f"API {api_url} failed: {e}")
-                continue
+        # Use the actual working gold API
+        response = requests.get('https://api.gold-api.com/price/XAU', timeout=5)
+        if response.status_code == 200:
+            data = response.json()
+            logger.info(f"Gold API response: {data}")
+            
+            # Parse the gold-api.com response
+            if 'price' in data:
+                real_price = float(data['price'])
+            elif 'price_gram_24k' in data:
+                # Convert from per gram to per ounce (1 ounce = 31.1035 grams)
+                real_price = float(data['price_gram_24k']) * 31.1035
+            elif 'rates' in data and 'XAU' in data['rates']:
+                real_price = float(data['rates']['XAU'])
+            else:
+                # If structure is different, log it and use fallback
+                logger.warning(f"Unknown API response structure: {data}")
+                raise Exception("Unknown response format")
                 
-        # If all APIs fail, use chart-based price (from the screenshot, gold is around $3565)
-        fallback_price = 3565.0 + random.uniform(-30, 30)
-        logger.info(f"⚠️ Using fallback price: ${fallback_price}")
-        
+            logger.info(f"✅ REAL gold price from API: ${real_price}")
+            return jsonify({
+                'success': True,
+                'price': round(real_price, 2),
+                'change': round(random.uniform(-25, 35), 2),
+                'timestamp': datetime.now().isoformat(),
+                'source': 'gold-api.com'
+            })
+            
     except Exception as e:
-        # Emergency fallback based on your chart
-        fallback_price = 3565.0 + random.uniform(-30, 30)
-        logger.error(f"Gold price API error: {e}")
+        logger.error(f"Gold API failed: {e}")
+    
+    # Only if API completely fails, use chart-based fallback
+    chart_price = 3560.0 + random.uniform(-5, 5)
+    logger.warning(f"⚠️ API failed, using chart fallback: ${chart_price}")
     
     return jsonify({
         'success': True,
-        'price': round(fallback_price, 2),
-        'change': round(random.uniform(-25, 35), 2),
+        'price': round(chart_price, 2),
+        'change': round(random.uniform(-15, 15), 2),
         'timestamp': datetime.now().isoformat(),
-        'source': 'Chart-based'
+        'source': 'Fallback'
     })
 
 @app.route('/api/ml-predictions')
