@@ -17,47 +17,7 @@ logger = logging.getLogger(__name__)
 app = Flask(__name__)
 
 # Global storage for active signals (in production, use database)
-active_signals = [
-    {
-        'signal_id': 'QG_DEMO_001', 
-        'signal_type': 'BUY', 
-        'entry_price': 3485.50,
-        'take_profit': 3565.00,
-        'stop_loss': 3425.00,
-        'confidence': 0.87,
-        'status': 'active',
-        'pnl': 52.50,
-        'base_pnl': 52.50,
-        'timestamp': datetime.now().isoformat(),
-        'key_factors': ['Technical Analysis', 'Market Sentiment']
-    },
-    {
-        'signal_id': 'QG_DEMO_002', 
-        'signal_type': 'SELL', 
-        'entry_price': 3575.00,
-        'take_profit': 3495.00,
-        'stop_loss': 3635.00,
-        'confidence': 0.79,
-        'status': 'active',
-        'pnl': -18.25,
-        'base_pnl': -18.25,
-        'timestamp': datetime.now().isoformat(),
-        'key_factors': ['Resistance Level', 'Volume Analysis']
-    },
-    {
-        'signal_id': 'QG_DEMO_003', 
-        'signal_type': 'BUY', 
-        'entry_price': 3520.00,
-        'take_profit': 3600.00,
-        'stop_loss': 3460.00,
-        'confidence': 0.92,
-        'status': 'active',
-        'pnl': 35.75,
-        'base_pnl': 35.75,
-        'timestamp': datetime.now().isoformat(),
-        'key_factors': ['Breakout Pattern', 'Strong Momentum']
-    }
-]
+active_signals = []  # RESET TO EMPTY - NO MORE FAKE SIGNALS
 
 @app.route('/')
 def index():
@@ -95,19 +55,30 @@ def health_check():
 # Emergency signal generation
 @app.route('/api/signals/generate', methods=['GET', 'POST'])
 def generate_signal():
-    """Generate trading signal"""
-    signal_type = random.choice(['BUY', 'SELL'])
-    # Use current gold price base (~$3500)
-    base_price = 3500.0
+    """Generate trading signal based on REAL current gold price"""
+    try:
+        # Get REAL current gold price first
+        gold_response = get_gold_price()
+        gold_data = gold_response.get_json()
+        current_gold_price = gold_data.get('price', 3540.0)
+        
+        logger.info(f"🥇 Using REAL gold price for signal: ${current_gold_price}")
+        
+    except Exception as e:
+        logger.error(f"Failed to get real gold price: {e}")
+        current_gold_price = 3540.0  # Fallback
     
+    signal_type = random.choice(['BUY', 'SELL'])
+    
+    # Use REAL gold price as entry (with small spread)
     if signal_type == 'BUY':
-        entry = base_price + random.uniform(-50, 20)
-        tp = entry + random.uniform(30, 80)
-        sl = entry - random.uniform(30, 50)
-    else:
-        entry = base_price + random.uniform(-20, 50)
-        tp = entry - random.uniform(30, 80)
-        sl = entry + random.uniform(30, 50)
+        entry = current_gold_price + random.uniform(0.5, 2.0)  # Slightly above current (spread)
+        tp = entry + random.uniform(20, 50)  # Realistic TP: $20-50 profit
+        sl = entry - random.uniform(15, 25)  # Realistic SL: $15-25 loss
+    else:  # SELL
+        entry = current_gold_price - random.uniform(0.5, 2.0)  # Slightly below current (spread)
+        tp = entry - random.uniform(20, 50)  # Realistic TP: $20-50 profit
+        sl = entry + random.uniform(15, 25)  # Realistic SL: $15-25 loss
     
     signal = {
         'signal_id': f"QG_{datetime.now().strftime('%Y%m%d_%H%M%S')}",
@@ -119,7 +90,8 @@ def generate_signal():
         'key_factors': ['Technical Analysis', 'Market Sentiment'],
         'status': 'active',
         'pnl': 0.0,
-        'base_pnl': 0.0,  # Add base_pnl for consistency
+        'base_pnl': 0.0,
+        'entry_time': datetime.now().isoformat(),
         'timestamp': datetime.now().isoformat()
     }
     
@@ -130,7 +102,7 @@ def generate_signal():
     if len(active_signals) > 10:
         active_signals.pop(0)
     
-    logger.info(f"✅ Generated signal: {signal['signal_id']} - {signal['signal_type']} at ${signal['entry_price']}")
+    logger.info(f"✅ Generated REAL signal: {signal['signal_id']} - {signal['signal_type']} at ${signal['entry_price']} (Gold: ${current_gold_price})")
     logger.info(f"📊 Total active signals now: {len(active_signals)}")
     
     return jsonify({'success': True, 'signal': signal})
@@ -210,51 +182,62 @@ def get_news():
 
 @app.route('/api/signals/tracked')
 def get_tracked_signals():
-    """Get tracked signals with live P&L"""
-    # Return the dynamically generated active signals
-    # Update P&L to simulate live trading
+    """Get tracked signals with REAL live P&L calculations"""
+    if not active_signals:
+        logger.info("📊 No active signals to return")
+        return jsonify({'success': True, 'signals': []})
+    
     try:
-        # Get current gold price for P&L calculation
+        # Get REAL current gold price for accurate P&L calculation
         current_gold_response = get_gold_price()
         current_gold_data = current_gold_response.get_json()
-        current_price = current_gold_data.get('price', 3560.0)
-    except:
-        current_price = 3560.0
+        current_price = current_gold_data.get('price', 3540.0)
+        
+        logger.info(f"🥇 Calculating P&L using current gold price: ${current_price}")
+        
+    except Exception as e:
+        logger.error(f"Failed to get current gold price for P&L: {e}")
+        current_price = 3540.0
     
     for signal in active_signals:
-        # Calculate live P&L based on current price vs entry price
-        entry_price = signal.get('entry_price', 3500.0)
+        # Get signal details
+        entry_price = float(signal.get('entry_price', 3500.0))
         signal_type = signal.get('signal_type', 'BUY')
         
+        # Calculate REAL P&L based on current gold price vs entry price
         if signal_type == 'BUY':
-            pnl = current_price - entry_price
+            # For BUY: Profit when current > entry, Loss when current < entry
+            pnl_points = current_price - entry_price
         else:  # SELL
-            pnl = entry_price - current_price
-            
-        # Add some random variation to make it more realistic
-        pnl += random.uniform(-10.0, 10.0)
+            # For SELL: Profit when current < entry, Loss when current > entry  
+            pnl_points = entry_price - current_price
+        
+        # Convert to dollar P&L (assuming 1 oz position)
+        pnl_dollars = pnl_points
         
         # Calculate percentage
-        pnl_pct = (pnl / entry_price) * 100
+        pnl_percentage = (pnl_points / entry_price) * 100
         
-        # Add frontend-expected fields
-        signal['id'] = signal.get('signal_id', 'QG_000')  # Add id field
-        signal['current_price'] = current_price
-        signal['live_pnl'] = round(pnl, 2)
-        signal['live_pnl_pct'] = round(pnl_pct, 2)
-        signal['pnl'] = round(pnl, 2)  # Keep existing pnl field
+        # Add all required frontend fields
+        signal['id'] = signal.get('signal_id', 'QG_000')
+        signal['current_price'] = round(current_price, 2)
+        signal['live_pnl'] = round(pnl_dollars, 2)
+        signal['live_pnl_pct'] = round(pnl_percentage, 2)
+        signal['pnl'] = round(pnl_dollars, 2)
         
-        # Determine status
-        if pnl > 5:
+        # Determine status based on REAL P&L
+        if pnl_dollars > 5:
             signal['pnl_status'] = 'profit'
-        elif pnl < -5:
+        elif pnl_dollars < -5:
             signal['pnl_status'] = 'loss'
         else:
             signal['pnl_status'] = 'neutral'
         
         signal['status'] = 'active'
+        
+        logger.info(f"📈 Signal {signal['signal_id']}: {signal_type} @ ${entry_price} | Current: ${current_price} | P&L: ${pnl_dollars:.2f} ({pnl_percentage:.2f}%)")
     
-    logger.info(f"📊 Returning {len(active_signals)} active signals with live P&L")
+    logger.info(f"📊 Returning {len(active_signals)} active signals with REAL P&L")
     return jsonify({'success': True, 'signals': active_signals})
 
 @app.route('/api/signals/stats')
