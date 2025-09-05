@@ -242,17 +242,29 @@ def get_tracked_signals():
 
 @app.route('/api/signals/stats')
 def get_signal_stats():
-    """Get signal stats"""
-    total_pnl = sum(signal.get('pnl', 0.0) for signal in active_signals)
-    win_count = sum(1 for signal in active_signals if signal.get('pnl', 0.0) > 0)
-    win_rate = (win_count / len(active_signals) * 100) if active_signals else 75.0
+    """Get REAL signal stats - NO FAKE DATA"""
+    if not active_signals:
+        # If no signals, everything should be 0
+        stats = {
+            'total_signals': 0,
+            'win_rate': 0.0,
+            'total_pnl': 0.0,
+            'active_signals': 0
+        }
+    else:
+        # Calculate REAL stats from actual signals
+        total_pnl = sum(signal.get('pnl', 0.0) for signal in active_signals)
+        win_count = sum(1 for signal in active_signals if signal.get('pnl', 0.0) > 0)
+        win_rate = (win_count / len(active_signals) * 100) if active_signals else 0.0
+        
+        stats = {
+            'total_signals': len(active_signals),  # ONLY actual signals generated
+            'win_rate': round(win_rate, 1),
+            'total_pnl': round(total_pnl, 2),  # ONLY real P&L from actual signals
+            'active_signals': len(active_signals)
+        }
     
-    stats = {
-        'total_signals': len(active_signals) + 20,  # Add some historical count
-        'win_rate': round(win_rate, 1),
-        'total_pnl': round(total_pnl + 1000.0, 2),  # Add some historical PnL
-        'active_signals': len(active_signals)
-    }
+    logger.info(f"📊 Stats: {len(active_signals)} signals, {stats['win_rate']}% win rate, ${stats['total_pnl']} P&L")
     return jsonify({'success': True, 'stats': stats})
 
 @app.route('/api/timeframe-predictions')
