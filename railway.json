@@ -5,9 +5,13 @@
   "deploy": {
     "startCommand": "python app.py",
     "restartPolicyType": "ON_FAILURE",
-    "restartPolicyMaxRetries": 3
+    "restartPolicyMaxRetries": 3,
+    "healthcheckPath": "/api/live-gold-price"
   },
   "variables": {
-    "RAILWAY_ENVIRONMENT": "production"
+    "RAILWAY_ENVIRONMENT": "production",
+    "AUTO_CLOSE_ENABLED": "true",
+    "LEARNING_ENGINE_ACTIVE": "true",
+    "DEPLOY_TRIGGER": "2025-09-08-force-redeploy"
   }
 }

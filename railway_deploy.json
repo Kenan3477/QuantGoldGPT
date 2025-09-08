@@ -1,0 +1,16 @@
+{
+  "deployment": {
+    "timestamp": "2025-09-08T08:30:00Z",
+    "version": "auto-close-v1.0",
+    "features": [
+      "intelligent-auto-close",
+      "learning-engine", 
+      "pattern-recognition",
+      "real-time-monitoring",
+      "trade-analytics"
+    ],
+    "status": "ready-for-production",
+    "auto_close_enabled": true,
+    "learning_system_active": true
+  }
+}

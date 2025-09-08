@@ -1,11 +1,12 @@
 {
   "name": "goldgpt-dashboard",
-  "version": "2.0.0",
-  "description": "GoldGPT Advanced Trading Dashboard - Railway Deployment",
+  "version": "2.1.0",
+  "description": "GoldGPT Advanced Trading Dashboard with Auto-Close Learning System - Railway Deployment",
   "main": "app.py",
   "scripts": {
     "start": "python app.py",
-    "dev": "python app.py"
+    "dev": "python app.py",
+    "force-deploy": "echo 'Railway force deploy triggered'"
   },
   "engines": {
     "python": ">=3.8"

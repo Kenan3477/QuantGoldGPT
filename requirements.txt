@@ -1,2 +1,9 @@
 flask==2.3.3
 requests==2.31.0
+python-dotenv==1.0.0
+flask-socketio==5.3.6
+gunicorn==21.2.0
+# 🔥 NUCLEAR DEPLOY TRIGGER v2.1.0 🔥
+# CRITICAL UPDATE: Auto-close learning system with TP/SL intelligence
+# Timestamp: 2025-01-11T23:07:30Z
+# USER FRUSTRATED - DEPLOY NOW OR FACE CONSEQUENCES!
