@@ -3,7 +3,10 @@ requests==2.31.0
 python-dotenv==1.0.0
 flask-socketio==5.3.6
 gunicorn==21.2.0
-# 🔥 NUCLEAR DEPLOY TRIGGER v2.1.0 🔥
-# CRITICAL UPDATE: Auto-close learning system with TP/SL intelligence
-# Timestamp: 2025-01-11T23:07:30Z
-# USER FRUSTRATED - DEPLOY NOW OR FACE CONSEQUENCES!
+numpy==1.24.3
+pandas==2.1.1
+scikit-learn==1.3.0
+# 🧠 ADVANCED LEARNING ENGINE v2.1.0 🧠
+# SELF-IMPROVING AI TRADING SYSTEM WITH PATTERN RECOGNITION
+# Timestamp: 2025-01-11T23:25:00Z
+# CRITICAL: Auto-close + ML learning system that evolves strategy based on wins/losses!

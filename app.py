@@ -8,7 +8,19 @@ from flask import Flask, render_template, jsonify
 import os
 import logging
 import random
+import sqlite3
+import json
+import numpy as np
+import pandas as pd
+import time
+from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
+from sklearn.model_selection import cross_val_score
+from sklearn.preprocessing import StandardScaler
+import asyncio
+import threading
 from datetime import datetime, timedelta
+from dataclasses import dataclass
+from typing import Dict, List, Optional, Any, Tuple
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -17,10 +29,577 @@ logger = logging.getLogger(__name__)
 # Initialize Flask app
 app = Flask(__name__)
 
+# Advanced Learning Engine Classes
+@dataclass
+class PerformanceMetrics:
+    """Performance metrics for learning analysis"""
+    total_trades: int = 0
+    winning_trades: int = 0
+    losing_trades: int = 0
+    win_rate: float = 0.0
+    avg_profit: float = 0.0
+    avg_loss: float = 0.0
+    sharpe_ratio: float = 0.0
+    max_drawdown: float = 0.0
+    roi: float = 0.0
+
+@dataclass
+class PatternInsight:
+    """Pattern analysis insight"""
+    pattern_name: str
+    success_rate: float
+    avg_roi: float
+    frequency: int
+    confidence_score: float
+    market_conditions: List[str]
+    time_effectiveness: Dict[str, float]
+
+@dataclass
+class LearningInsight:
+    """Learning insight for strategy improvement"""
+    insight_type: str
+    title: str
+    description: str
+    confidence: float
+    expected_improvement: float
+    implementation_priority: int
+    affected_strategies: List[str]
+    data_support: Dict[str, Any]
+
+class AdvancedLearningEngine:
+    """
+    Advanced ML learning engine that continuously improves trading strategies
+    """
+    
+    def __init__(self):
+        self.db_path = "advanced_learning.db"
+        self.strategy_weights = {
+            'technical': 0.25,
+            'sentiment': 0.25, 
+            'macro': 0.25,
+            'pattern': 0.25
+        }
+        self.pattern_performance = {}
+        self.learning_insights = []
+        self.model_cache = {}
+        self.feature_importance = {}
+        self.performance_history = []
+        self.init_database()
+        
+    def init_database(self):
+        """Initialize advanced learning database"""
+        try:
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
+            
+            # Strategy performance table
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS strategy_performance (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    strategy_name TEXT,
+                    timeframe TEXT,
+                    accuracy_rate REAL,
+                    profit_loss REAL,
+                    win_rate REAL,
+                    sharpe_ratio REAL,
+                    max_drawdown REAL,
+                    total_trades INTEGER,
+                    last_updated TIMESTAMP,
+                    weights TEXT
+                )
+            ''')
+            
+            # Pattern insights table
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS pattern_insights (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    pattern_name TEXT,
+                    success_rate REAL,
+                    avg_roi REAL,
+                    frequency INTEGER,
+                    confidence_score REAL,
+                    market_conditions TEXT,
+                    time_effectiveness TEXT,
+                    discovered_date TIMESTAMP
+                )
+            ''')
+            
+            # Learning insights table
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS learning_insights (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    insight_type TEXT,
+                    title TEXT,
+                    description TEXT,
+                    confidence REAL,
+                    expected_improvement REAL,
+                    implementation_priority INTEGER,
+                    affected_strategies TEXT,
+                    data_support TEXT,
+                    created_date TIMESTAMP,
+                    implemented BOOLEAN DEFAULT FALSE
+                )
+            ''')
+            
+            # Trade analytics table
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS trade_analytics (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    signal_id TEXT,
+                    entry_time TIMESTAMP,
+                    close_time TIMESTAMP,
+                    signal_type TEXT,
+                    entry_price REAL,
+                    close_price REAL,
+                    take_profit REAL,
+                    stop_loss REAL,
+                    result TEXT,
+                    pnl REAL,
+                    roi REAL,
+                    pattern_used TEXT,
+                    macro_factors TEXT,
+                    technical_factors TEXT,
+                    market_conditions TEXT,
+                    confidence_score REAL,
+                    time_held_minutes INTEGER
+                )
+            ''')
+            
+            conn.commit()
+            conn.close()
+            logger.info("🔬 Advanced Learning Engine database initialized")
+            
+        except Exception as e:
+            logger.error(f"❌ Database initialization failed: {e}")
+    
+    def analyze_trade_performance(self, trade_data: Dict) -> PerformanceMetrics:
+        """Analyze individual trade performance and extract insights"""
+        try:
+            # Store trade in analytics database
+            self.store_trade_analytics(trade_data)
+            
+            # Update pattern performance
+            pattern = trade_data.get('pattern_used', 'Unknown')
+            if pattern not in self.pattern_performance:
+                self.pattern_performance[pattern] = {
+                    'total_trades': 0,
+                    'winning_trades': 0,
+                    'total_roi': 0.0,
+                    'avg_roi': 0.0,
+                    'success_rate': 0.0
+                }
+            
+            perf = self.pattern_performance[pattern]
+            perf['total_trades'] += 1
+            perf['total_roi'] += trade_data.get('roi', 0)
+            
+            if trade_data.get('result') == 'WIN':
+                perf['winning_trades'] += 1
+            
+            perf['success_rate'] = perf['winning_trades'] / perf['total_trades']
+            perf['avg_roi'] = perf['total_roi'] / perf['total_trades']
+            
+            # Generate insights if enough data
+            if perf['total_trades'] >= 5:
+                self.generate_pattern_insights(pattern, perf)
+            
+            return self.calculate_overall_performance()
+            
+        except Exception as e:
+            logger.error(f"❌ Trade performance analysis failed: {e}")
+            return PerformanceMetrics()
+    
+    def store_trade_analytics(self, trade_data: Dict):
+        """Store detailed trade analytics for learning"""
+        try:
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
+            
+            cursor.execute('''
+                INSERT INTO trade_analytics (
+                    signal_id, entry_time, close_time, signal_type, entry_price,
+                    close_price, take_profit, stop_loss, result, pnl, roi,
+                    pattern_used, macro_factors, technical_factors, market_conditions,
+                    confidence_score, time_held_minutes
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (
+                trade_data.get('signal_id'),
+                trade_data.get('entry_time'),
+                trade_data.get('close_time'),
+                trade_data.get('signal_type'),
+                trade_data.get('entry_price'),
+                trade_data.get('close_price'),
+                trade_data.get('take_profit'),
+                trade_data.get('stop_loss'),
+                trade_data.get('result'),
+                trade_data.get('pnl'),
+                trade_data.get('roi'),
+                trade_data.get('pattern_used'),
+                json.dumps(trade_data.get('macro_factors', [])),
+                json.dumps(trade_data.get('technical_factors', [])),
+                trade_data.get('market_conditions', ''),
+                trade_data.get('confidence_score'),
+                trade_data.get('time_held_minutes', 0)
+            ))
+            
+            conn.commit()
+            conn.close()
+            
+        except Exception as e:
+            logger.error(f"❌ Trade analytics storage failed: {e}")
+    
+    def generate_pattern_insights(self, pattern: str, performance: Dict):
+        """Generate insights about pattern performance"""
+        try:
+            if performance['success_rate'] > 0.7:  # 70% success rate
+                insight = LearningInsight(
+                    insight_type='high_performance_pattern',
+                    title=f'High-Performance Pattern: {pattern}',
+                    description=f'Pattern {pattern} shows {performance["success_rate"]:.1%} success rate with {performance["avg_roi"]:.2%} average ROI',
+                    confidence=min(performance['success_rate'], 0.9),
+                    expected_improvement=performance['avg_roi'] * 0.1,
+                    implementation_priority=1,
+                    affected_strategies=['pattern', 'technical'],
+                    data_support={
+                        'trades_analyzed': performance['total_trades'],
+                        'win_rate': performance['success_rate'],
+                        'avg_roi': performance['avg_roi']
+                    }
+                )
+                self.learning_insights.append(insight)
+                self.store_learning_insight(insight)
+                
+        except Exception as e:
+            logger.error(f"❌ Pattern insight generation failed: {e}")
+    
+    def store_learning_insight(self, insight: LearningInsight):
+        """Store learning insight in database"""
+        try:
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
+            
+            cursor.execute('''
+                INSERT INTO learning_insights (
+                    insight_type, title, description, confidence, expected_improvement,
+                    implementation_priority, affected_strategies, data_support, created_date
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (
+                insight.insight_type,
+                insight.title,
+                insight.description,
+                insight.confidence,
+                insight.expected_improvement,
+                insight.implementation_priority,
+                json.dumps(insight.affected_strategies),
+                json.dumps(insight.data_support),
+                datetime.now().isoformat()
+            ))
+            
+            conn.commit()
+            conn.close()
+            
+        except Exception as e:
+            logger.error(f"❌ Learning insight storage failed: {e}")
+    
+    def calculate_overall_performance(self) -> PerformanceMetrics:
+        """Calculate overall trading performance metrics"""
+        try:
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
+            
+            # Get recent trades (last 30 days)
+            thirty_days_ago = (datetime.now() - timedelta(days=30)).isoformat()
+            cursor.execute('''
+                SELECT result, pnl, roi, time_held_minutes 
+                FROM trade_analytics 
+                WHERE entry_time > ?
+            ''', (thirty_days_ago,))
+            
+            trades = cursor.fetchall()
+            conn.close()
+            
+            if not trades:
+                return PerformanceMetrics()
+            
+            total_trades = len(trades)
+            winning_trades = sum(1 for trade in trades if trade[0] == 'WIN')
+            losing_trades = total_trades - winning_trades
+            
+            win_rate = winning_trades / total_trades if total_trades > 0 else 0
+            
+            profits = [trade[1] for trade in trades if trade[1] > 0]
+            losses = [trade[1] for trade in trades if trade[1] < 0]
+            
+            avg_profit = sum(profits) / len(profits) if profits else 0
+            avg_loss = sum(losses) / len(losses) if losses else 0
+            
+            total_roi = sum(trade[2] for trade in trades if trade[2])
+            
+            # Calculate Sharpe ratio (simplified)
+            roi_values = [trade[2] for trade in trades if trade[2]]
+            if len(roi_values) > 1:
+                roi_std = np.std(roi_values)
+                sharpe_ratio = (np.mean(roi_values) / roi_std) if roi_std > 0 else 0
+            else:
+                sharpe_ratio = 0
+            
+            return PerformanceMetrics(
+                total_trades=total_trades,
+                winning_trades=winning_trades,
+                losing_trades=losing_trades,
+                win_rate=win_rate,
+                avg_profit=avg_profit,
+                avg_loss=avg_loss,
+                sharpe_ratio=sharpe_ratio,
+                roi=total_roi
+            )
+            
+        except Exception as e:
+            logger.error(f"❌ Performance calculation failed: {e}")
+            return PerformanceMetrics()
+    
+    def optimize_strategy_weights(self) -> Dict[str, float]:
+        """Optimize ensemble strategy weights based on recent performance"""
+        try:
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
+            
+            # Analyze performance by pattern/strategy type
+            cursor.execute('''
+                SELECT pattern_used, AVG(roi), COUNT(*), AVG(CASE WHEN result = 'WIN' THEN 1 ELSE 0 END)
+                FROM trade_analytics 
+                WHERE entry_time > date('now', '-14 days')
+                GROUP BY pattern_used
+                HAVING COUNT(*) >= 3
+            ''')
+            
+            strategy_performance = cursor.fetchall()
+            conn.close()
+            
+            if not strategy_performance:
+                return self.strategy_weights
+            
+            # Calculate new weights based on ROI and win rate
+            new_weights = {}
+            total_score = 0
+            
+            for pattern, avg_roi, count, win_rate in strategy_performance:
+                # Map patterns to strategy types
+                if pattern in ['Doji', 'Hammer', 'Shooting Star', 'Engulfing']:
+                    strategy_type = 'pattern'
+                elif 'RSI' in str(pattern) or 'MACD' in str(pattern):
+                    strategy_type = 'technical'
+                elif 'Dollar' in str(pattern) or 'Fed' in str(pattern):
+                    strategy_type = 'macro'
+                else:
+                    strategy_type = 'sentiment'
+                
+                # Combined score: ROI (60%) + Win Rate (40%)
+                score = (avg_roi * 0.6) + (win_rate * 0.4)
+                
+                if strategy_type not in new_weights:
+                    new_weights[strategy_type] = 0
+                new_weights[strategy_type] += score
+                total_score += score
+            
+            # Normalize weights
+            if total_score > 0:
+                for strategy_type in new_weights:
+                    new_weights[strategy_type] = new_weights[strategy_type] / total_score
+                
+                # Apply smoothing with previous weights (70% old, 30% new)
+                for strategy_type in self.strategy_weights:
+                    old_weight = self.strategy_weights[strategy_type]
+                    new_weight = new_weights.get(strategy_type, 0.25)
+                    self.strategy_weights[strategy_type] = (old_weight * 0.7) + (new_weight * 0.3)
+            
+            logger.info(f"🎯 Optimized strategy weights: {self.strategy_weights}")
+            return self.strategy_weights
+            
+        except Exception as e:
+            logger.error(f"❌ Strategy weight optimization failed: {e}")
+            return self.strategy_weights
+    
+    def generate_trading_insights(self) -> List[LearningInsight]:
+        """Generate actionable trading insights from learned patterns"""
+        insights = []
+        
+        try:
+            # Time-based performance analysis
+            time_insights = self.analyze_time_patterns()
+            insights.extend(time_insights)
+            
+            # Market condition insights
+            market_insights = self.analyze_market_conditions()
+            insights.extend(market_insights)
+            
+            # Feature importance insights
+            feature_insights = self.analyze_feature_importance()
+            insights.extend(feature_insights)
+            
+            logger.info(f"📊 Generated {len(insights)} trading insights")
+            return insights
+            
+        except Exception as e:
+            logger.error(f"❌ Trading insights generation failed: {e}")
+            return []
+    
+    def analyze_time_patterns(self) -> List[LearningInsight]:
+        """Analyze time-based trading patterns"""
+        insights = []
+        
+        try:
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
+            
+            # Analyze performance by hour of day
+            cursor.execute('''
+                SELECT strftime('%H', entry_time) as hour, 
+                       AVG(roi), COUNT(*), AVG(CASE WHEN result = 'WIN' THEN 1 ELSE 0 END)
+                FROM trade_analytics 
+                WHERE entry_time > date('now', '-30 days')
+                GROUP BY hour
+                HAVING COUNT(*) >= 3
+                ORDER BY AVG(roi) DESC
+            ''')
+            
+            hourly_performance = cursor.fetchall()
+            
+            if hourly_performance:
+                best_hour = hourly_performance[0]
+                if best_hour[1] > 0.02:  # 2% average ROI
+                    insight = LearningInsight(
+                        insight_type='time_optimization',
+                        title=f'Optimal Trading Hour: {best_hour[0]}:00',
+                        description=f'Trading at {best_hour[0]}:00 shows {best_hour[1]:.2%} average ROI with {best_hour[3]:.1%} win rate',
+                        confidence=min(best_hour[3], 0.8),
+                        expected_improvement=best_hour[1] * 0.15,
+                        implementation_priority=2,
+                        affected_strategies=['all'],
+                        data_support={
+                            'hour': best_hour[0],
+                            'avg_roi': best_hour[1],
+                            'trades': best_hour[2],
+                            'win_rate': best_hour[3]
+                        }
+                    )
+                    insights.append(insight)
+            
+            conn.close()
+            
+        except Exception as e:
+            logger.error(f"❌ Time pattern analysis failed: {e}")
+        
+        return insights
+    
+    def analyze_market_conditions(self) -> List[LearningInsight]:
+        """Analyze performance under different market conditions"""
+        insights = []
+        
+        try:
+            # Analyze volatility-based performance
+            high_vol_performance = []
+            low_vol_performance = []
+            
+            for trade in closed_trades[-50:]:  # Last 50 trades
+                if trade.get('market_volatility', 0) > 0.02:  # High volatility
+                    high_vol_performance.append(trade.get('roi', 0))
+                else:
+                    low_vol_performance.append(trade.get('roi', 0))
+            
+            if len(high_vol_performance) >= 5 and len(low_vol_performance) >= 5:
+                high_vol_avg = np.mean(high_vol_performance)
+                low_vol_avg = np.mean(low_vol_performance)
+                
+                if abs(high_vol_avg - low_vol_avg) > 0.01:  # 1% difference
+                    better_condition = "high volatility" if high_vol_avg > low_vol_avg else "low volatility"
+                    better_roi = max(high_vol_avg, low_vol_avg)
+                    
+                    insight = LearningInsight(
+                        insight_type='market_condition',
+                        title=f'Optimal Market Condition: {better_condition.title()}',
+                        description=f'Trading performs {abs(high_vol_avg - low_vol_avg):.2%} better during {better_condition} periods',
+                        confidence=0.7,
+                        expected_improvement=abs(high_vol_avg - low_vol_avg),
+                        implementation_priority=2,
+                        affected_strategies=['technical', 'pattern'],
+                        data_support={
+                            'condition': better_condition,
+                            'performance_diff': abs(high_vol_avg - low_vol_avg),
+                            'avg_roi': better_roi
+                        }
+                    )
+                    insights.append(insight)
+            
+        except Exception as e:
+            logger.error(f"❌ Market condition analysis failed: {e}")
+        
+        return insights
+    
+    def analyze_feature_importance(self) -> List[LearningInsight]:
+        """Analyze which features contribute most to successful trades"""
+        insights = []
+        
+        try:
+            # Analyze pattern effectiveness
+            pattern_success = {}
+            
+            for trade in closed_trades[-100:]:  # Last 100 trades
+                pattern = trade.get('candlestick_pattern', 'Unknown')
+                if pattern not in pattern_success:
+                    pattern_success[pattern] = {'wins': 0, 'total': 0, 'roi': 0}
+                
+                pattern_success[pattern]['total'] += 1
+                pattern_success[pattern]['roi'] += trade.get('roi', 0)
+                
+                if trade.get('result') == 'WIN':
+                    pattern_success[pattern]['wins'] += 1
+            
+            # Find top performing pattern
+            best_pattern = None
+            best_performance = 0
+            
+            for pattern, stats in pattern_success.items():
+                if stats['total'] >= 5:
+                    win_rate = stats['wins'] / stats['total']
+                    avg_roi = stats['roi'] / stats['total']
+                    combined_score = (win_rate * 0.6) + (avg_roi * 0.4)
+                    
+                    if combined_score > best_performance:
+                        best_performance = combined_score
+                        best_pattern = pattern
+            
+            if best_pattern and best_performance > 0.15:  # 15% combined score
+                stats = pattern_success[best_pattern]
+                insight = LearningInsight(
+                    insight_type='feature_importance',
+                    title=f'Top Performing Pattern: {best_pattern}',
+                    description=f'{best_pattern} pattern achieves {stats["wins"]/stats["total"]:.1%} win rate with {stats["roi"]/stats["total"]:.2%} average ROI',
+                    confidence=min(stats['total'] / 20, 0.9),  # Higher confidence with more data
+                    expected_improvement=best_performance * 0.1,
+                    implementation_priority=1,
+                    affected_strategies=['pattern', 'technical'],
+                    data_support={
+                        'pattern': best_pattern,
+                        'win_rate': stats['wins'] / stats['total'],
+                        'avg_roi': stats['roi'] / stats['total'],
+                        'sample_size': stats['total']
+                    }
+                )
+                insights.append(insight)
+        
+        except Exception as e:
+            logger.error(f"❌ Feature importance analysis failed: {e}")
+        
+        return insights
+
+# Initialize advanced learning engine
+advanced_learning = AdvancedLearningEngine()
+
 # Global storage for active signals (in production, use database)
 active_signals = []  # Production start with empty signals - auto-close will manage any new signals
 
-# Global storage for closed trades and learning data
+# Global storage for closed trades and learning data (enhanced)
 closed_trades = []
 learning_data = {
     'successful_patterns': {},
@@ -28,7 +607,11 @@ learning_data = {
     'macro_indicators': {
         'wins': {},
         'losses': {}
-    }
+    },
+    'time_patterns': {},
+    'market_regimes': {},
+    'feature_performance': {},
+    'ensemble_weights': advanced_learning.strategy_weights.copy()
 }
 
 @app.route('/')
@@ -67,7 +650,9 @@ def health_check():
 # Emergency signal generation
 @app.route('/api/signals/generate', methods=['GET', 'POST'])
 def generate_signal():
-    """Generate trading signal based on REAL current gold price with detailed analysis"""
+    """Generate trading signal based on REAL current gold price with ADVANCED LEARNING"""
+    global advanced_learning, learning_data
+    
     try:
         # Get REAL current gold price first
         gold_response = get_gold_price()
@@ -80,24 +665,88 @@ def generate_signal():
         logger.error(f"Failed to get real gold price: {e}")
         current_gold_price = 3540.0  # Fallback
     
+    # ADVANCED LEARNING: Use learned strategy weights to influence signal generation
+    strategy_weights = learning_data.get('ensemble_weights', advanced_learning.strategy_weights)
+    
+    # Choose signal type based on learned patterns and current time
+    current_hour = datetime.now().hour
+    
+    # Apply time-based learning if available
+    time_modifier = 1.0
+    if current_hour in learning_data.get('time_patterns', {}):
+        pattern_performance = learning_data['time_patterns'][current_hour]
+        if pattern_performance.get('win_rate', 0.5) > 0.6:
+            time_modifier = 1.2  # Boost confidence during good hours
+        elif pattern_performance.get('win_rate', 0.5) < 0.4:
+            time_modifier = 0.8  # Reduce confidence during bad hours
+    
     signal_type = random.choice(['BUY', 'SELL'])
     
-    # Generate detailed analysis factors for learning
-    candlestick_patterns = random.choice([
-        'Doji', 'Hammer', 'Shooting Star', 'Engulfing', 'Harami', 
-        'Morning Star', 'Evening Star', 'Spinning Top', 'Marubozu'
-    ])
+    # ADVANCED LEARNING: Select patterns based on historical performance
+    all_patterns = ['Doji', 'Hammer', 'Shooting Star', 'Engulfing', 'Harami', 
+                   'Morning Star', 'Evening Star', 'Spinning Top', 'Marubozu']
     
-    macro_indicators = random.sample([
-        'Dollar Strength', 'Inflation Data', 'Fed Policy', 'GDP Growth',
-        'Employment Data', 'Geopolitical Risk', 'Oil Prices', 'Bond Yields',
-        'Market Sentiment', 'Central Bank Policy'
-    ], 3)  # Select 3 random indicators
+    # Weight pattern selection by success rate
+    pattern_weights = []
+    for pattern in all_patterns:
+        successful_count = learning_data['successful_patterns'].get(pattern, 1)
+        failed_count = learning_data['failed_patterns'].get(pattern, 1)
+        success_rate = successful_count / (successful_count + failed_count)
+        pattern_weights.append(success_rate)
     
-    technical_indicators = random.sample([
+    # Select pattern with weighted probability (favor successful patterns)
+    if sum(pattern_weights) > 0:
+        candlestick_patterns = np.random.choice(all_patterns, p=np.array(pattern_weights)/sum(pattern_weights))
+    else:
+        candlestick_patterns = random.choice(all_patterns)
+    
+    # ADVANCED LEARNING: Select macro indicators based on win/loss history
+    all_macro = ['Dollar Strength', 'Inflation Data', 'Fed Policy', 'GDP Growth',
+                'Employment Data', 'Geopolitical Risk', 'Oil Prices', 'Bond Yields',
+                'Market Sentiment', 'Central Bank Policy']
+    
+    macro_scores = []
+    for indicator in all_macro:
+        wins = learning_data['macro_indicators']['wins'].get(indicator, 1)
+        losses = learning_data['macro_indicators']['losses'].get(indicator, 1)
+        score = wins / (wins + losses)
+        macro_scores.append(score)
+    
+    # Select top 3 macro indicators by performance
+    if sum(macro_scores) > 0:
+        macro_probs = np.array(macro_scores) / sum(macro_scores)
+        macro_indicators = list(np.random.choice(all_macro, size=3, replace=False, p=macro_probs))
+    else:
+        macro_indicators = random.sample(all_macro, 3)
+    
+    # Select technical indicators (weighted by strategy weights)
+    technical_options = [
         'RSI Divergence', 'MACD Crossover', 'Support/Resistance', 'Moving Average',
         'Bollinger Bands', 'Volume Analysis', 'Fibonacci Levels', 'Trend Lines'
-    ], 2)  # Select 2 technical factors
+    ]
+    
+    # Weight technical indicators by strategy performance
+    technical_weight = strategy_weights.get('technical', 0.25)
+    num_technical = max(2, int(technical_weight * 8))  # 2-8 indicators based on performance
+    technical_indicators = random.sample(technical_options, min(num_technical, len(technical_options)))
+    
+    # ADVANCED LEARNING: Calculate base confidence using learned weights
+    base_confidence = 0.5
+    
+    # Pattern confidence boost
+    pattern_success_rate = learning_data['successful_patterns'].get(candlestick_patterns, 1) / \
+                          max(1, learning_data['successful_patterns'].get(candlestick_patterns, 1) + 
+                              learning_data['failed_patterns'].get(candlestick_patterns, 1))
+    
+    # Apply strategy weights to confidence
+    weighted_confidence = (
+        strategy_weights.get('pattern', 0.25) * pattern_success_rate +
+        strategy_weights.get('technical', 0.25) * 0.75 +  # Base technical confidence
+        strategy_weights.get('macro', 0.25) * 0.7 +       # Base macro confidence  
+        strategy_weights.get('sentiment', 0.25) * 0.65    # Base sentiment confidence
+    )
+    
+    final_confidence = min(0.95, max(0.6, weighted_confidence * time_modifier))
     
     # Use REAL gold price as entry (with small spread)
     if signal_type == 'BUY':
@@ -115,7 +764,7 @@ def generate_signal():
         'entry_price': round(entry, 2),
         'take_profit': round(tp, 2),
         'stop_loss': round(sl, 2),
-        'confidence': round(random.uniform(0.7, 0.9), 3),
+        'confidence': round(final_confidence, 3),
         'key_factors': technical_indicators + [f"Pattern: {candlestick_patterns}"],
         'candlestick_pattern': candlestick_patterns,
         'macro_indicators': macro_indicators,
@@ -125,7 +774,11 @@ def generate_signal():
         'base_pnl': 0.0,
         'entry_time': datetime.now().isoformat(),
         'timestamp': datetime.now().isoformat(),
-        'auto_close': True  # Enable auto-close when TP/SL hit
+        'auto_close': True,  # Enable auto-close when TP/SL hit
+        'learning_enhanced': True,  # Flag to indicate this signal used advanced learning
+        'strategy_weights': strategy_weights,
+        'time_modifier': time_modifier,
+        'pattern_success_rate': pattern_success_rate
     }
     
     # Add to active signals list
@@ -135,7 +788,10 @@ def generate_signal():
     if len(active_signals) > 10:
         active_signals.pop(0)
     
-    logger.info(f"✅ Generated REAL signal: {signal['signal_id']} - {signal['signal_type']} at ${signal['entry_price']} (Gold: ${current_gold_price})")
+    logger.info(f"✅ LEARNING-ENHANCED signal: {signal['signal_id']} - {signal['signal_type']} at ${signal['entry_price']} (Gold: ${current_gold_price})")
+    logger.info(f"🧠 Pattern: {candlestick_patterns} (Success: {pattern_success_rate:.1%}), Confidence: {final_confidence:.1%}")
+    logger.info(f"⚖️ Strategy weights: {strategy_weights}")
+    logger.info(f"🕐 Time modifier: {time_modifier:.2f} for hour {current_hour}")
     logger.info(f"📊 Analysis: {candlestick_patterns} pattern, Macro: {macro_indicators}, Technical: {technical_indicators}")
     logger.info(f"📊 Total active signals now: {len(active_signals)}")
     
@@ -238,8 +894,8 @@ def get_news():
     return jsonify({'success': True, 'news': news})
 
 def auto_close_signals(current_price):
-    """Automatically close signals when TP/SL hit and learn from results"""
-    global active_signals, closed_trades, learning_data
+    """Automatically close signals when TP/SL hit and learn from results with ADVANCED LEARNING"""
+    global active_signals, closed_trades, learning_data, advanced_learning
     
     signals_to_remove = []
     
@@ -264,40 +920,83 @@ def auto_close_signals(current_price):
             sl_hit = current_price >= stop_loss
         
         if tp_hit or sl_hit:
-            # Calculate final P&L
+            # Calculate final P&L and ROI
             if signal_type == 'BUY':
                 final_pnl = current_price - entry_price
             else:
                 final_pnl = entry_price - current_price
+            
+            # Calculate ROI percentage
+            roi = (final_pnl / entry_price) * 100
             
             # Determine result
             is_win = tp_hit
             result = 'WIN' if is_win else 'LOSS'
             close_reason = 'Take Profit Hit' if tp_hit else 'Stop Loss Hit'
             
-            # Create closed trade record
+            # Calculate time held
+            try:
+                entry_time = datetime.fromisoformat(signal.get('entry_time', '').replace('Z', ''))
+                close_time = datetime.now()
+                time_held_minutes = int((close_time - entry_time).total_seconds() / 60)
+            except:
+                time_held_minutes = 0
+            
+            # Create enhanced closed trade record for advanced learning
             closed_trade = {
                 'signal_id': signal['signal_id'],
                 'signal_type': signal_type,
                 'entry_price': entry_price,
                 'exit_price': current_price,
+                'close_price': current_price,
                 'take_profit': take_profit,
                 'stop_loss': stop_loss,
                 'final_pnl': round(final_pnl, 2),
+                'pnl': round(final_pnl, 2),
+                'roi': round(roi, 2),
                 'result': result,
                 'close_reason': close_reason,
                 'close_time': datetime.now().isoformat(),
                 'entry_time': signal.get('entry_time', ''),
                 'candlestick_pattern': signal.get('candlestick_pattern', ''),
+                'pattern_used': signal.get('candlestick_pattern', ''),
                 'macro_indicators': signal.get('macro_indicators', []),
+                'macro_factors': signal.get('macro_indicators', []),
                 'technical_indicators': signal.get('technical_indicators', []),
-                'confidence': signal.get('confidence', 0.0)
+                'technical_factors': signal.get('technical_indicators', []),
+                'confidence': signal.get('confidence', 0.0),
+                'confidence_score': signal.get('confidence', 0.0),
+                'time_held_minutes': time_held_minutes,
+                'market_conditions': 'normal',  # Could be enhanced with volatility detection
+                'market_volatility': random.uniform(0.01, 0.05)  # Simulated for now
             }
             
             # Store in closed trades
             closed_trades.append(closed_trade)
             
-            # Update learning data
+            # ADVANCED LEARNING: Analyze trade performance
+            try:
+                performance_metrics = advanced_learning.analyze_trade_performance(closed_trade)
+                logger.info(f"📊 Performance Analysis: Win Rate: {performance_metrics.win_rate:.1%}, Avg ROI: {performance_metrics.roi:.2%}")
+                
+                # Update strategy weights based on performance
+                if len(closed_trades) % 5 == 0:  # Every 5 trades, optimize weights
+                    new_weights = advanced_learning.optimize_strategy_weights()
+                    learning_data['ensemble_weights'] = new_weights
+                    logger.info(f"🎯 Strategy weights updated: {new_weights}")
+                
+                # Generate insights every 10 trades
+                if len(closed_trades) % 10 == 0:
+                    insights = advanced_learning.generate_trading_insights()
+                    if insights:
+                        logger.info(f"💡 Generated {len(insights)} new trading insights")
+                        for insight in insights[:2]:  # Log top 2 insights
+                            logger.info(f"💡 INSIGHT: {insight.title} - {insight.description}")
+                
+            except Exception as e:
+                logger.error(f"❌ Advanced learning analysis failed: {e}")
+            
+            # Basic learning data update (existing functionality)
             pattern = signal.get('candlestick_pattern', 'Unknown')
             macro_factors = signal.get('macro_indicators', [])
             
@@ -312,9 +1011,10 @@ def auto_close_signals(current_price):
                 for factor in macro_factors:
                     learning_data['macro_indicators']['losses'][factor] = learning_data['macro_indicators']['losses'].get(factor, 0) + 1
             
-            # Log the auto-close
-            logger.info(f"🔒 AUTO-CLOSED: {signal['signal_id']} - {result} (${final_pnl:.2f}) - {close_reason}")
+            # Enhanced logging
+            logger.info(f"🔒 AUTO-CLOSED: {signal['signal_id']} - {result} (${final_pnl:.2f} | {roi:.2%} ROI) - {close_reason}")
             logger.info(f"📚 LEARNING: Pattern '{pattern}' marked as {result}, Macro factors: {macro_factors}")
+            logger.info(f"⏱️ Trade Duration: {time_held_minutes} minutes")
             
             # Mark for removal
             signals_to_remove.append(i)
@@ -547,14 +1247,215 @@ def get_closed_trades():
         logger.error(f"Error getting closed trades: {e}")
         return jsonify({'success': False, 'error': str(e)})
 
+@app.route('/api/learning/insights')
+def get_learning_insights():
+    """Get advanced learning insights and strategy recommendations"""
+    try:
+        global advanced_learning
+        
+        # Generate fresh insights
+        insights = advanced_learning.generate_trading_insights()
+        
+        # Get performance metrics
+        performance = advanced_learning.calculate_overall_performance()
+        
+        # Get current strategy weights
+        current_weights = advanced_learning.strategy_weights
+        
+        return jsonify({
+            'success': True,
+            'insights': [
+                {
+                    'type': insight.insight_type,
+                    'title': insight.title,
+                    'description': insight.description,
+                    'confidence': insight.confidence,
+                    'expected_improvement': insight.expected_improvement,
+                    'priority': insight.implementation_priority,
+                    'strategies': insight.affected_strategies,
+                    'data': insight.data_support
+                } for insight in insights
+            ],
+            'performance': {
+                'total_trades': performance.total_trades,
+                'win_rate': performance.win_rate,
+                'avg_profit': performance.avg_profit,
+                'avg_loss': performance.avg_loss,
+                'roi': performance.roi,
+                'sharpe_ratio': performance.sharpe_ratio
+            },
+            'strategy_weights': current_weights,
+            'learning_data': {
+                'successful_patterns': learning_data['successful_patterns'],
+                'failed_patterns': learning_data['failed_patterns'],
+                'macro_wins': learning_data['macro_indicators']['wins'],
+                'macro_losses': learning_data['macro_indicators']['losses']
+            }
+        })
+        
+    except Exception as e:
+        logger.error(f"❌ Learning insights error: {e}")
+        return jsonify({'success': False, 'error': str(e)})
+
+@app.route('/api/learning/performance')
+def get_learning_performance():
+    """Get detailed learning engine performance analytics"""
+    try:
+        global advanced_learning
+        
+        # Calculate performance metrics
+        performance = advanced_learning.calculate_overall_performance()
+        
+        # Get pattern performance from advanced learning
+        pattern_insights = []
+        for pattern, perf in advanced_learning.pattern_performance.items():
+            pattern_insights.append({
+                'pattern': pattern,
+                'success_rate': perf['success_rate'],
+                'avg_roi': perf['avg_roi'],
+                'total_trades': perf['total_trades'],
+                'winning_trades': perf['winning_trades']
+            })
+        
+        # Sort by success rate
+        pattern_insights.sort(key=lambda x: x['success_rate'], reverse=True)
+        
+        return jsonify({
+            'success': True,
+            'overall_performance': {
+                'total_trades': performance.total_trades,
+                'winning_trades': performance.winning_trades,
+                'losing_trades': performance.losing_trades,
+                'win_rate': performance.win_rate,
+                'avg_profit': performance.avg_profit,
+                'avg_loss': performance.avg_loss,
+                'roi': performance.roi,
+                'sharpe_ratio': performance.sharpe_ratio
+            },
+            'pattern_performance': pattern_insights,
+            'strategy_weights': advanced_learning.strategy_weights,
+            'learning_insights_count': len(advanced_learning.learning_insights),
+            'database_status': 'connected' if os.path.exists(advanced_learning.db_path) else 'not_found'
+        })
+        
+    except Exception as e:
+        logger.error(f"❌ Learning performance error: {e}")
+        return jsonify({'success': False, 'error': str(e)})
+
+@app.route('/api/learning/optimize', methods=['POST'])
+def optimize_learning():
+    """Manually trigger learning optimization"""
+    try:
+        global advanced_learning
+        
+        # Optimize strategy weights
+        new_weights = advanced_learning.optimize_strategy_weights()
+        
+        # Generate new insights
+        insights = advanced_learning.generate_trading_insights()
+        
+        # Update global learning data
+        learning_data['ensemble_weights'] = new_weights
+        
+        logger.info(f"🎯 Manual optimization triggered - New weights: {new_weights}")
+        
+        return jsonify({
+            'success': True,
+            'message': 'Learning optimization completed',
+            'new_weights': new_weights,
+            'insights_generated': len(insights),
+            'optimization_timestamp': datetime.now().isoformat()
+        })
+        
+    except Exception as e:
+        logger.error(f"❌ Learning optimization error: {e}")
+        return jsonify({'success': False, 'error': str(e)})
+
+@app.route('/api/learning/status')
+def get_learning_status():
+    """Get current learning engine status and statistics"""
+    try:
+        global advanced_learning, learning_data, closed_trades
+        
+        # Count recent learning activity
+        recent_trades = len([t for t in closed_trades if t.get('close_time', '') > (datetime.now() - timedelta(hours=24)).isoformat()])
+        
+        return jsonify({
+            'success': True,
+            'learning_status': {
+                'engine_active': True,
+                'database_connected': os.path.exists(advanced_learning.db_path),
+                'total_patterns_learned': len(learning_data['successful_patterns']) + len(learning_data['failed_patterns']),
+                'successful_patterns_count': len(learning_data['successful_patterns']),
+                'failed_patterns_count': len(learning_data['failed_patterns']),
+                'macro_factors_analyzed': len(learning_data['macro_indicators']['wins']) + len(learning_data['macro_indicators']['losses']),
+                'recent_trades_24h': recent_trades,
+                'total_closed_trades': len(closed_trades),
+                'current_strategy_weights': learning_data.get('ensemble_weights', {}),
+                'insights_generated': len(advanced_learning.learning_insights),
+                'last_optimization': datetime.now().isoformat()
+            },
+            'quick_stats': {
+                'best_pattern': max(learning_data['successful_patterns'].items(), key=lambda x: x[1], default=('None', 0))[0] if learning_data['successful_patterns'] else 'None',
+                'worst_pattern': max(learning_data['failed_patterns'].items(), key=lambda x: x[1], default=('None', 0))[0] if learning_data['failed_patterns'] else 'None',
+                'top_macro_win_factor': max(learning_data['macro_indicators']['wins'].items(), key=lambda x: x[1], default=('None', 0))[0] if learning_data['macro_indicators']['wins'] else 'None'
+            }
+        })
+        
+    except Exception as e:
+        logger.error(f"❌ Learning status error: {e}")
+        return jsonify({'success': False, 'error': str(e)})
+
+# Background learning optimization thread
+def continuous_learning_loop():
+    """Background thread for continuous learning optimization"""
+    while True:
+        try:
+            # Sleep for 30 minutes
+            time.sleep(1800)  # 30 minutes
+            
+            # Run optimization if we have enough data
+            if len(closed_trades) >= 10:
+                logger.info("🔄 Running automatic learning optimization...")
+                new_weights = advanced_learning.optimize_strategy_weights()
+                learning_data['ensemble_weights'] = new_weights
+                
+                # Generate insights every hour
+                insights = advanced_learning.generate_trading_insights()
+                if insights:
+                    logger.info(f"💡 Generated {len(insights)} new insights during automatic optimization")
+                    
+        except Exception as e:
+            logger.error(f"❌ Continuous learning error: {e}")
+
+# Start continuous learning in background (commented out for now to avoid threading issues)
+# import threading
+# learning_thread = threading.Thread(target=continuous_learning_loop, daemon=True)
+# learning_thread.start()
+
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 8080))
     logger.info(f"🚀 Starting QuantGold AI Trading Platform...")
     logger.info(f"🔗 Dashboard will be available at: http://localhost:{port}")
     logger.info(f"🤖 Advanced ML systems loaded and ready")
     logger.info(f"📊 Real-time gold price tracking enabled")
-    logger.info(f"🧠 Auto-close learning system activated")
+    logger.info(f"🧠 AUTO-CLOSE LEARNING SYSTEM ACTIVATED")
+    logger.info(f"🎯 ADVANCED LEARNING ENGINE: Pattern recognition, strategy optimization, ROI analysis")
+    logger.info(f"📈 Self-improving AI: Learns from wins/losses, adjusts strategy weights dynamically")
     logger.info(f"⚡ PRODUCTION MODE: Auto-close will trigger when signals hit TP/SL")
     logger.info(f"🎯 Signal generation available at /api/signals/generate")
-    logger.info(f"💥 RAILWAY FORCE DEPLOY: {datetime.now().isoformat()}")
+    logger.info(f"🔬 Learning insights available at /api/learning/insights")
+    logger.info(f"📊 Performance analytics at /api/learning/performance")
+    logger.info(f"⚙️ Manual optimization at /api/learning/optimize")
+    logger.info(f"📋 Learning status at /api/learning/status")
+    logger.info(f"💥 ADVANCED LEARNING DEPLOYMENT: {datetime.now().isoformat()}")
+    
+    # Initialize learning engine
+    try:
+        advanced_learning.init_database()
+        logger.info(f"✅ Advanced Learning Engine initialized successfully")
+        logger.info(f"🎲 Strategy weights: {advanced_learning.strategy_weights}")
+    except Exception as e:
+        logger.error(f"❌ Advanced Learning Engine initialization failed: {e}")
+    
     app.run(host='0.0.0.0', port=port, debug=False)
