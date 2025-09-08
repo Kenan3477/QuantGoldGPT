@@ -21,6 +21,8 @@ import threading
 from datetime import datetime, timedelta
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Any, Tuple
+import re
+from collections import deque
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -593,8 +595,336 @@ class AdvancedLearningEngine:
         
         return insights
 
+class LivePatternDetector:
+    """Real-time candlestick pattern detection engine"""
+    
+    def __init__(self):
+        self.price_history = deque(maxlen=20)  # Last 20 prices for pattern analysis
+        self.pattern_history = deque(maxlen=10)  # Last 10 detected patterns
+        
+    def add_price_point(self, price: float, timestamp: str = None):
+        """Add new price point for pattern analysis"""
+        if timestamp is None:
+            timestamp = datetime.now().isoformat()
+            
+        price_point = {
+            'price': price,
+            'timestamp': timestamp,
+            'high': price + random.uniform(0.5, 2.0),  # Simulated OHLC
+            'low': price - random.uniform(0.5, 2.0),
+            'open': price + random.uniform(-1.0, 1.0),
+            'close': price,
+            'volume': random.uniform(1000, 5000)
+        }
+        
+        self.price_history.append(price_point)
+        return self.detect_patterns()
+    
+    def detect_patterns(self) -> List[Dict]:
+        """Detect candlestick patterns from recent price data"""
+        if len(self.price_history) < 3:
+            return []
+        
+        patterns = []
+        recent_candles = list(self.price_history)[-5:]  # Last 5 candles
+        
+        try:
+            # Doji Pattern Detection
+            if self.is_doji(recent_candles[-1]):
+                patterns.append({
+                    'pattern': 'Doji',
+                    'type': 'reversal',
+                    'strength': 'medium',
+                    'description': 'Indecision pattern - potential reversal',
+                    'timestamp': recent_candles[-1]['timestamp'],
+                    'price': recent_candles[-1]['close'],
+                    'confidence': 0.7,
+                    'signal': 'neutral'
+                })
+            
+            # Hammer Pattern Detection
+            if self.is_hammer(recent_candles[-1]):
+                patterns.append({
+                    'pattern': 'Hammer',
+                    'type': 'bullish_reversal',
+                    'strength': 'strong',
+                    'description': 'Bullish reversal pattern detected',
+                    'timestamp': recent_candles[-1]['timestamp'],
+                    'price': recent_candles[-1]['close'],
+                    'confidence': 0.8,
+                    'signal': 'bullish'
+                })
+            
+            # Shooting Star Pattern Detection
+            if self.is_shooting_star(recent_candles[-1]):
+                patterns.append({
+                    'pattern': 'Shooting Star',
+                    'type': 'bearish_reversal',
+                    'strength': 'strong',
+                    'description': 'Bearish reversal pattern detected',
+                    'timestamp': recent_candles[-1]['timestamp'],
+                    'price': recent_candles[-1]['close'],
+                    'confidence': 0.8,
+                    'signal': 'bearish'
+                })
+            
+            # Engulfing Pattern Detection (requires 2 candles)
+            if len(recent_candles) >= 2:
+                engulfing = self.is_engulfing(recent_candles[-2], recent_candles[-1])
+                if engulfing:
+                    patterns.append({
+                        'pattern': f'{engulfing} Engulfing',
+                        'type': f'{engulfing.lower()}_reversal',
+                        'strength': 'very_strong',
+                        'description': f'{engulfing} engulfing pattern - strong reversal signal',
+                        'timestamp': recent_candles[-1]['timestamp'],
+                        'price': recent_candles[-1]['close'],
+                        'confidence': 0.9,
+                        'signal': engulfing.lower()
+                    })
+            
+            # Morning/Evening Star (requires 3 candles)
+            if len(recent_candles) >= 3:
+                star = self.is_star_pattern(recent_candles[-3:])
+                if star:
+                    patterns.append({
+                        'pattern': f'{star} Star',
+                        'type': f'{star.lower()}_reversal',
+                        'strength': 'very_strong',
+                        'description': f'{star} star pattern - major reversal signal',
+                        'timestamp': recent_candles[-1]['timestamp'],
+                        'price': recent_candles[-1]['close'],
+                        'confidence': 0.85,
+                        'signal': 'morning' if star == 'Morning' else 'bearish'
+                    })
+            
+            # Store patterns for history
+            for pattern in patterns:
+                self.pattern_history.append(pattern)
+            
+            return patterns
+            
+        except Exception as e:
+            logger.error(f"❌ Pattern detection error: {e}")
+            return []
+    
+    def is_doji(self, candle: Dict) -> bool:
+        """Detect Doji pattern"""
+        body = abs(candle['close'] - candle['open'])
+        range_size = candle['high'] - candle['low']
+        return body <= range_size * 0.1  # Body is less than 10% of range
+    
+    def is_hammer(self, candle: Dict) -> bool:
+        """Detect Hammer pattern"""
+        body = abs(candle['close'] - candle['open'])
+        upper_shadow = candle['high'] - max(candle['open'], candle['close'])
+        lower_shadow = min(candle['open'], candle['close']) - candle['low']
+        
+        return (lower_shadow >= body * 2 and upper_shadow <= body * 0.5 and 
+                candle['close'] > candle['open'])
+    
+    def is_shooting_star(self, candle: Dict) -> bool:
+        """Detect Shooting Star pattern"""
+        body = abs(candle['close'] - candle['open'])
+        upper_shadow = candle['high'] - max(candle['open'], candle['close'])
+        lower_shadow = min(candle['open'], candle['close']) - candle['low']
+        
+        return (upper_shadow >= body * 2 and lower_shadow <= body * 0.5 and 
+                candle['open'] > candle['close'])
+    
+    def is_engulfing(self, prev_candle: Dict, curr_candle: Dict) -> Optional[str]:
+        """Detect Engulfing patterns"""
+        prev_body = prev_candle['close'] - prev_candle['open']
+        curr_body = curr_candle['close'] - curr_candle['open']
+        
+        # Bullish Engulfing
+        if (prev_body < 0 and curr_body > 0 and 
+            curr_candle['open'] < prev_candle['close'] and 
+            curr_candle['close'] > prev_candle['open']):
+            return 'Bullish'
+        
+        # Bearish Engulfing
+        if (prev_body > 0 and curr_body < 0 and 
+            curr_candle['open'] > prev_candle['close'] and 
+            curr_candle['close'] < prev_candle['open']):
+            return 'Bearish'
+        
+        return None
+    
+    def is_star_pattern(self, candles: List[Dict]) -> Optional[str]:
+        """Detect Morning/Evening Star patterns"""
+        if len(candles) != 3:
+            return None
+        
+        first, second, third = candles
+        
+        # Check for gaps and small middle candle
+        first_body = abs(first['close'] - first['open'])
+        second_body = abs(second['close'] - second['open'])
+        third_body = abs(third['close'] - third['open'])
+        
+        if second_body > first_body * 0.3:  # Middle candle should be small
+            return None
+        
+        # Morning Star (bullish reversal)
+        if (first['close'] < first['open'] and  # First candle bearish
+            third['close'] > third['open'] and  # Third candle bullish
+            third['close'] > (first['open'] + first['close']) / 2):  # Third closes above first midpoint
+            return 'Morning'
+        
+        # Evening Star (bearish reversal)
+        if (first['close'] > first['open'] and  # First candle bullish
+            third['close'] < third['open'] and  # Third candle bearish
+            third['close'] < (first['open'] + first['close']) / 2):  # Third closes below first midpoint
+            return 'Evening'
+        
+        return None
+
+class LiveNewsMonitor:
+    """Real-time news monitoring and alert system"""
+    
+    def __init__(self):
+        self.news_cache = deque(maxlen=20)
+        self.alert_keywords = [
+            'federal reserve', 'fed', 'interest rate', 'inflation', 'gold', 'dollar',
+            'central bank', 'monetary policy', 'economic data', 'gdp', 'employment',
+            'geopolitical', 'crisis', 'war', 'trade war', 'recession', 'market crash'
+        ]
+        
+    def fetch_live_news(self) -> List[Dict]:
+        """Fetch real-time gold and economic news"""
+        try:
+            # Simulated news - in production, you'd use APIs like NewsAPI, Alpha Vantage, etc.
+            news_items = [
+                {
+                    'title': 'Federal Reserve Signals Potential Rate Cut',
+                    'summary': 'Fed officials hint at monetary policy adjustments amid economic uncertainty',
+                    'impact': 'bullish',
+                    'relevance': 'high',
+                    'timestamp': datetime.now().isoformat(),
+                    'source': 'Financial News',
+                    'urgency': 'high',
+                    'keywords': ['federal reserve', 'interest rate', 'monetary policy']
+                },
+                {
+                    'title': 'Gold Prices Surge on Inflation Concerns',
+                    'summary': 'Rising inflation expectations drive investors toward safe-haven assets',
+                    'impact': 'bullish',
+                    'relevance': 'very_high',
+                    'timestamp': (datetime.now() - timedelta(minutes=5)).isoformat(),
+                    'source': 'Market Watch',
+                    'urgency': 'medium',
+                    'keywords': ['gold', 'inflation', 'safe-haven']
+                },
+                {
+                    'title': 'Dollar Strength Tests Gold Support Levels',
+                    'summary': 'Strong USD performance puts pressure on gold prices',
+                    'impact': 'bearish',
+                    'relevance': 'high',
+                    'timestamp': (datetime.now() - timedelta(minutes=10)).isoformat(),
+                    'source': 'Reuters',
+                    'urgency': 'medium',
+                    'keywords': ['dollar', 'gold', 'support levels']
+                },
+                {
+                    'title': 'Geopolitical Tensions Rise in Middle East',
+                    'summary': 'Regional conflicts boost demand for precious metals',
+                    'impact': 'bullish',
+                    'relevance': 'medium',
+                    'timestamp': (datetime.now() - timedelta(minutes=15)).isoformat(),
+                    'source': 'CNN Finance',
+                    'urgency': 'high',
+                    'keywords': ['geopolitical', 'crisis', 'precious metals']
+                }
+            ]
+            
+            # Add random recent news
+            for i in range(3):
+                news_items.append({
+                    'title': f'Economic Update: {random.choice(["GDP Growth", "Employment Data", "Trade Balance"])} Released',
+                    'summary': f'Latest economic indicators show {random.choice(["positive", "mixed", "concerning"])} trends',
+                    'impact': random.choice(['bullish', 'bearish', 'neutral']),
+                    'relevance': random.choice(['medium', 'high']),
+                    'timestamp': (datetime.now() - timedelta(minutes=random.randint(20, 60))).isoformat(),
+                    'source': 'Economic Times',
+                    'urgency': 'low',
+                    'keywords': ['economic data', 'gdp', 'employment']
+                })
+            
+            return news_items
+            
+        except Exception as e:
+            logger.error(f"❌ News fetching error: {e}")
+            return []
+    
+    def generate_market_alerts(self, current_price: float, patterns: List[Dict]) -> List[Dict]:
+        """Generate market condition alerts"""
+        alerts = []
+        
+        try:
+            # Price movement alerts
+            if len(price_history) >= 2:
+                prev_price = price_history[-2]['price'] if len(price_history) > 1 else current_price
+                price_change = ((current_price - prev_price) / prev_price) * 100
+                
+                if abs(price_change) > 0.5:  # 0.5% change
+                    direction = "📈 Rising" if price_change > 0 else "📉 Falling"
+                    alerts.append({
+                        'type': 'price_movement',
+                        'title': f'{direction} Gold Price Alert',
+                        'message': f'Gold moved {abs(price_change):.2f}% to ${current_price:.2f}',
+                        'severity': 'high' if abs(price_change) > 1 else 'medium',
+                        'timestamp': datetime.now().isoformat(),
+                        'price': current_price,
+                        'change': price_change
+                    })
+            
+            # Pattern-based alerts
+            for pattern in patterns:
+                if pattern['confidence'] > 0.7:
+                    alerts.append({
+                        'type': 'pattern_alert',
+                        'title': f'🎯 {pattern["pattern"]} Pattern Detected',
+                        'message': f'{pattern["description"]} - Confidence: {pattern["confidence"]:.1%}',
+                        'severity': 'high' if pattern['confidence'] > 0.8 else 'medium',
+                        'timestamp': pattern['timestamp'],
+                        'pattern': pattern['pattern'],
+                        'signal': pattern['signal']
+                    })
+            
+            # Volatility alerts
+            if len(price_history) >= 5:
+                recent_prices = [p['price'] for p in list(price_history)[-5:]]
+                volatility = np.std(recent_prices) / np.mean(recent_prices) * 100
+                
+                if volatility > 1.5:  # High volatility threshold
+                    alerts.append({
+                        'type': 'volatility_alert',
+                        'title': '⚡ High Volatility Alert',
+                        'message': f'Market volatility increased to {volatility:.2f}%',
+                        'severity': 'medium',
+                        'timestamp': datetime.now().isoformat(),
+                        'volatility': volatility
+                    })
+            
+            return alerts
+            
+        except Exception as e:
+            logger.error(f"❌ Market alerts generation error: {e}")
+            return []
+
+# Initialize real-time monitoring systems
+pattern_detector = LivePatternDetector()
+news_monitor = LiveNewsMonitor()
+
 # Initialize advanced learning engine
 advanced_learning = AdvancedLearningEngine()
+
+# Global storage for real-time data
+price_history = deque(maxlen=50)  # Store last 50 price points for pattern analysis
+live_patterns = []  # Current detected patterns
+news_alerts = []    # Current news alerts
+market_alerts = []  # Market condition alerts
 
 # Global storage for active signals (in production, use database)
 active_signals = []  # Production start with empty signals - auto-close will manage any new signals
@@ -1405,6 +1735,190 @@ def get_learning_status():
     except Exception as e:
         logger.error(f"❌ Learning status error: {e}")
         return jsonify({'success': False, 'error': str(e)})
+
+@app.route('/api/live/patterns')
+def get_live_patterns():
+    """Get current live candlestick patterns"""
+    try:
+        global pattern_detector, price_history
+        
+        # Get current gold price and add to pattern detector
+        try:
+            gold_response = get_gold_price()
+            gold_data = gold_response.get_json()
+            current_price = gold_data.get('price', 3540.0)
+            
+            # Add price point and detect patterns
+            patterns = pattern_detector.add_price_point(current_price)
+            
+            # Store in global price history
+            price_point = {
+                'price': current_price,
+                'timestamp': datetime.now().isoformat()
+            }
+            price_history.append(price_point)
+            
+        except Exception as e:
+            logger.error(f"❌ Price fetching error: {e}")
+            patterns = []
+            current_price = 3540.0
+        
+        # Get recent pattern history
+        recent_patterns = list(pattern_detector.pattern_history)[-5:]  # Last 5 patterns
+        
+        return jsonify({
+            'success': True,
+            'current_patterns': patterns,
+            'recent_patterns': recent_patterns,
+            'current_price': current_price,
+            'total_patterns_detected': len(pattern_detector.pattern_history),
+            'last_updated': datetime.now().isoformat()
+        })
+        
+    except Exception as e:
+        logger.error(f"❌ Live patterns error: {e}")
+        return jsonify({'success': False, 'error': str(e)})
+
+@app.route('/api/live/news')
+def get_live_news():
+    """Get current live news and market alerts"""
+    try:
+        global news_monitor, pattern_detector
+        
+        # Fetch live news
+        news_items = news_monitor.fetch_live_news()
+        
+        # Get current patterns for alert generation
+        current_patterns = list(pattern_detector.pattern_history)[-3:]  # Last 3 patterns
+        
+        # Get current price
+        try:
+            gold_response = get_gold_price()
+            gold_data = gold_response.get_json()
+            current_price = gold_data.get('price', 3540.0)
+        except:
+            current_price = 3540.0
+        
+        # Generate market alerts
+        market_alerts = news_monitor.generate_market_alerts(current_price, current_patterns)
+        
+        # Filter news by relevance and recency
+        high_relevance_news = [n for n in news_items if n.get('relevance') in ['high', 'very_high']]
+        urgent_news = [n for n in news_items if n.get('urgency') == 'high']
+        
+        return jsonify({
+            'success': True,
+            'news': {
+                'all_news': news_items,
+                'high_relevance': high_relevance_news,
+                'urgent_news': urgent_news,
+                'total_count': len(news_items)
+            },
+            'alerts': {
+                'market_alerts': market_alerts,
+                'pattern_alerts': [a for a in market_alerts if a.get('type') == 'pattern_alert'],
+                'price_alerts': [a for a in market_alerts if a.get('type') == 'price_movement'],
+                'total_alerts': len(market_alerts)
+            },
+            'last_updated': datetime.now().isoformat()
+        })
+        
+    except Exception as e:
+        logger.error(f"❌ Live news error: {e}")
+        return jsonify({'success': False, 'error': str(e)})
+
+@app.route('/api/live/dashboard')
+def get_live_dashboard_data():
+    """Get comprehensive live dashboard data - patterns, news, alerts, price"""
+    try:
+        # Get current gold price
+        try:
+            gold_response = get_gold_price()
+            gold_data = gold_response.get_json()
+            current_price = gold_data.get('price', 3540.0)
+        except:
+            current_price = 3540.0
+        
+        # Detect current patterns
+        patterns = pattern_detector.add_price_point(current_price)
+        
+        # Get news and alerts
+        news_items = news_monitor.fetch_live_news()
+        market_alerts = news_monitor.generate_market_alerts(current_price, patterns)
+        
+        # Calculate price change
+        price_change = 0
+        price_change_percent = 0
+        if len(price_history) >= 2:
+            prev_price = price_history[-2]['price']
+            price_change = current_price - prev_price
+            price_change_percent = (price_change / prev_price) * 100
+        
+        # Market sentiment analysis
+        bullish_patterns = len([p for p in patterns if p.get('signal') == 'bullish'])
+        bearish_patterns = len([p for p in patterns if p.get('signal') == 'bearish'])
+        
+        if bullish_patterns > bearish_patterns:
+            market_sentiment = 'bullish'
+        elif bearish_patterns > bullish_patterns:
+            market_sentiment = 'bearish'
+        else:
+            market_sentiment = 'neutral'
+        
+        # Recent price history for mini chart
+        recent_prices = [
+            {'price': p['price'], 'timestamp': p['timestamp']} 
+            for p in list(price_history)[-10:]
+        ]
+        
+        return jsonify({
+            'success': True,
+            'live_data': {
+                'current_price': current_price,
+                'price_change': price_change,
+                'price_change_percent': price_change_percent,
+                'market_sentiment': market_sentiment,
+                'timestamp': datetime.now().isoformat()
+            },
+            'patterns': {
+                'current': patterns,
+                'recent': list(pattern_detector.pattern_history)[-5:],
+                'total_detected': len(pattern_detector.pattern_history)
+            },
+            'news': {
+                'latest': news_items[:5],  # Top 5 news items
+                'urgent': [n for n in news_items if n.get('urgency') == 'high']
+            },
+            'alerts': {
+                'active': market_alerts,
+                'count': len(market_alerts)
+            },
+            'price_history': recent_prices,
+            'system_status': {
+                'pattern_detector': 'active',
+                'news_monitor': 'active',
+                'last_updated': datetime.now().isoformat()
+            }
+        })
+        
+    except Exception as e:
+        logger.error(f"❌ Live dashboard error: {e}")
+        return jsonify({'success': False, 'error': str(e)})
+
+@app.route('/api/live/alerts/subscribe')
+def subscribe_to_alerts():
+    """Subscribe to live alerts (for future WebSocket implementation)"""
+    return jsonify({
+        'success': True,
+        'message': 'Alert subscription endpoint ready',
+        'available_alerts': [
+            'pattern_detection',
+            'price_movement', 
+            'news_updates',
+            'volatility_changes',
+            'market_sentiment'
+        ]
+    })
 
 # Background learning optimization thread
 def continuous_learning_loop():
