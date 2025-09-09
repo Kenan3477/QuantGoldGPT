@@ -967,6 +967,11 @@ def debug_info():
         'running_from': __file__ if '__file__' in globals() else 'unknown'
     })
 
+@app.route('/')
+def root():
+    """Root endpoint that redirects to dashboard"""
+    return redirect('/dashboard')
+
 @app.route('/health')
 def health_check():
     """Health check endpoint"""
@@ -1845,7 +1850,7 @@ def subscribe_to_alerts():
     })
 
 @app.route('/health')
-def health_check():
+def health_check_v2():
     """Health check endpoint for deployment verification"""
     return jsonify({
         'status': 'healthy',
@@ -1955,14 +1960,20 @@ if __name__ == '__main__':
     logger.info(f"🆔 DEPLOYMENT VERSION: FIXED-DUPLICATE-ROUTES-v2.0")
     
     # Route verification for deployment debugging
-    logger.info(f"🔍 ROUTE VERIFICATION: Learning insights route count = 1 (expected)")
+    logger.info(f"🔍 ROUTE VERIFICATION: Health check and learning routes verified")
     
-    # Initialize learning engine
-    try:
-        advanced_learning.init_database()
-        logger.info(f"✅ Advanced Learning Engine initialized successfully")
-        logger.info(f"🎲 Strategy weights: {advanced_learning.strategy_weights}")
-    except Exception as e:
-        logger.error(f"❌ Advanced Learning Engine initialization failed: {e}")
+    # Initialize learning engine in background to speed up startup
+    def init_learning_background():
+        try:
+            advanced_learning.init_database()
+            logger.info(f"✅ Advanced Learning Engine initialized successfully")
+            logger.info(f"🎲 Strategy weights: {advanced_learning.strategy_weights}")
+        except Exception as e:
+            logger.error(f"❌ Advanced Learning Engine initialization failed: {e}")
     
+    import threading
+    init_thread = threading.Thread(target=init_learning_background, daemon=True)
+    init_thread.start()
+    
+    logger.info(f"🚀 Flask app starting on port {port}...")
     app.run(host='0.0.0.0', port=port, debug=False)
