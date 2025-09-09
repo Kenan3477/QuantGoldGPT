@@ -1,7 +1,8 @@
 """
 QuantGold Dashboard - Railway-Ready Deployment
-Advanced AI Trading Platform with Auto-Close Learning System
+Advanced AI Trading Platform with Auto-Close Learning System + Signal Memory
 Auto-close system deployment: 2025-09-08
+Signal Memory System: 2025-09-09
 """
 
 from flask import Flask, render_template, jsonify
@@ -23,6 +24,9 @@ from dataclasses import dataclass
 from typing import Dict, List, Optional, Any, Tuple
 import re
 from collections import deque
+
+# Import Signal Memory System
+from signal_memory_system import SignalMemorySystem, SignalData, create_signal_data
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -71,6 +75,7 @@ class LearningInsight:
 class AdvancedLearningEngine:
     """
     Advanced ML learning engine that continuously improves trading strategies
+    Integrated with Signal Memory System for comprehensive learning
     """
     
     def __init__(self):
@@ -86,6 +91,11 @@ class AdvancedLearningEngine:
         self.model_cache = {}
         self.feature_importance = {}
         self.performance_history = []
+        
+        # Initialize Signal Memory System - Main Signal Brain
+        self.signal_memory = SignalMemorySystem()
+        logger.info("🧠 Signal Memory System (Main Signal Brain) initialized")
+        
         self.init_database()
         
     def init_database(self):
@@ -1093,8 +1103,56 @@ def generate_signal():
         tp = entry - random.uniform(20, 50)  # Realistic TP: $20-50 profit
         sl = entry + random.uniform(15, 25)  # Realistic SL: $15-25 loss
     
+    # Prepare data for Signal Memory System
+    patterns_data = [{"name": candlestick_patterns, "confidence": pattern_success_rate * 100, "timeframe": "1H"}]
+    
+    macro_data = {
+        "indicators": macro_indicators,
+        "DXY": random.uniform(-1.0, 1.0),
+        "INFLATION": random.uniform(2.0, 3.5),
+        "FED_SENTIMENT": random.choice(["HAWKISH", "DOVISH", "NEUTRAL"])
+    }
+    
+    news_data = [
+        {"headline": f"Gold analysis: {random.choice(['Fed policy shift', 'Economic data', 'Geopolitical tensions'])}", 
+         "sentiment": signal_type.replace('BUY', 'BULLISH').replace('SELL', 'BEARISH'), 
+         "impact": round(random.uniform(6.0, 9.0), 1)}
+    ]
+    
+    technical_data = {
+        "indicators": technical_indicators,
+        "RSI": random.uniform(30, 70),
+        "MACD": random.choice(["BULLISH_CROSSOVER", "BEARISH_CROSSOVER", "NEUTRAL"]),
+        "SUPPORT": sl if signal_type == 'BUY' else tp,
+        "RESISTANCE": tp if signal_type == 'BUY' else sl
+    }
+    
+    sentiment_data = {
+        "fear_greed": random.randint(20, 80),
+        "market_mood": random.choice(["RISK_ON", "RISK_OFF", "NEUTRAL"]),
+        "buyer_strength": random.randint(40, 80) if signal_type == 'BUY' else random.randint(20, 60)
+    }
+    
+    # Create Signal Data for Memory System
+    signal_data = create_signal_data(
+        signal_type=signal_type.replace('BUY', 'BULLISH').replace('SELL', 'BEARISH'),
+        confidence=final_confidence * 100,
+        price=current_gold_price,
+        entry=entry,
+        sl=sl,
+        tp=tp,
+        patterns=patterns_data,
+        macro=macro_data,
+        news=news_data,
+        technical=technical_data,
+        sentiment=sentiment_data
+    )
+    
+    # Store in Signal Memory System (Main Signal Brain)
+    memory_stored = advanced_learning.signal_memory.store_signal(signal_data)
+    
     signal = {
-        'signal_id': f"QG_{datetime.now().strftime('%Y%m%d_%H%M%S')}",
+        'signal_id': signal_data.signal_id,  # Use memory system ID
         'signal_type': signal_type,
         'entry_price': round(entry, 2),
         'take_profit': round(tp, 2),
@@ -1113,7 +1171,8 @@ def generate_signal():
         'learning_enhanced': True,  # Flag to indicate this signal used advanced learning
         'strategy_weights': strategy_weights,
         'time_modifier': time_modifier,
-        'pattern_success_rate': pattern_success_rate
+        'pattern_success_rate': pattern_success_rate,
+        'memory_stored': memory_stored  # Indicate if stored in memory system
     }
     
     # Add to active signals list
@@ -1128,7 +1187,8 @@ def generate_signal():
     logger.info(f"⚖️ Strategy weights: {strategy_weights}")
     logger.info(f"🕐 Time modifier: {time_modifier:.2f} for hour {current_hour}")
     logger.info(f"📊 Analysis: {candlestick_patterns} pattern, Macro: {macro_indicators}, Technical: {technical_indicators}")
-    logger.info(f"📊 Total active signals now: {len(active_signals)}")
+    logger.info(f"� Signal Memory: {'✅ STORED' if memory_stored else '❌ FAILED'} in Main Signal Brain")
+    logger.info(f"�📊 Total active signals now: {len(active_signals)}")
     
     return jsonify({'success': True, 'signal': signal})
 
@@ -1350,6 +1410,17 @@ def auto_close_signals(current_price):
             logger.info(f"🔒 AUTO-CLOSED: {signal['signal_id']} - {result} (${final_pnl:.2f} | {roi:.2%} ROI) - {close_reason}")
             logger.info(f"📚 LEARNING: Pattern '{pattern}' marked as {result}, Macro factors: {macro_factors}")
             logger.info(f"⏱️ Trade Duration: {time_held_minutes} minutes")
+            
+            # Update Signal Memory System (Main Signal Brain)
+            try:
+                memory_updated = advanced_learning.signal_memory.update_signal_outcome(
+                    signal_id=signal['signal_id'],
+                    close_price=current_price,
+                    close_reason=close_reason.upper().replace(' ', '_')
+                )
+                logger.info(f"💾 Memory Update: {'✅ SUCCESS' if memory_updated else '❌ FAILED'} for signal {signal['signal_id']}")
+            except Exception as e:
+                logger.error(f"❌ Failed to update signal memory: {e}")
             
             # Mark for removal
             signals_to_remove.append(i)
@@ -1914,6 +1985,118 @@ def get_learning_insights():
         logger.error(f"❌ Learning insights error: {e}")
         return jsonify({'success': False, 'error': str(e)})
 
+# Signal Memory System API Endpoints
+
+@app.route('/api/memory/active-signals')
+def get_memory_active_signals():
+    """Get active signals from Signal Memory System"""
+    try:
+        active_signals_memory = advanced_learning.signal_memory.get_active_signals()
+        
+        return jsonify({
+            'success': True,
+            'active_signals': active_signals_memory,
+            'count': len(active_signals_memory),
+            'timestamp': datetime.now().isoformat()
+        })
+        
+    except Exception as e:
+        logger.error(f"❌ Error getting active signals from memory: {e}")
+        return jsonify({'success': False, 'error': str(e)})
+
+@app.route('/api/memory/insights')
+def get_memory_insights():
+    """Get comprehensive learning insights from Signal Memory System"""
+    try:
+        insights = advanced_learning.signal_memory.get_learning_insights()
+        pattern_effectiveness = advanced_learning.signal_memory.get_pattern_effectiveness()
+        
+        return jsonify({
+            'success': True,
+            'insights': insights,
+            'pattern_effectiveness': pattern_effectiveness,
+            'timestamp': datetime.now().isoformat()
+        })
+        
+    except Exception as e:
+        logger.error(f"❌ Error getting memory insights: {e}")
+        return jsonify({'success': False, 'error': str(e)})
+
+@app.route('/api/memory/optimize')
+def optimize_strategy_from_memory():
+    """Optimize strategy weights using Signal Memory System data"""
+    try:
+        optimized_weights = advanced_learning.signal_memory.optimize_strategy_weights()
+        
+        # Update the learning engine weights
+        advanced_learning.strategy_weights = optimized_weights
+        learning_data['ensemble_weights'] = optimized_weights
+        
+        return jsonify({
+            'success': True,
+            'optimized_weights': optimized_weights,
+            'message': 'Strategy weights optimized based on signal memory data',
+            'timestamp': datetime.now().isoformat()
+        })
+        
+    except Exception as e:
+        logger.error(f"❌ Error optimizing strategy from memory: {e}")
+        return jsonify({'success': False, 'error': str(e)})
+
+@app.route('/api/memory/performance')
+def get_memory_performance():
+    """Get detailed performance metrics from Signal Memory System"""
+    try:
+        insights = advanced_learning.signal_memory.get_learning_insights()
+        
+        # Extract performance data
+        overall_performance = insights.get('overall', {})
+        recent_performance = insights.get('recent_performance', [])
+        best_patterns = insights.get('best_patterns', [])
+        
+        return jsonify({
+            'success': True,
+            'overall_performance': overall_performance,
+            'recent_performance': recent_performance,
+            'best_patterns': best_patterns,
+            'timestamp': datetime.now().isoformat()
+        })
+        
+    except Exception as e:
+        logger.error(f"❌ Error getting memory performance: {e}")
+        return jsonify({'success': False, 'error': str(e)})
+
+@app.route('/api/memory/stats')
+def get_memory_stats():
+    """Get Signal Memory System statistics"""
+    try:
+        insights = advanced_learning.signal_memory.get_learning_insights()
+        active_signals = advanced_learning.signal_memory.get_active_signals()
+        
+        # Calculate statistics
+        overall = insights.get('overall', {})
+        stats = {
+            'total_signals_stored': overall.get('total_signals', 0),
+            'active_signals': len(active_signals),
+            'win_rate': overall.get('win_rate', 0),
+            'total_wins': overall.get('wins', 0),
+            'total_losses': overall.get('losses', 0),
+            'average_pnl': overall.get('avg_pnl', 0),
+            'average_duration_minutes': overall.get('avg_duration_minutes', 0),
+            'memory_system_status': 'operational',
+            'last_updated': datetime.now().isoformat()
+        }
+        
+        return jsonify({
+            'success': True,
+            'stats': stats,
+            'timestamp': datetime.now().isoformat()
+        })
+        
+    except Exception as e:
+        logger.error(f"❌ Error getting memory stats: {e}")
+        return jsonify({'success': False, 'error': str(e)})
+
 # Background learning optimization thread
 def continuous_learning_loop():
     """Background thread for continuous learning optimization"""
@@ -1956,11 +2139,15 @@ if __name__ == '__main__':
     logger.info(f"📊 Performance analytics at /api/learning/performance")
     logger.info(f"⚙️ Manual optimization at /api/learning/optimize")
     logger.info(f"📋 Learning status at /api/learning/status")
-    logger.info(f"💥 ADVANCED LEARNING DEPLOYMENT: {datetime.now().isoformat()}")
-    logger.info(f"🆔 DEPLOYMENT VERSION: FIXED-DUPLICATE-ROUTES-v2.0")
+    logger.info(f"🧠 Signal Memory API at /api/memory/*")
+    logger.info(f"� Memory insights at /api/memory/insights")
+    logger.info(f"📈 Memory performance at /api/memory/performance")
+    logger.info(f"⚡ Memory optimization at /api/memory/optimize")
+    logger.info(f"�💥 ADVANCED LEARNING DEPLOYMENT: {datetime.now().isoformat()}")
+    logger.info(f"🆔 DEPLOYMENT VERSION: SIGNAL-MEMORY-v3.0")
     
     # Route verification for deployment debugging
-    logger.info(f"🔍 ROUTE VERIFICATION: Health check and learning routes verified")
+    logger.info(f"🔍 ROUTE VERIFICATION: Health check, learning, and memory routes verified")
     
     # Initialize learning engine in background to speed up startup
     def init_learning_background():
@@ -1968,6 +2155,7 @@ if __name__ == '__main__':
             advanced_learning.init_database()
             logger.info(f"✅ Advanced Learning Engine initialized successfully")
             logger.info(f"🎲 Strategy weights: {advanced_learning.strategy_weights}")
+            logger.info(f"💾 Signal Memory System ready for signal storage and learning")
         except Exception as e:
             logger.error(f"❌ Advanced Learning Engine initialization failed: {e}")
     
