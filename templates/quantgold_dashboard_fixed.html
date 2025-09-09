@@ -485,9 +485,10 @@
         }
 
         .chart-container {
-            padding: 10px 20px 0px 20px; /* No bottom padding at all */
+            padding: 20px;
             display: flex;
             flex-direction: column;
+            height: calc(100vh - 120px); /* Take up most of the viewport */
             flex-shrink: 0;
         }
 
@@ -495,7 +496,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 10px; /* Minimal margin */
+            margin-bottom: 20px; /* Normal spacing for header */
         }
 
         .chart-title {
@@ -552,16 +553,15 @@
             border: 1px solid var(--border-primary);
             border-radius: 8px;
             overflow: hidden;
-            height: 300px; /* Even smaller height */
-            max-height: 300px;
-            margin-bottom: 0; /* Remove any bottom margin */
+            flex: 1; /* Take up all available space in chart container */
+            min-height: 500px; /* Minimum height for proper chart display */
         }
 
         /* Live Alerts Dashboard Styles */
         .alerts-dashboard {
-            padding: 0px 20px 20px 20px; /* No top padding at all */
+            padding: 20px; /* Normal padding for alerts section */
             background: var(--bg-primary);
-            margin-top: 0; /* Ensure no top margin */
+            min-height: 100vh; /* Make alerts take up full viewport when scrolled to */
         }
 
         .alerts-row {
