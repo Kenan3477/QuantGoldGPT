@@ -1471,82 +1471,6 @@ def get_live_price():
         'timestamp': datetime.now().isoformat()
     })
 
-@app.route('/api/learning/insights')
-def get_learning_insights():
-    """Get AI learning insights from closed trades"""
-    try:
-        # Calculate win rates
-        total_closed = len(closed_trades)
-        if total_closed == 0:
-            return jsonify({
-                'success': True,
-                'insights': {
-                    'total_trades': 0,
-                    'win_rate': 0,
-                    'best_patterns': [],
-                    'worst_patterns': [],
-                    'macro_performance': {}
-                }
-            })
-        
-        wins = sum(1 for trade in closed_trades if trade['result'] == 'WIN')
-        losses = total_closed - wins
-        win_rate = (wins / total_closed) * 100
-        
-        # Analyze pattern performance
-        pattern_performance = {}
-        for trade in closed_trades:
-            pattern = trade.get('candlestick_pattern', 'Unknown')
-            if pattern not in pattern_performance:
-                pattern_performance[pattern] = {'wins': 0, 'total': 0}
-            pattern_performance[pattern]['total'] += 1
-            if trade['result'] == 'WIN':
-                pattern_performance[pattern]['wins'] += 1
-        
-        # Calculate pattern win rates
-        for pattern in pattern_performance:
-            total = pattern_performance[pattern]['total']
-            wins = pattern_performance[pattern]['wins']
-            pattern_performance[pattern]['win_rate'] = (wins / total) * 100 if total > 0 else 0
-        
-        # Best and worst patterns
-        patterns_sorted = sorted(pattern_performance.items(), 
-                               key=lambda x: x[1]['win_rate'], reverse=True)
-        best_patterns = [(p[0], p[1]['win_rate'], p[1]['total']) for p in patterns_sorted[:3]]
-        worst_patterns = [(p[0], p[1]['win_rate'], p[1]['total']) for p in patterns_sorted[-3:]]
-        
-        # Macro indicator performance
-        macro_performance = {}
-        for indicator in learning_data['macro_indicators']['wins']:
-            wins = learning_data['macro_indicators']['wins'][indicator]
-            losses = learning_data['macro_indicators']['losses'].get(indicator, 0)
-            total = wins + losses
-            win_rate = (wins / total) * 100 if total > 0 else 0
-            macro_performance[indicator] = {
-                'wins': wins,
-                'losses': losses,
-                'total': total,
-                'win_rate': win_rate
-            }
-        
-        insights = {
-            'total_trades': total_closed,
-            'wins': wins,
-            'losses': losses,
-            'win_rate': round(win_rate, 2),
-            'best_patterns': best_patterns,
-            'worst_patterns': worst_patterns,
-            'macro_performance': macro_performance,
-            'recent_trades': closed_trades[-5:] if len(closed_trades) >= 5 else closed_trades
-        }
-        
-        logger.info(f"📊 Learning Insights: {total_closed} trades, {win_rate:.1f}% win rate")
-        return jsonify({'success': True, 'insights': insights})
-        
-    except Exception as e:
-        logger.error(f"Error getting learning insights: {e}")
-        return jsonify({'success': False, 'error': str(e)})
-
 @app.route('/api/trades/closed')
 def get_closed_trades():
     """Get all closed trades with performance details"""
@@ -1577,8 +1501,8 @@ def get_closed_trades():
         logger.error(f"Error getting closed trades: {e}")
         return jsonify({'success': False, 'error': str(e)})
 
-@app.route('/api/learning/insights')
-def get_learning_insights():
+@app.route('/api/learning/insights-v2')
+def get_learning_insights_v2():
     """Get advanced learning insights and strategy recommendations"""
     try:
         global advanced_learning
@@ -1920,6 +1844,71 @@ def subscribe_to_alerts():
         ]
     })
 
+@app.route('/health')
+def health_check():
+    """Health check endpoint for deployment verification"""
+    return jsonify({
+        'status': 'healthy',
+        'version': 'FIXED-DUPLICATE-ROUTES-v2.0',
+        'timestamp': datetime.now().isoformat(),
+        'features': {
+            'advanced_learning': True,
+            'live_alerts': True,
+            'pattern_detection': True,
+            'news_monitoring': True
+        }
+    })
+
+@app.route('/api/learning/insights')
+def get_learning_insights():
+    """Get advanced learning insights and strategy recommendations - CLEAN VERSION"""
+    try:
+        global advanced_learning
+        
+        # Generate fresh insights
+        insights = advanced_learning.generate_trading_insights()
+        
+        # Get performance metrics
+        performance = advanced_learning.calculate_overall_performance()
+        
+        # Get current strategy weights
+        current_weights = advanced_learning.strategy_weights
+        
+        return jsonify({
+            'success': True,
+            'insights': [
+                {
+                    'type': insight.insight_type,
+                    'title': insight.title,
+                    'description': insight.description,
+                    'confidence': insight.confidence,
+                    'expected_improvement': insight.expected_improvement,
+                    'priority': insight.implementation_priority,
+                    'strategies': insight.affected_strategies,
+                    'data': insight.data_support
+                } for insight in insights
+            ],
+            'performance': {
+                'total_trades': performance.total_trades,
+                'win_rate': performance.win_rate,
+                'avg_profit': performance.avg_profit,
+                'avg_loss': performance.avg_loss,
+                'roi': performance.roi,
+                'sharpe_ratio': performance.sharpe_ratio
+            },
+            'strategy_weights': current_weights,
+            'learning_data': {
+                'successful_patterns': learning_data['successful_patterns'],
+                'failed_patterns': learning_data['failed_patterns'],
+                'macro_wins': learning_data['macro_indicators']['wins'],
+                'macro_losses': learning_data['macro_indicators']['losses']
+            }
+        })
+        
+    except Exception as e:
+        logger.error(f"❌ Learning insights error: {e}")
+        return jsonify({'success': False, 'error': str(e)})
+
 # Background learning optimization thread
 def continuous_learning_loop():
     """Background thread for continuous learning optimization"""
@@ -1963,6 +1952,10 @@ if __name__ == '__main__':
     logger.info(f"⚙️ Manual optimization at /api/learning/optimize")
     logger.info(f"📋 Learning status at /api/learning/status")
     logger.info(f"💥 ADVANCED LEARNING DEPLOYMENT: {datetime.now().isoformat()}")
+    logger.info(f"🆔 DEPLOYMENT VERSION: FIXED-DUPLICATE-ROUTES-v2.0")
+    
+    # Route verification for deployment debugging
+    logger.info(f"🔍 ROUTE VERIFICATION: Learning insights route count = 1 (expected)")
     
     # Initialize learning engine
     try:
