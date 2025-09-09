@@ -1277,6 +1277,68 @@
             animation: pulse 2s infinite;
         }
 
+        /* AI Recommendation Panel Specific */
+        .ai-recommendation-panel .recommendation-signal {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-bottom: 15px;
+        }
+
+        .ai-recommendation-panel .recommendation-signal.bullish {
+            background: rgba(76, 175, 80, 0.2);
+            color: var(--success);
+            border: 1px solid var(--success);
+        }
+
+        .ai-recommendation-panel .recommendation-signal.bearish {
+            background: rgba(244, 67, 54, 0.2);
+            color: var(--danger);
+            border: 1px solid var(--danger);
+        }
+
+        .ai-recommendation-panel .recommendation-details {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .ai-recommendation-panel .detail-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            border-bottom: 1px solid var(--border-secondary);
+        }
+
+        .ai-recommendation-panel .detail-item:last-child {
+            border-bottom: none;
+        }
+
+        .ai-recommendation-panel .label {
+            color: var(--text-secondary);
+            font-size: 0.9em;
+        }
+
+        .ai-recommendation-panel .value {
+            font-weight: bold;
+            color: var(--text-primary);
+        }
+
+        .ai-recommendation-panel .recommendation-reason {
+            font-size: 0.9em;
+            color: var(--text-secondary);
+            padding: 10px;
+            background: var(--bg-tertiary);
+            border-radius: 6px;
+            border-left: 3px solid var(--info);
+        }
+
         /* Responsive adjustments */
         @media (max-width: 768px) {
             .sentiment-row {
@@ -1477,20 +1539,37 @@
                         </div>
                     </div>
 
-                    <!-- Market Alerts -->
-                    <div class="alert-panel alerts-panel">
+                    <!-- AI Recommendation Panel -->
+                    <div class="alert-panel ai-recommendation-panel">
                         <div class="panel-header">
-                            <i class="fas fa-exclamation-triangle"></i>
-                            <span>Market Alerts</span>
-                            <div class="panel-status" id="alerts-status">
-                                <div class="status-dot"></div>
-                                <span id="alerts-count">0 Active</span>
+                            <i class="fas fa-robot"></i>
+                            <span>AI Recommendation</span>
+                            <div class="panel-status">
+                                <div class="status-dot ai-active"></div>
+                                <span>76% Confidence</span>
                             </div>
                         </div>
-                        <div class="panel-content" id="live-alerts-content">
-                            <div class="no-alerts">
-                                <i class="fas fa-shield-alt"></i>
-                                <span>No active alerts</span>
+                        <div class="panel-content" id="ai-recommendation-standalone">
+                            <div class="recommendation-signal bullish" id="ai-signal-main">
+                                <i class="fas fa-arrow-up"></i>
+                                <span>CAUTIOUSLY BULLISH</span>
+                            </div>
+                            <div class="recommendation-details">
+                                <div class="detail-item">
+                                    <span class="label">Target:</span>
+                                    <span class="value">$3,680</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="label">Stop Loss:</span>
+                                    <span class="value">$3,635</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="label">Time Horizon:</span>
+                                    <span class="value">2-4 Hours</span>
+                                </div>
+                            </div>
+                            <div class="recommendation-reason">
+                                Dollar weakness + Fed dovishness outweighs yield concerns. Monitor $3,642 support.
                             </div>
                         </div>
                     </div>
@@ -1683,37 +1762,6 @@
                                         </div>
                                         <div class="insight-summary">
                                             Federal Reserve signals potential rate cuts, supporting precious metals outlook.
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- AI Recommendation Card -->
-                                <div class="analysis-card">
-                                    <div class="card-header">
-                                        <span><i class="fas fa-robot"></i> AI Recommendation</span>
-                                        <div class="confidence-badge ai-confidence">76%</div>
-                                    </div>
-                                    <div class="card-content" id="ai-recommendation-content">
-                                        <div class="recommendation-signal bullish" id="ai-signal">
-                                            <i class="fas fa-arrow-up"></i>
-                                            <span>CAUTIOUSLY BULLISH</span>
-                                        </div>
-                                        <div class="recommendation-details">
-                                            <div class="detail-item">
-                                                <span class="label">Target:</span>
-                                                <span class="value">$3,680</span>
-                                            </div>
-                                            <div class="detail-item">
-                                                <span class="label">Stop Loss:</span>
-                                                <span class="value">$3,635</span>
-                                            </div>
-                                            <div class="detail-item">
-                                                <span class="label">Time Horizon:</span>
-                                                <span class="value">2-4 Hours</span>
-                                            </div>
-                                        </div>
-                                        <div class="recommendation-reason">
-                                            Dollar weakness + Fed dovishness outweighs yield concerns. Monitor $3,642 support.
                                         </div>
                                     </div>
                                 </div>
