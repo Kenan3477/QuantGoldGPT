@@ -38,13 +38,13 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: var(--bg-primary);
             color: var(--text-primary);
-            height: 100vh;
-            overflow: hidden;
+            min-height: 100vh;
+            overflow-x: hidden; /* Prevent horizontal scroll only */
         }
 
         .app-container {
             display: flex;
-            height: 100vh;
+            min-height: 100vh;
         }
 
         /* Left Sidebar */
@@ -438,6 +438,8 @@
             display: flex;
             flex-direction: column;
             background: var(--bg-primary);
+            overflow-y: auto; /* Allow vertical scrolling */
+            max-height: 100vh; /* Limit height to viewport */
         }
 
         .main-header {
@@ -483,10 +485,11 @@
         }
 
         .chart-container {
-            flex: 1;
             padding: 20px;
             display: flex;
             flex-direction: column;
+            height: 480px; /* Fixed reasonable height */
+            flex-shrink: 0; /* Don't shrink */
         }
 
         .chart-header {
@@ -546,12 +549,12 @@
         }
 
         .tradingview-widget {
-            flex: 1;
             background: var(--bg-secondary);
             border: 1px solid var(--border-primary);
             border-radius: 8px;
             overflow: hidden;
-            min-height: 500px;
+            height: 400px; /* Fixed height instead of flex */
+            max-height: 400px; /* Ensure it doesn't grow */
         }
 
         /* Live Alerts Dashboard Styles */
