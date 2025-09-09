@@ -960,9 +960,8 @@
         }
         /* Sentiment & AI Analysis Dashboard Styles */
         .sentiment-ai-dashboard {
-            padding: 20px;
-            background: var(--bg-primary);
-            min-height: 100vh;
+            padding: 20px 0;
+            background: transparent;
         }
 
         .sentiment-row {
@@ -1496,12 +1495,237 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Market Sentiment & AI Analysis Dashboard -->
+                <div class="sentiment-ai-dashboard">
+                    <!-- Greed/Fear & Buyer/Seller Indicators -->
+                    <div class="sentiment-row">
+                        <div class="sentiment-panel greed-fear-panel">
+                            <div class="panel-header">
+                                <i class="fas fa-heartbeat"></i>
+                                <span>Market Sentiment</span>
+                                <div class="panel-status">
+                                    <div class="status-dot sentiment-active"></div>
+                                    <span>Live</span>
+                                </div>
+                            </div>
+                            <div class="panel-content">
+                                <div class="greed-fear-meter">
+                                    <div class="meter-container">
+                                        <div class="meter-background"></div>
+                                        <div class="meter-fill" id="greed-fear-fill"></div>
+                                        <div class="meter-needle" id="greed-fear-needle"></div>
+                                    </div>
+                                    <div class="meter-labels">
+                                        <span class="fear-label">EXTREME FEAR</span>
+                                        <span class="neutral-label">NEUTRAL</span>
+                                        <span class="greed-label">EXTREME GREED</span>
+                                    </div>
+                                    <div class="current-sentiment">
+                                        <span class="sentiment-value" id="sentiment-value">52</span>
+                                        <span class="sentiment-text" id="sentiment-text">NEUTRAL</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="sentiment-panel buyer-seller-panel">
+                            <div class="panel-header">
+                                <i class="fas fa-balance-scale"></i>
+                                <span>Buyer/Seller Strength</span>
+                                <div class="panel-status">
+                                    <div class="status-dot sentiment-active"></div>
+                                    <span>Real-time</span>
+                                </div>
+                            </div>
+                            <div class="panel-content">
+                                <div class="timeframe-grid">
+                                    <div class="timeframe-item">
+                                        <div class="timeframe-label">5M</div>
+                                        <div class="buyer-seller-bar">
+                                            <div class="buyer-bar" id="buyer-5m" style="width: 65%"></div>
+                                            <div class="seller-bar" id="seller-5m" style="width: 35%"></div>
+                                        </div>
+                                        <div class="percentage-labels">
+                                            <span class="buyer-pct">65%</span>
+                                            <span class="seller-pct">35%</span>
+                                        </div>
+                                    </div>
+                                    <div class="timeframe-item">
+                                        <div class="timeframe-label">15M</div>
+                                        <div class="buyer-seller-bar">
+                                            <div class="buyer-bar" id="buyer-15m" style="width: 58%"></div>
+                                            <div class="seller-bar" id="seller-15m" style="width: 42%"></div>
+                                        </div>
+                                        <div class="percentage-labels">
+                                            <span class="buyer-pct">58%</span>
+                                            <span class="seller-pct">42%</span>
+                                        </div>
+                                    </div>
+                                    <div class="timeframe-item">
+                                        <div class="timeframe-label">1H</div>
+                                        <div class="buyer-seller-bar">
+                                            <div class="buyer-bar" id="buyer-1h" style="width: 72%"></div>
+                                            <div class="seller-bar" id="seller-1h" style="width: 28%"></div>
+                                        </div>
+                                        <div class="percentage-labels">
+                                            <span class="buyer-pct">72%</span>
+                                            <span class="seller-pct">28%</span>
+                                        </div>
+                                    </div>
+                                    <div class="timeframe-item">
+                                        <div class="timeframe-label">4H</div>
+                                        <div class="buyer-seller-bar">
+                                            <div class="buyer-bar" id="buyer-4h" style="width: 45%"></div>
+                                            <div class="seller-bar" id="seller-4h" style="width: 55%"></div>
+                                        </div>
+                                        <div class="percentage-labels">
+                                            <span class="buyer-pct">45%</span>
+                                            <span class="seller-pct">55%</span>
+                                        </div>
+                                    </div>
+                                    <div class="timeframe-item">
+                                        <div class="timeframe-label">1D</div>
+                                        <div class="buyer-seller-bar">
+                                            <div class="buyer-bar" id="buyer-1d" style="width: 38%"></div>
+                                            <div class="seller-bar" id="seller-1d" style="width: 62%"></div>
+                                        </div>
+                                        <div class="percentage-labels">
+                                            <span class="buyer-pct">38%</span>
+                                            <span class="seller-pct">62%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Live AI Analysis Section -->
+                    <div class="ai-analysis-section">
+                        <div class="ai-analysis-panel">
+                            <div class="panel-header">
+                                <i class="fas fa-brain"></i>
+                                <span>Live AI Analysis</span>
+                                <div class="panel-status">
+                                    <div class="status-dot ai-active"></div>
+                                    <span>Processing</span>
+                                </div>
+                            </div>
+                            <div class="analysis-grid">
+                                <!-- Macro Indicators Card -->
+                                <div class="analysis-card">
+                                    <div class="card-header">
+                                        <span><i class="fas fa-globe"></i> Macro Indicators</span>
+                                        <div class="confidence-badge">82%</div>
+                                    </div>
+                                    <div class="card-content">
+                                        <div class="insight-item">
+                                            <span class="indicator">DXY Strength:</span>
+                                            <span class="value bearish">Weakening (-0.3%)</span>
+                                        </div>
+                                        <div class="insight-item">
+                                            <span class="indicator">Yields:</span>
+                                            <span class="value bearish">Rising (+2bp)</span>
+                                        </div>
+                                        <div class="insight-item">
+                                            <span class="indicator">Inflation:</span>
+                                            <span class="value neutral">Stable (2.4%)</span>
+                                        </div>
+                                        <div class="insight-summary">
+                                            Mixed signals with dollar weakness supporting gold, but rising yields creating headwinds.
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Pattern Analysis Card -->
+                                <div class="analysis-card">
+                                    <div class="card-header">
+                                        <span><i class="fas fa-chart-line"></i> Pattern Analysis</span>
+                                        <div class="confidence-badge">74%</div>
+                                    </div>
+                                    <div class="card-content">
+                                        <div class="insight-item">
+                                            <span class="indicator">Primary Pattern:</span>
+                                            <span class="value neutral">Doji Formation</span>
+                                        </div>
+                                        <div class="insight-item">
+                                            <span class="indicator">Support Level:</span>
+                                            <span class="value bullish">$3,642</span>
+                                        </div>
+                                        <div class="insight-item">
+                                            <span class="indicator">Resistance:</span>
+                                            <span class="value bearish">$3,665</span>
+                                        </div>
+                                        <div class="insight-summary">
+                                            Indecision pattern forming at key support. Watch for breakout direction.
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- News Impact Card -->
+                                <div class="analysis-card">
+                                    <div class="card-header">
+                                        <span><i class="fas fa-newspaper"></i> News Impact</span>
+                                        <div class="confidence-badge">68%</div>
+                                    </div>
+                                    <div class="card-content">
+                                        <div class="insight-item">
+                                            <span class="indicator">Fed Sentiment:</span>
+                                            <span class="value bullish">Dovish Shift</span>
+                                        </div>
+                                        <div class="insight-item">
+                                            <span class="indicator">Geopolitical:</span>
+                                            <span class="value neutral">Stable</span>
+                                        </div>
+                                        <div class="insight-item">
+                                            <span class="indicator">Market Mood:</span>
+                                            <span class="value bullish">Risk-On</span>
+                                        </div>
+                                        <div class="insight-summary">
+                                            Federal Reserve signals potential rate cuts, supporting precious metals outlook.
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- AI Recommendation Card -->
+                                <div class="analysis-card">
+                                    <div class="card-header">
+                                        <span><i class="fas fa-robot"></i> AI Recommendation</span>
+                                        <div class="confidence-badge ai-confidence">76%</div>
+                                    </div>
+                                    <div class="card-content" id="ai-recommendation-content">
+                                        <div class="recommendation-signal bullish" id="ai-signal">
+                                            <i class="fas fa-arrow-up"></i>
+                                            <span>CAUTIOUSLY BULLISH</span>
+                                        </div>
+                                        <div class="recommendation-details">
+                                            <div class="detail-item">
+                                                <span class="label">Target:</span>
+                                                <span class="value">$3,680</span>
+                                            </div>
+                                            <div class="detail-item">
+                                                <span class="label">Stop Loss:</span>
+                                                <span class="value">$3,635</span>
+                                            </div>
+                                            <div class="detail-item">
+                                                <span class="label">Time Horizon:</span>
+                                                <span class="value">2-4 Hours</span>
+                                            </div>
+                                        </div>
+                                        <div class="recommendation-reason">
+                                            Dollar weakness + Fed dovishness outweighs yield concerns. Monitor $3,642 support.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Market Sentiment & AI Analysis Dashboard -->
-    <div class="sentiment-ai-dashboard">
+    <script>
         <!-- Greed/Fear & Buyer/Seller Indicators -->
         <div class="sentiment-row">
             <div class="sentiment-panel greed-fear-panel">
