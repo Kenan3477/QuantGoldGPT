@@ -163,27 +163,27 @@ def get_prediction_accuracy():
         logger.error(f"Failed to get prediction accuracy: {e}")
         return jsonify({'success': False, 'error': str(e)}), 500
 
-@dashboard_bp.route('/api/learning/insights', methods=['GET'])
-def get_learning_insights():
-    """Get recent learning insights and improvements"""
-    try:
-        limit = request.args.get('limit', 20, type=int)
-        category = request.args.get('category')  # feature_importance, model_improvement, market_regime
-        
-        insights = learning_engine.get_recent_insights(
-            limit=limit,
-            category=category
-        )
-        
-        return jsonify({
-            'success': True,
-            'data': insights,
-            'count': len(insights)
-        })
-        
-    except Exception as e:
-        logger.error(f"Failed to get learning insights: {e}")
-        return jsonify({'success': False, 'error': str(e)}), 500
+# @dashboard_bp.route('/api/learning/insights-alt', methods=['GET'])
+# def get_learning_insights_alt():
+#     """Get recent learning insights and improvements (alternative endpoint)"""
+#     try:
+#         limit = request.args.get('limit', 20, type=int)
+#         category = request.args.get('category')  # feature_importance, model_improvement, market_regime
+#         
+#         insights = learning_engine.get_recent_insights(
+#             limit=limit,
+#             category=category
+#         )
+#         
+#         return jsonify({
+#             'success': True,
+#             'data': insights,
+#             'count': len(insights)
+#         })
+#         
+#     except Exception as e:
+#         logger.error(f"Failed to get learning insights: {e}")
+#         return jsonify({'success': False, 'error': str(e)}), 500
 
 @dashboard_bp.route('/api/learning/feature-importance', methods=['GET'])
 def get_feature_importance():
