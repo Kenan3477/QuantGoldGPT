@@ -1321,7 +1321,7 @@ def get_ml_predictions():
                 'NEUTRAL': '#ffaa00'
             }.get(pred['signal'], '#66ccff')
             
-            # Primary prediction with targets
+            # Primary prediction with targets - All info in one entry
             formatted_predictions.append({
                 'signal': pred['signal'],
                 'confidence': pred['confidence'],
@@ -1339,18 +1339,6 @@ def get_ml_predictions():
                 'stop_loss': pred['stop_loss'],
                 'volatility': pred['volatility']
             })
-            
-            # Add detailed target breakdown for important timeframes
-            if timeframe in ['1H', '4H', '1D']:
-                formatted_predictions.append({
-                    'signal': f"{timeframe} Targets",
-                    'confidence': pred['confidence'],
-                    'prediction': f"T1: ${pred['targets']['target_1']:,.0f} | T2: ${pred['targets']['target_2']:,.0f} | T3: ${pred['targets']['target_3']:,.0f}",
-                    'color': '#66ccff',
-                    'timestamp': datetime.now().strftime('%H:%M:%S'),
-                    'timeframe': timeframe,
-                    'type': 'targets'
-                })
         
         # Add overall analysis summary
         if analysis_summary.get('status') == 'SUCCESS':
