@@ -73,31 +73,31 @@ class AdvancedMLPredictionEngine:
     def get_market_sentiment(self, timeframe: str) -> str:
         """Generate dynamic market sentiment based on timeframe and conditions"""
         
-        # Different sentiment probabilities for different timeframes
+        # Different sentiment probabilities for different timeframes - More balanced
         sentiment_weights = {
-            '5M': {'bullish': 0.4, 'bearish': 0.4, 'neutral': 0.2},
-            '15M': {'bullish': 0.35, 'bearish': 0.35, 'neutral': 0.3},
+            '5M': {'bullish': 0.35, 'bearish': 0.35, 'neutral': 0.3},
+            '15M': {'bullish': 0.33, 'bearish': 0.33, 'neutral': 0.34},
             '30M': {'bullish': 0.35, 'bearish': 0.35, 'neutral': 0.3},
-            '1H': {'bullish': 0.4, 'bearish': 0.3, 'neutral': 0.3},
-            '4H': {'bullish': 0.45, 'bearish': 0.25, 'neutral': 0.3},
-            '1D': {'bullish': 0.5, 'bearish': 0.2, 'neutral': 0.3},
-            '1W': {'bullish': 0.6, 'bearish': 0.15, 'neutral': 0.25}
+            '1H': {'bullish': 0.38, 'bearish': 0.32, 'neutral': 0.3},
+            '4H': {'bullish': 0.4, 'bearish': 0.3, 'neutral': 0.3},
+            '1D': {'bullish': 0.42, 'bearish': 0.28, 'neutral': 0.3},
+            '1W': {'bullish': 0.45, 'bearish': 0.25, 'neutral': 0.3}
         }
         
         weights = sentiment_weights.get(timeframe, {'bullish': 0.33, 'bearish': 0.33, 'neutral': 0.34})
         
-        # Add some time-based variation (hour of day affects sentiment)
+        # Add some time-based variation (hour of day affects sentiment) - More subtle
         current_hour = datetime.now().hour
         
-        # Market hours typically more bullish, off-hours more neutral
+        # Market hours slightly more bullish, off-hours slightly more neutral
         if 9 <= current_hour <= 16:  # Market hours
-            weights['bullish'] += 0.1
-            weights['neutral'] -= 0.05
-            weights['bearish'] -= 0.05
+            weights['bullish'] += 0.05  # Reduced from 0.1
+            weights['neutral'] -= 0.025
+            weights['bearish'] -= 0.025
         elif 0 <= current_hour <= 6:  # Late night/early morning
-            weights['neutral'] += 0.1
-            weights['bullish'] -= 0.05
-            weights['bearish'] -= 0.05
+            weights['neutral'] += 0.05  # Reduced from 0.1
+            weights['bullish'] -= 0.025
+            weights['bearish'] -= 0.025
         
         # Choose sentiment based on adjusted weights
         sentiments = list(weights.keys())

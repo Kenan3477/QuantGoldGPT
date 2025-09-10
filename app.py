@@ -1276,7 +1276,39 @@ def get_ml_predictions():
         
         # Get ML predictions
         predictions = get_ml_price_predictions(timeframes)
-        analysis_summary = get_ml_analysis_summary()
+        
+        # Calculate consensus from the SAME predictions being displayed
+        if predictions:
+            signals = [pred['signal'] for pred in predictions.values()]
+            bullish_count = signals.count('BULLISH')
+            bearish_count = signals.count('BEARISH')
+            neutral_count = signals.count('NEUTRAL')
+            
+            if bullish_count > bearish_count and bullish_count > neutral_count:
+                consensus = 'BULLISH'
+            elif bearish_count > bullish_count and bearish_count > neutral_count:
+                consensus = 'BEARISH'
+            else:
+                consensus = 'NEUTRAL'
+            
+            # Calculate average confidence from displayed predictions
+            avg_confidence = sum(pred['confidence'] for pred in predictions.values()) / len(predictions)
+            current_price = list(predictions.values())[0]['current_price']
+            
+            analysis_summary = {
+                'status': 'SUCCESS',
+                'consensus': consensus,
+                'confidence': round(avg_confidence, 3),
+                'current_price': current_price,
+                'signal_distribution': {
+                    'bullish': bullish_count,
+                    'bearish': bearish_count,
+                    'neutral': neutral_count
+                },
+                'analysis_timestamp': datetime.now().isoformat()
+            }
+        else:
+            analysis_summary = {'status': 'ERROR', 'message': 'No predictions available'}
         
         # Format predictions for frontend
         formatted_predictions = []
