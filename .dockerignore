@@ -1,0 +1,12 @@
+# Files to ignore in Docker build context
+.git
+.gitignore
+README.md
+.env
+*.log
+__pycache__
+*.pyc
+.pytest_cache
+.coverage
+.vscode
+node_modules

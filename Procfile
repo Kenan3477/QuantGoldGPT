@@ -1,2 +1,2 @@
-web: python main.py
-# 🔥 FINAL NUCLEAR OPTION: Auto-close learning system v2.1.0 🔥
+web: python app.py
+# 🔥 FIXED: Auto-close learning system with correct app.py 🔥

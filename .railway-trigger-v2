@@ -1,0 +1,4 @@
+FORCE DEPLOY - Fixed Docker file copying issue
+Timestamp: 2025-09-10T08:35:00Z
+Fixed: Explicit file copying in Dockerfile instead of wildcard
+Files: signal_memory_system.py, real_pattern_detection.py, app.py

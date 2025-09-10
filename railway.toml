@@ -8,10 +8,11 @@ restartPolicyType = "on_failure"
 restartPolicyMaxRetries = 3
 startCommand = "python app.py"
 
-# Auto-close learning system deployment - 2025-09-08
+# Fixed deployment - 2025-09-10
 [variables]
 AUTO_CLOSE_ENABLED = "true"
 LEARNING_ENGINE_ACTIVE = "true"
+FORCE_DEPLOY = "2025-09-10-08-55"
 
 [[services]]
 name = "quantgold-web"

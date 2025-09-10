@@ -2237,22 +2237,27 @@ Closed at: $${result.closed_price.toLocaleString()}`;
 
         // Live Patterns Functions
         function loadLivePatterns() {
-            console.log('🔍 Loading live candlestick patterns...');
+            console.log('🔍 PATTERN DETECTION: Loading live candlestick patterns...');
+            console.log('🔍 PATTERN DETECTION: Making fetch request to /api/live/patterns');
+            console.log('🔥 CRITICAL DEBUG: Function loadLivePatterns() EXECUTED at', new Date().toISOString());
             
             fetch('/api/live/patterns')
-                .then(response => response.json())
+                .then(response => {
+                    console.log('📊 PATTERN DETECTION: Response received, status:', response.status);
+                    return response.json();
+                })
                 .then(data => {
-                    console.log('📊 Live patterns data:', data);
+                    console.log('📊 PATTERN DETECTION: Live patterns data:', data);
                     if (data.success) {
                         displayLivePatterns(data);
                         updatePatternsStatus(data.total_patterns_detected);
                     } else {
-                        console.error('❌ Failed to load patterns:', data.error);
+                        console.error('❌ PATTERN DETECTION: Failed to load patterns:', data.error);
                         displayPatternsError(data.error);
                     }
                 })
                 .catch(error => {
-                    console.error('❌ Error loading patterns:', error);
+                    console.error('❌ PATTERN DETECTION: Error loading patterns:', error);
                     displayPatternsError('Connection failed');
                 });
         }
@@ -2536,6 +2541,7 @@ Closed at: $${result.closed_price.toLocaleString()}`;
         // Initialize live alerts system
         function initializeLiveAlerts() {
             console.log('🚀 Initializing live alerts system...');
+            alert('PATTERN DEBUG: initializeLiveAlerts() is running!');
             
             // Load initial data
             loadLivePatterns();
@@ -2543,11 +2549,24 @@ Closed at: $${result.closed_price.toLocaleString()}`;
             loadLiveAlerts();
             
             // Set up intervals for real-time updates
-            setInterval(loadLivePatterns, 15000);  // Update patterns every 15 seconds
+            setInterval(loadLivePatterns, 5000);   // Update patterns every 5 seconds (FORCE MORE FREQUENT CALLS)
             setInterval(loadLiveNews, 60000);      // Update news every minute
             setInterval(loadLiveAlerts, 30000);    // Update alerts every 30 seconds
             
             console.log('✅ Live alerts system initialized');
+            
+            // EMERGENCY FORCE PATTERN CALL TO TEST ENDPOINT
+            setTimeout(() => {
+                console.log('🔴 EMERGENCY: Force calling pattern endpoint...');
+                alert('PATTERN DEBUG: About to call loadLivePatterns from setTimeout');
+                loadLivePatterns();
+            }, 2000);
+            
+            // ANOTHER EMERGENCY CALL
+            setTimeout(() => {
+                console.log('🔴 EMERGENCY 2: Second force call...');
+                loadLivePatterns();
+            }, 5000);
         }
 
         function loadMarketNews() {
