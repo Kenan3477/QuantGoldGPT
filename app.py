@@ -1267,17 +1267,101 @@ def get_gold_price():
 
 @app.route('/api/ml-predictions')
 def get_ml_predictions():
-    """Get ML predictions"""
-    timeframes = ['5M', '15M', '30M', '1H', '4H', '1D', '1W']
-    predictions = {}
-    
-    for tf in timeframes:
-        predictions[tf] = {
-            'signal': random.choice(['BULLISH', 'BEARISH', 'NEUTRAL']),
-            'confidence': round(random.uniform(0.6, 0.9), 3)
-        }
-    
-    return jsonify({'success': True, 'predictions': predictions})
+    """Get Advanced ML-based market predictions with price targets"""
+    try:
+        from advanced_ml_predictions import get_ml_price_predictions, get_ml_analysis_summary
+        
+        # Get timeframes from request or use defaults
+        timeframes = request.args.getlist('timeframes') or ['5M', '15M', '30M', '1H', '4H', '1D']
+        
+        # Get ML predictions
+        predictions = get_ml_price_predictions(timeframes)
+        analysis_summary = get_ml_analysis_summary()
+        
+        # Format predictions for frontend
+        formatted_predictions = []
+        
+        for timeframe, pred in predictions.items():
+            # Main prediction entry
+            signal_color = {
+                'BULLISH': '#00ff88',
+                'BEARISH': '#ff4444', 
+                'NEUTRAL': '#ffaa00'
+            }.get(pred['signal'], '#66ccff')
+            
+            # Primary prediction with targets
+            formatted_predictions.append({
+                'signal': pred['signal'],
+                'confidence': pred['confidence'],
+                'prediction': f"{timeframe} Target: ${pred['targets']['target_1']:,.0f} | Stop: ${pred['stop_loss']:,.0f}",
+                'color': signal_color,
+                'timestamp': datetime.now().strftime('%H:%M:%S'),
+                'timeframe': timeframe,
+                'current_price': pred['current_price'],
+                'predicted_price': pred['predicted_price'],
+                'price_change': pred['price_change'],
+                'price_change_pct': pred['price_change_pct'],
+                'targets': pred['targets'],
+                'support': pred['support'],
+                'resistance': pred['resistance'],
+                'stop_loss': pred['stop_loss'],
+                'volatility': pred['volatility']
+            })
+            
+            # Add detailed target breakdown for important timeframes
+            if timeframe in ['1H', '4H', '1D']:
+                formatted_predictions.append({
+                    'signal': f"{timeframe} Targets",
+                    'confidence': pred['confidence'],
+                    'prediction': f"T1: ${pred['targets']['target_1']:,.0f} | T2: ${pred['targets']['target_2']:,.0f} | T3: ${pred['targets']['target_3']:,.0f}",
+                    'color': '#66ccff',
+                    'timestamp': datetime.now().strftime('%H:%M:%S'),
+                    'timeframe': timeframe,
+                    'type': 'targets'
+                })
+        
+        # Add overall analysis summary
+        if analysis_summary.get('status') == 'SUCCESS':
+            formatted_predictions.insert(0, {
+                'signal': f"ML CONSENSUS: {analysis_summary['consensus']}",
+                'confidence': analysis_summary['confidence'],
+                'prediction': f"Overall Market Sentiment - Current: ${analysis_summary['current_price']:,.0f}",
+                'color': {
+                    'BULLISH': '#00ff88',
+                    'BEARISH': '#ff4444', 
+                    'NEUTRAL': '#ffaa00'
+                }.get(analysis_summary['consensus'], '#66ccff'),
+                'timestamp': datetime.now().strftime('%H:%M:%S'),
+                'timeframe': 'CONSENSUS',
+                'type': 'consensus'
+            })
+        
+        logger.info(f"✅ ML Predictions generated: {len(formatted_predictions)} entries")
+        
+        return jsonify({
+            'success': True,
+            'predictions': formatted_predictions,
+            'model_status': 'ACTIVE',
+            'analysis_summary': analysis_summary,
+            'raw_predictions': predictions,
+            'timestamp': datetime.now().isoformat()
+        })
+        
+    except Exception as e:
+        logger.error(f"❌ ML predictions error: {e}")
+        # Fallback to basic predictions if ML fails
+        return jsonify({
+            'success': False,
+            'error': f"ML system temporarily unavailable: {str(e)}",
+            'predictions': [{
+                'signal': 'SYSTEM ERROR',
+                'confidence': 0.0,
+                'prediction': 'ML prediction system is initializing...',
+                'color': '#ff6600',
+                'timestamp': datetime.now().strftime('%H:%M:%S')
+            }],
+            'model_status': 'ERROR'
+        }), 500
 
 @app.route('/api/market-news')
 def get_news():

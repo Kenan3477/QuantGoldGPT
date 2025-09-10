@@ -2222,14 +2222,76 @@ Closed at: $${result.closed_price.toLocaleString()}`;
                 const signal = pred.signal || pred.direction || 'NEUTRAL';
                 const confidence = pred.confidence || 0.5;
                 const timeframe = pred.timeframe || 'Unknown';
+                const prediction = pred.prediction || `${signal} Signal`;
+                const color = pred.color || '#66ccff';
+                const timestamp = pred.timestamp || new Date().toLocaleTimeString();
+                
+                // Enhanced display for price targets
+                let targetInfo = '';
+                if (pred.targets) {
+                    targetInfo = `
+                        <div class="prediction-targets" style="font-size: 0.9em; margin-top: 8px;">
+                            <div style="color: #00ff88;">🎯 T1: $${pred.targets.target_1?.toLocaleString() || 'N/A'}</div>
+                            <div style="color: #ffaa00;">🎯 T2: $${pred.targets.target_2?.toLocaleString() || 'N/A'}</div>
+                            <div style="color: #ff6600;">🎯 T3: $${pred.targets.target_3?.toLocaleString() || 'N/A'}</div>
+                            <div style="color: #ff4444;">🛑 Stop: $${pred.stop_loss?.toLocaleString() || 'N/A'}</div>
+                        </div>
+                    `;
+                }
+                
+                // Price change indicator
+                let priceChangeInfo = '';
+                if (pred.price_change !== undefined) {
+                    const changeColor = pred.price_change > 0 ? '#00ff88' : pred.price_change < 0 ? '#ff4444' : '#ffaa00';
+                    priceChangeInfo = `
+                        <div class="prediction-change" style="color: ${changeColor}; margin-top: 5px;">
+                            ${pred.price_change > 0 ? '+' : ''}${pred.price_change.toFixed(2)} 
+                            (${pred.price_change_pct > 0 ? '+' : ''}${pred.price_change_pct?.toFixed(2) || '0.00'}%)
+                        </div>
+                    `;
+                }
+                
+                // Support/Resistance levels
+                let levelInfo = '';
+                if (pred.support && pred.resistance) {
+                    levelInfo = `
+                        <div class="prediction-levels" style="font-size: 0.85em; margin-top: 6px; color: #ccc;">
+                            📈 R: $${pred.resistance?.toLocaleString() || 'N/A'} | 📉 S: $${pred.support?.toLocaleString() || 'N/A'}
+                        </div>
+                    `;
+                }
                 
                 return `
-                    <div class="prediction-item">
-                        <div class="prediction-timeframe">${timeframe}</div>
-                        <div class="prediction-signal ${signal.toLowerCase()}">${signal.toUpperCase()}</div>
-                        <div class="prediction-confidence">Confidence: ${Math.round(confidence * 100)}%</div>
-                        ${pred.target ? `<div class="prediction-target">Target: $${Math.round(pred.target)}</div>` : ''}
-                        ${pred.change_percent ? `<div class="prediction-change">${pred.change_percent > 0 ? '+' : ''}${pred.change_percent.toFixed(2)}%</div>` : ''}
+                    <div class="prediction-item" style="border-left: 3px solid ${color}; background: linear-gradient(135deg, rgba(0,0,0,0.4), rgba(0,0,0,0.6)); margin-bottom: 12px; padding: 12px; border-radius: 8px;">
+                        <div class="prediction-header" style="display: flex; justify-content: space-between; align-items: center;">
+                            <div class="prediction-signal" style="color: ${color}; font-weight: bold; font-size: 1.1em;">
+                                ${signal.toUpperCase()}
+                            </div>
+                            <div class="prediction-timeframe" style="background: ${color}; color: #000; padding: 2px 8px; border-radius: 12px; font-size: 0.8em; font-weight: bold;">
+                                ${timeframe}
+                            </div>
+                        </div>
+                        
+                        <div class="prediction-main" style="margin: 8px 0;">
+                            <div class="prediction-text" style="color: #fff; font-size: 0.95em;">
+                                ${prediction}
+                            </div>
+                            
+                            <div class="prediction-confidence" style="color: #ccc; font-size: 0.85em; margin-top: 4px;">
+                                🔥 Confidence: ${Math.round(confidence * 100)}%
+                            </div>
+                            
+                            ${priceChangeInfo}
+                        </div>
+                        
+                        ${targetInfo}
+                        ${levelInfo}
+                        
+                        <div class="prediction-footer" style="margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.1);">
+                            <div class="prediction-timestamp" style="color: #888; font-size: 0.75em;">
+                                🕒 ${timestamp}
+                            </div>
+                        </div>
                     </div>
                 `;
             }).join('');
