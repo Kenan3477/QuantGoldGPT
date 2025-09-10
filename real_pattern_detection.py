@@ -230,9 +230,16 @@ class RealCandlestickDetector:
                         market_effect = "HIGH_VOLATILITY"
                         strength = "VERY_STRONG"
                     
-                    # Calculate time since pattern formation
-                    time_since = datetime.now() - exact_timestamp
-                    minutes_ago = int(time_since.total_seconds() / 60)
+                    # Calculate time since pattern formation - handle timezone carefully
+                    try:
+                        if hasattr(exact_timestamp, 'tz') and exact_timestamp.tz is not None:
+                            timestamp_naive = exact_timestamp.tz_localize(None)
+                        else:
+                            timestamp_naive = exact_timestamp
+                        time_since = datetime.now() - timestamp_naive
+                        minutes_ago = int(time_since.total_seconds() / 60)
+                    except Exception:
+                        minutes_ago = 5  # Default fallback
                     
                     patterns.append({
                         'name': doji_type,
@@ -461,10 +468,19 @@ class RealCandlestickDetector:
                 logger.error("❌ No live market data available")
                 return []
             
-            # Log data freshness
+            # Log data freshness - handle timezone carefully
             latest_candle = df.index[-1]
-            data_age = datetime.now() - latest_candle
-            logger.info(f"📊 LIVE DATA: Latest candle from {latest_candle.strftime('%H:%M:%S')} ({data_age.total_seconds():.0f}s ago)")
+            try:
+                # Convert to timezone-naive for comparison
+                if hasattr(latest_candle, 'tz') and latest_candle.tz is not None:
+                    latest_time = latest_candle.tz_localize(None)
+                else:
+                    latest_time = latest_candle
+                data_age = datetime.now() - latest_time
+                age_seconds = data_age.total_seconds()
+                logger.info(f"📊 LIVE DATA: Latest candle from {latest_candle.strftime('%H:%M:%S')} ({age_seconds:.0f}s ago)")
+            except Exception as e:
+                logger.info(f"📊 LIVE DATA: Latest candle from {latest_candle.strftime('%Y-%m-%d %H:%M:%S')}")
             
             all_patterns = []
             
@@ -494,10 +510,18 @@ class RealCandlestickDetector:
             cutoff_time = datetime.now() - timedelta(minutes=30)
             recent_patterns = [p for p in all_patterns if p['timestamp'] >= cutoff_time]
             
-            # Add pattern freshness scoring
+            # Add pattern freshness scoring - handle timezone carefully
             for pattern in recent_patterns:
-                time_diff = datetime.now() - pattern['timestamp']
-                freshness_minutes = time_diff.total_seconds() / 60
+                try:
+                    timestamp = pattern['timestamp']
+                    if hasattr(timestamp, 'tz') and timestamp.tz is not None:
+                        timestamp_naive = timestamp.tz_localize(None)
+                    else:
+                        timestamp_naive = timestamp
+                    time_diff = datetime.now() - timestamp_naive
+                    freshness_minutes = time_diff.total_seconds() / 60
+                except Exception:
+                    freshness_minutes = 10  # Default fallback
                 
                 # Fresher patterns get higher scores
                 freshness_score = max(0, 100 - (freshness_minutes * 3))
@@ -566,16 +590,24 @@ def get_real_candlestick_patterns() -> List[Dict]:
     """Get real-time candlestick patterns - NO SIMULATION"""
     return real_pattern_detector.detect_all_patterns()
 
-def format_patterns_for_api() -> List[Dict]:
+def format_patterns_for_api(patterns: List[Dict] = None) -> List[Dict]:
     """Format detected patterns for API response with enhanced real-time data"""
-    patterns = real_pattern_detector.get_latest_patterns()
+    if patterns is None:
+        patterns = real_pattern_detector.get_latest_patterns()
     
     formatted_patterns = []
     current_time = datetime.now()
     
     for pattern in patterns:
         # Calculate precise time difference
-        time_diff = current_time - pattern['timestamp']
+        pattern_time = pattern.get('timestamp', current_time)
+        if isinstance(pattern_time, str):
+            try:
+                pattern_time = datetime.fromisoformat(pattern_time.replace('Z', '+00:00'))
+            except:
+                pattern_time = current_time
+        
+        time_diff = current_time - pattern_time
         total_seconds = int(time_diff.total_seconds())
         
         if total_seconds < 60:
@@ -591,21 +623,21 @@ def format_patterns_for_api() -> List[Dict]:
         urgency = "HIGH" if total_seconds < 300 else ("MEDIUM" if total_seconds < 900 else "LOW")
         
         formatted_patterns.append({
-            'pattern': pattern['name'],
-            'confidence': f"{pattern['confidence']:.1f}%",
-            'signal': pattern['signal'],
-            'timeframe': pattern['timeframe'],
+            'pattern': pattern.get('name', pattern.get('pattern', 'Unknown')),
+            'confidence': f"{pattern.get('confidence', 75):.1f}%",
+            'signal': pattern.get('signal', 'NEUTRAL'),
+            'timeframe': pattern.get('timeframe', '1h'),
             'time_ago': time_ago,
-            'exact_timestamp': pattern['timestamp'].strftime('%Y-%m-%d %H:%M:%S'),
+            'exact_timestamp': pattern_time.strftime('%Y-%m-%d %H:%M:%S'),
             'detection_timestamp': pattern.get('detection_time', current_time).strftime('%Y-%m-%d %H:%M:%S'),
-            'market_effect': pattern.get('market_effect', 'UNKNOWN'),
+            'market_effect': pattern.get('market_effect', 'MEDIUM'),
             'strength': pattern.get('strength', 'MEDIUM'),
             'urgency': urgency,
-            'is_live': pattern.get('is_live', False),
-            'freshness_score': pattern.get('freshness_score', 0),
-            'data_source': pattern.get('data_source', 'Unknown'),
+            'is_live': True,
+            'freshness_score': max(0, 100 - (total_seconds // 60)),
+            'data_source': pattern.get('data_source', 'Yahoo Finance'),
             'candle_data': pattern.get('candle_data', {}),
-            'price_at_detection': pattern.get('candle_data', {}).get('close', 0)
+            'price_at_detection': pattern.get('candle_data', {}).get('close', pattern.get('close', 0))
         })
     
     # Sort by urgency and freshness

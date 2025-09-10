@@ -1848,6 +1848,9 @@ def get_live_patterns():
         print("� PATTERN ENDPOINT CALLED!")
         logger.info("� PATTERN ENDPOINT CALLED!")
         
+        # Get real-time patterns using the detection system
+        from real_pattern_detection import get_real_candlestick_patterns, format_patterns_for_api
+        
         # Get current gold price
         try:
             gold_response = get_gold_price()
@@ -1857,37 +1860,40 @@ def get_live_patterns():
             logger.error(f"❌ Price fetching error: {e}")
             current_price = 3540.0
         
-        # EMERGENCY: Return simple test patterns first to verify endpoint works
-        test_patterns = [
-            {
-                'pattern': 'Doji',
-                'confidence': '78%',
-                'signal': 'NEUTRAL',
-                'timeframe': '1h',
-                'time_ago': '2m ago',
-                'timestamp': datetime.now().isoformat()
-            },
-            {
-                'pattern': 'Hammer',
-                'confidence': '85%',
-                'signal': 'BULLISH',
-                'timeframe': '4h',
-                'time_ago': '15m ago',
-                'timestamp': datetime.now().isoformat()
-            }
-        ]
+        # Get REAL patterns from live data
+        logger.info("📊 Scanning for REAL candlestick patterns...")
+        real_patterns = get_real_candlestick_patterns()
         
-        logger.info(f"✅ Returning {len(test_patterns)} test patterns")
-        
-        return jsonify({
-            'success': True,
-            'current_patterns': test_patterns,
-            'recent_patterns': test_patterns,
-            'current_price': current_price,
-            'total_patterns_detected': len(test_patterns),
-            'data_source': 'TEST_MODE',
-            'last_updated': datetime.now().isoformat()
-        })
+        if real_patterns and len(real_patterns) > 0:
+            # Format patterns for API response
+            formatted_patterns = format_patterns_for_api(real_patterns)
+            
+            logger.info(f"✅ REAL PATTERNS DETECTED: {len(formatted_patterns)} patterns found")
+            
+            return jsonify({
+                'success': True,
+                'current_patterns': formatted_patterns,
+                'recent_patterns': formatted_patterns,
+                'current_price': current_price,
+                'total_patterns_detected': len(formatted_patterns),
+                'data_source': 'LIVE_YAHOO_FINANCE',
+                'last_updated': datetime.now().isoformat(),
+                'scan_status': 'ACTIVE'
+            })
+        else:
+            # If no real patterns found, return empty but valid response
+            logger.info("📊 No patterns detected in current market scan")
+            
+            return jsonify({
+                'success': True,
+                'current_patterns': [],
+                'recent_patterns': [],
+                'current_price': current_price,
+                'total_patterns_detected': 0,
+                'data_source': 'LIVE_YAHOO_FINANCE',
+                'last_updated': datetime.now().isoformat(),
+                'scan_status': 'NO_PATTERNS_DETECTED'
+            })
         
     except Exception as e:
         logger.error(f"❌ Real pattern detection error: {e}")
