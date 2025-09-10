@@ -2235,30 +2235,58 @@ Closed at: $${result.closed_price.toLocaleString()}`;
             }).join('');
         }
 
-        // Live Patterns Functions
+        // Live Patterns Functions - Enhanced Real-Time Detection
         function loadLivePatterns() {
-            console.log('🔍 PATTERN DETECTION: Loading live candlestick patterns...');
-            console.log('🔍 PATTERN DETECTION: Making fetch request to /api/live/patterns');
-            console.log('🔥 CRITICAL DEBUG: Function loadLivePatterns() EXECUTED at', new Date().toISOString());
+            console.log('🔍 LIVE PATTERN SCAN: Starting real-time pattern detection...');
+            console.log('📡 FETCH REQUEST: Calling /api/live/patterns endpoint');
+            
+            const startTime = performance.now();
             
             fetch('/api/live/patterns')
                 .then(response => {
-                    console.log('📊 PATTERN DETECTION: Response received, status:', response.status);
+                    const fetchTime = performance.now() - startTime;
+                    console.log(`📊 RESPONSE RECEIVED: ${response.status} in ${fetchTime.toFixed(1)}ms`);
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
                     return response.json();
                 })
                 .then(data => {
-                    console.log('📊 PATTERN DETECTION: Live patterns data:', data);
+                    console.log('📊 LIVE PATTERN DATA:', data);
+                    
                     if (data.success) {
+                        console.log(`✅ SCAN SUCCESS: ${data.pattern_count} patterns detected`);
+                        console.log(`🔴 LIVE COUNT: ${data.live_pattern_count || 0} live patterns`);
+                        console.log(`📈 DATA SOURCE: ${data.data_source}`);
+                        console.log(`⏰ SCAN TIME: ${data.scan_timestamp}`);
+                        
                         displayLivePatterns(data);
-                        updatePatternsStatus(data.total_patterns_detected);
+                        updatePatternsStatus(data.pattern_count, data.scan_status);
+                        
+                        // Show scan quality indicator
+                        if (data.scan_quality === 'HIGH') {
+                            console.log('🟢 HIGH QUALITY SCAN - Reliable data detected');
+                        } else {
+                            console.log('🟡 MEDIUM QUALITY SCAN - Limited data available');
+                        }
+                        
+                        // Log most recent pattern for debugging
+                        if (data.most_recent_pattern) {
+                            console.log(`🎯 LATEST PATTERN: ${data.most_recent_pattern.pattern} (${data.most_recent_pattern.confidence}) - ${data.most_recent_pattern.time_ago}`);
+                        }
+                        
                     } else {
-                        console.error('❌ PATTERN DETECTION: Failed to load patterns:', data.error);
-                        displayPatternsError(data.error);
+                        console.error('❌ SCAN FAILED:', data.error);
+                        console.error('📍 ERROR SOURCE:', data.data_source);
+                        displayPatternsError(data.error || 'Pattern scan failed');
                     }
                 })
                 .catch(error => {
-                    console.error('❌ PATTERN DETECTION: Error loading patterns:', error);
-                    displayPatternsError('Connection failed');
+                    console.error('❌ FETCH ERROR:', error);
+                    console.error('📍 ERROR TYPE:', error.name);
+                    console.error('📍 ERROR MESSAGE:', error.message);
+                    displayPatternsError(`Connection failed: ${error.message}`);
                 });
         }
 
