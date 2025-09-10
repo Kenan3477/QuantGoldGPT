@@ -5,7 +5,7 @@ Auto-close system deployment: 2025-09-08
 Signal Memory System: 2025-09-09
 """
 
-from flask import Flask, render_template, jsonify
+from flask import Flask, render_template, jsonify, request
 import os
 import logging
 import random
