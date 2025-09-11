@@ -100,10 +100,18 @@ class AdvancedLearningEngine:
         self.init_database()
         
     def init_database(self):
-        """Initialize advanced learning database"""
+        """Initialize advanced learning database with robust Railway environment handling"""
         try:
+            # Ensure directory exists for database file
+            os.makedirs(os.path.dirname(self.db_path) if os.path.dirname(self.db_path) else '.', exist_ok=True)
+            logger.info(f"🔬 Initializing Advanced Learning Engine database at: {self.db_path}")
+            
             conn = sqlite3.connect(self.db_path)
             cursor = conn.cursor()
+            
+            # Test database connection
+            cursor.execute("SELECT 1")
+            logger.info("✅ Database connection established")
             
             # Strategy performance table
             cursor.execute('''
@@ -179,11 +187,22 @@ class AdvancedLearningEngine:
             ''')
             
             conn.commit()
+            
+            # Verify tables were created successfully
+            cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
+            tables = [row[0] for row in cursor.fetchall()]
+            logger.info(f"✅ Created database tables: {', '.join(tables)}")
+            
             conn.close()
-            logger.info("🔬 Advanced Learning Engine database initialized")
+            logger.info("🔬 Advanced Learning Engine database initialized successfully")
             
         except Exception as e:
-            logger.error(f"❌ Database initialization failed: {e}")
+            logger.error(f"❌ Advanced Learning Engine database initialization failed: {e}")
+            logger.error(f"📍 Database path: {self.db_path}")
+            logger.error(f"📍 Current working directory: {os.getcwd()}")
+            logger.error(f"📍 Directory exists: {os.path.exists(os.path.dirname(self.db_path) if os.path.dirname(self.db_path) else '.')}")
+            # Continue without database - system will work with in-memory storage
+            logger.warning("⚠️ Continuing without persistent learning database - using in-memory storage")
     
     def analyze_trade_performance(self, trade_data: Dict) -> PerformanceMetrics:
         """Analyze individual trade performance and extract insights"""
