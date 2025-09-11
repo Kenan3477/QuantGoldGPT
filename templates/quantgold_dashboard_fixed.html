@@ -2152,50 +2152,190 @@ Closed at: $${result.closed_price.toLocaleString()}`;
             }
         }
 
-        // Load predictions and news data
+        // Load predictions and news data - ENHANCED WITH REAL-TIME AI
         function loadMLPredictions() {
-            console.log('🔄 Loading ML predictions...');
+            console.log('🔄 Loading Real-Time AI predictions...');
             fetch('/api/ml-predictions')
                 .then(response => {
-                    console.log('📡 ML predictions response status:', response.status);
+                    console.log('📡 AI predictions response status:', response.status);
                     return response.json();
                 })
                 .then(data => {
-                    console.log('📊 ML predictions data received:', data);
+                    console.log('📊 Real-Time AI data received:', data);
                     if (data.success && data.predictions) {
-                        // Handle both array and object formats
-                        let predictionsArray = data.predictions;
-                        if (typeof data.predictions === 'object' && !Array.isArray(data.predictions)) {
-                            // Convert object to array
-                            predictionsArray = Object.keys(data.predictions).map(timeframe => ({
-                                timeframe: timeframe,
-                                signal: data.predictions[timeframe].signal || data.predictions[timeframe].direction || 'NEUTRAL',
-                                confidence: data.predictions[timeframe].confidence || 0.5,
-                                change_percent: data.predictions[timeframe].change_percent || 0,
-                                target: data.predictions[timeframe].target || data.predictions[timeframe].predicted_price
-                            }));
+                        // Display the real-time AI predictions
+                        displayMLPredictions(data.predictions);
+                        
+                        // Also update AI recommendation panel if it exists
+                        if (data.ai_analysis) {
+                            updateAIRecommendationPanel(data.ai_analysis);
                         }
-                        displayMLPredictions(predictionsArray);
                     } else {
-                        console.log('No ML predictions available in response');
+                        console.log('No AI predictions available in response');
                         document.getElementById('predictions-container').innerHTML = `
                             <div class="no-data">
                                 <i class="fas fa-brain" style="font-size: 2em; color: #666; margin-bottom: 10px;"></i>
-                                <div>No ML predictions available</div>
+                                <div>AI analysis temporarily unavailable</div>
                             </div>
                         `;
                     }
                 })
                 .catch(error => {
-                    console.error('❌ Error loading ML predictions:', error);
+                    console.error('❌ Error loading AI predictions:', error);
                     document.getElementById('predictions-container').innerHTML = `
                         <div class="no-data">
                             <i class="fas fa-exclamation-triangle" style="color: #f44336; font-size: 2em; margin-bottom: 10px;"></i>
-                            <div>Failed to load predictions</div>
+                            <div>Failed to load AI predictions</div>
                             <div style="font-size: 0.8em; color: #888; margin-top: 5px;">Check console for details</div>
                         </div>
                     `;
                 });
+        }
+        
+        // NEW: Update AI Recommendation Panel with real-time data
+        function updateAIRecommendationPanel(aiAnalysis) {
+            console.log('🤖 Updating AI Recommendation Panel with real-time data');
+            
+            // Update main AI recommendation if container exists
+            const aiContainer = document.querySelector('.ai-recommendation-panel');
+            if (aiContainer) {
+                const signal = aiAnalysis.signal;
+                const confidence = aiAnalysis.confidence;
+                const signalClass = signal.toLowerCase();
+                
+                // Update recommendation signal
+                const signalElement = aiContainer.querySelector('.recommendation-signal');
+                if (signalElement) {
+                    signalElement.textContent = signal;
+                    signalElement.className = `recommendation-signal ${signalClass}`;
+                }
+                
+                // Update confidence
+                const confidenceElement = aiContainer.querySelector('.ai-confidence');
+                if (confidenceElement) {
+                    confidenceElement.textContent = `${confidence.toFixed(1)}%`;
+                }
+                
+                // Update factors if they exist
+                const factorsContainer = aiContainer.querySelector('.analysis-factors');
+                if (factorsContainer && aiAnalysis.bullish_factors && aiAnalysis.bearish_factors) {
+                    let factorsHTML = '<div class="factors-title">Key Analysis Factors:</div>';
+                    
+                    if (aiAnalysis.bullish_factors.length > 0) {
+                        factorsHTML += '<div class="bullish-factors">';
+                        factorsHTML += '<strong>Bullish:</strong><ul>';
+                        aiAnalysis.bullish_factors.slice(0, 3).forEach(factor => {
+                            factorsHTML += `<li>${factor}</li>`;
+                        });
+                        factorsHTML += '</ul></div>';
+                    }
+                    
+                    if (aiAnalysis.bearish_factors.length > 0) {
+                        factorsHTML += '<div class="bearish-factors">';
+                        factorsHTML += '<strong>Bearish:</strong><ul>';
+                        aiAnalysis.bearish_factors.slice(0, 3).forEach(factor => {
+                            factorsHTML += `<li>${factor}</li>`;
+                        });
+                        factorsHTML += '</ul></div>';
+                    }
+                    
+                    factorsContainer.innerHTML = factorsHTML;
+                }
+                
+                // Update market conditions
+                const conditionsElement = aiContainer.querySelector('.market-conditions');
+                if (conditionsElement && aiAnalysis.market_conditions) {
+                    const conditions = aiAnalysis.market_conditions;
+                    conditionsElement.innerHTML = `
+                        <div class="condition-item">RSI: ${conditions.rsi?.toFixed(1) || 'N/A'}</div>
+                        <div class="condition-item">VIX: ${conditions.vix?.toFixed(1) || 'N/A'}</div>
+                        <div class="condition-item">Volatility: ${conditions.volatility?.toFixed(2) || 'N/A'}%</div>
+                    `;
+                }
+                
+                // Update timestamp
+                const timestampElement = aiContainer.querySelector('.update-time');
+                if (timestampElement) {
+                    timestampElement.textContent = `Updated: ${new Date().toLocaleTimeString()}`;
+                }
+                
+                console.log('✅ AI Recommendation Panel updated with real-time data');
+            }
+        }
+        
+        // NEW: Load detailed AI recommendation
+        function loadAIRecommendation() {
+            console.log('🤖 Loading detailed AI recommendation...');
+            fetch('/api/ai-recommendation')
+                .then(response => response.json())
+                .then(data => {
+                    console.log('📊 AI recommendation data:', data);
+                    if (data.success && data.recommendation) {
+                        displayAIRecommendation(data.recommendation);
+                    } else {
+                        console.log('AI recommendation temporarily unavailable');
+                    }
+                })
+                .catch(error => {
+                    console.error('❌ Error loading AI recommendation:', error);
+                });
+        }
+        
+        // NEW: Display comprehensive AI recommendation
+        function displayAIRecommendation(recommendation) {
+            // Find AI recommendation containers and update them
+            const containers = document.querySelectorAll('.ai-recommendation-panel, .ai-analysis-panel');
+            
+            containers.forEach(container => {
+                if (container.querySelector('.recommendation-signal')) {
+                    // Update signal
+                    const signalEl = container.querySelector('.recommendation-signal');
+                    signalEl.textContent = recommendation.signal;
+                    signalEl.className = `recommendation-signal ${recommendation.signal.toLowerCase()}`;
+                    
+                    // Update confidence
+                    const confidenceEl = container.querySelector('.ai-confidence');
+                    if (confidenceEl) {
+                        confidenceEl.textContent = `${recommendation.confidence.toFixed(1)}%`;
+                    }
+                    
+                    // Update details
+                    const detailsEl = container.querySelector('.recommendation-details');
+                    if (detailsEl) {
+                        detailsEl.innerHTML = `
+                            <div class="detail-item">
+                                <span class="label">Entry:</span>
+                                <span class="value">$${recommendation.entry_price.toLocaleString()}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="label">Target:</span>
+                                <span class="value">$${recommendation.target_1.toLocaleString()}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="label">Stop:</span>
+                                <span class="value">$${recommendation.stop_loss.toLocaleString()}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="label">R:R Ratio:</span>
+                                <span class="value">${recommendation.risk_reward_ratio.toFixed(2)}:1</span>
+                            </div>
+                        `;
+                    }
+                    
+                    // Update recommendation reason
+                    const reasonEl = container.querySelector('.recommendation-reason');
+                    if (reasonEl) {
+                        reasonEl.innerHTML = `
+                            <div class="reason-summary">${recommendation.recommendation_summary}</div>
+                            <div class="data-sources">Sources: ${recommendation.data_sources.join(', ')}</div>
+                            <div class="update-time">Updated: ${new Date(recommendation.update_time).toLocaleTimeString()}</div>
+                        `;
+                    }
+                }
+            });
+            
+            console.log('✅ AI Recommendation displayed with real-time data');
+        }
         }
 
         function displayMLPredictions(predictions) {
@@ -2961,7 +3101,7 @@ Closed at: $${result.closed_price.toLocaleString()}`;
 
         // Initialize everything
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM loaded, initializing dashboard...');
+            console.log('DOM loaded, initializing dashboard with Real-Time AI...');
             
             // Start live price updates
             updateLiveGoldPrice();
@@ -2973,9 +3113,13 @@ Closed at: $${result.closed_price.toLocaleString()}`;
                 setInterval(loadActiveSignals, 15000); // Update every 15 seconds
             }
             
-            // Load ML predictions
+            // Load ML predictions (now includes real-time AI analysis)
             loadMLPredictions();
             setInterval(loadMLPredictions, 30000); // Update every 30 seconds
+            
+            // Load detailed AI recommendations (NEW!)
+            loadAIRecommendation();
+            setInterval(loadAIRecommendation, 45000); // Update every 45 seconds
             
             // Load market news
             loadMarketNews();
@@ -2994,6 +3138,8 @@ Closed at: $${result.closed_price.toLocaleString()}`;
             
             // Initialize TradingView with delay
             setTimeout(initTradingView, 1500);
+            
+            console.log('✅ Dashboard initialized with Real-Time AI System');
         });
 
         // Global error handler
