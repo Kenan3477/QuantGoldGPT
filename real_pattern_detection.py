@@ -508,19 +508,43 @@ class RealCandlestickDetector:
             
             # Only keep very recent patterns (last 30 minutes for real-time)
             cutoff_time = datetime.now() - timedelta(minutes=30)
-            recent_patterns = [p for p in all_patterns if p['timestamp'] >= cutoff_time]
+            recent_patterns = []
+            
+            for p in all_patterns:
+                try:
+                    pattern_timestamp = p['timestamp']
+                    # Handle timezone-aware timestamps
+                    if hasattr(pattern_timestamp, 'tz') and pattern_timestamp.tz is not None:
+                        # Convert to naive datetime for comparison
+                        pattern_timestamp = pattern_timestamp.tz_localize(None)
+                    elif isinstance(pattern_timestamp, str):
+                        # Parse string timestamps
+                        pattern_timestamp = datetime.fromisoformat(pattern_timestamp.replace('Z', ''))
+                    
+                    # Compare with cutoff time
+                    if pattern_timestamp >= cutoff_time:
+                        recent_patterns.append(p)
+                except Exception as e:
+                    logger.warning(f"❌ Error processing pattern timestamp: {e}")
+                    # Include pattern anyway if timestamp processing fails
+                    recent_patterns.append(p)
             
             # Add pattern freshness scoring - handle timezone carefully
             for pattern in recent_patterns:
                 try:
                     timestamp = pattern['timestamp']
+                    # Handle different timestamp formats and timezones
                     if hasattr(timestamp, 'tz') and timestamp.tz is not None:
                         timestamp_naive = timestamp.tz_localize(None)
+                    elif isinstance(timestamp, str):
+                        timestamp_naive = datetime.fromisoformat(timestamp.replace('Z', ''))
                     else:
                         timestamp_naive = timestamp
+                    
                     time_diff = datetime.now() - timestamp_naive
-                    freshness_minutes = time_diff.total_seconds() / 60
-                except Exception:
+                    freshness_minutes = max(0, time_diff.total_seconds() / 60)
+                except Exception as e:
+                    logger.warning(f"❌ Error calculating pattern freshness: {e}")
                     freshness_minutes = 10  # Default fallback
                 
                 # Fresher patterns get higher scores
@@ -591,7 +615,7 @@ def get_real_candlestick_patterns() -> List[Dict]:
     return real_pattern_detector.detect_all_patterns()
 
 def format_patterns_for_api(patterns: List[Dict] = None) -> List[Dict]:
-    """Format detected patterns for API response with enhanced real-time data"""
+    """Format detected patterns for API response with enhanced real-time data and NaN protection"""
     if patterns is None:
         patterns = real_pattern_detector.get_latest_patterns()
     
@@ -599,52 +623,96 @@ def format_patterns_for_api(patterns: List[Dict] = None) -> List[Dict]:
     current_time = datetime.now()
     
     for pattern in patterns:
-        # Calculate precise time difference
-        pattern_time = pattern.get('timestamp', current_time)
-        if isinstance(pattern_time, str):
-            try:
-                pattern_time = datetime.fromisoformat(pattern_time.replace('Z', '+00:00'))
-            except:
-                pattern_time = current_time
-        
-        time_diff = current_time - pattern_time
-        total_seconds = int(time_diff.total_seconds())
-        
-        if total_seconds < 60:
-            time_ago = f"{total_seconds}s ago"
-        elif total_seconds < 3600:
-            minutes = total_seconds // 60
-            time_ago = f"{minutes}m ago"
-        else:
-            hours = total_seconds // 3600
-            time_ago = f"{hours}h ago"
-        
-        # Determine urgency level
-        urgency = "HIGH" if total_seconds < 300 else ("MEDIUM" if total_seconds < 900 else "LOW")
-        
-        formatted_patterns.append({
-            'pattern': pattern.get('name', pattern.get('pattern', 'Unknown')),
-            'confidence': f"{pattern.get('confidence', 75):.1f}%",
-            'signal': pattern.get('signal', 'NEUTRAL'),
-            'timeframe': pattern.get('timeframe', '1h'),
-            'time_ago': time_ago,
-            'exact_timestamp': pattern_time.strftime('%Y-%m-%d %H:%M:%S'),
-            'detection_timestamp': pattern.get('detection_time', current_time).strftime('%Y-%m-%d %H:%M:%S'),
-            'market_effect': pattern.get('market_effect', 'MEDIUM'),
-            'strength': pattern.get('strength', 'MEDIUM'),
-            'urgency': urgency,
-            'is_live': True,
-            'freshness_score': max(0, 100 - (total_seconds // 60)),
-            'data_source': pattern.get('data_source', 'Yahoo Finance'),
-            'candle_data': pattern.get('candle_data', {}),
-            'price_at_detection': pattern.get('candle_data', {}).get('close', pattern.get('close', 0))
-        })
+        try:
+            # Calculate precise time difference with error handling
+            pattern_time = pattern.get('timestamp', current_time)
+            if isinstance(pattern_time, str):
+                try:
+                    pattern_time = datetime.fromisoformat(pattern_time.replace('Z', '+00:00'))
+                except:
+                    pattern_time = current_time
+            
+            time_diff = current_time - pattern_time
+            total_seconds = max(0, int(time_diff.total_seconds()))  # Ensure non-negative
+            
+            if total_seconds < 60:
+                time_ago = f"{total_seconds}s ago"
+            elif total_seconds < 3600:
+                minutes = total_seconds // 60
+                time_ago = f"{minutes}m ago"
+            else:
+                hours = total_seconds // 3600
+                time_ago = f"{hours}h ago"
+            
+            # Determine urgency level
+            urgency = "HIGH" if total_seconds < 300 else ("MEDIUM" if total_seconds < 900 else "LOW")
+            
+            # Sanitize confidence value to prevent NaN issues
+            confidence = pattern.get('confidence', 75)
+            if pd.isna(confidence) or not isinstance(confidence, (int, float)):
+                confidence = 75
+            confidence = max(0, min(100, float(confidence)))  # Clamp between 0-100
+            
+            # Sanitize price data
+            candle_data = pattern.get('candle_data', {})
+            close_price = candle_data.get('close', 0)
+            if pd.isna(close_price) or not isinstance(close_price, (int, float)):
+                close_price = 0
+            
+            # Ensure all numeric values are valid
+            freshness_score = max(0, min(100, 100 - (total_seconds // 60)))
+            
+            formatted_pattern = {
+                'pattern': str(pattern.get('name', pattern.get('pattern', 'Unknown'))),
+                'confidence': f"{confidence:.1f}%",
+                'signal': str(pattern.get('signal', 'NEUTRAL')).upper(),
+                'timeframe': str(pattern.get('timeframe', '1h')),
+                'time_ago': time_ago,
+                'exact_timestamp': pattern_time.strftime('%Y-%m-%d %H:%M:%S'),
+                'detection_timestamp': pattern.get('detection_time', current_time).strftime('%Y-%m-%d %H:%M:%S'),
+                'market_effect': str(pattern.get('market_effect', 'MEDIUM')),
+                'strength': str(pattern.get('strength', 'MEDIUM')),
+                'urgency': urgency,
+                'is_live': True,
+                'freshness_score': freshness_score,
+                'data_source': str(pattern.get('data_source', 'Yahoo Finance')),
+                'candle_data': candle_data,
+                'price_at_detection': float(close_price) if close_price else 0.0,
+                'description': str(pattern.get('description', f"{pattern.get('name', 'Pattern')} detected with {confidence:.0f}% confidence"))
+            }
+            
+            formatted_patterns.append(formatted_pattern)
+            
+        except Exception as e:
+            logger.error(f"Error formatting pattern: {e}")
+            # Add a safe fallback pattern
+            formatted_patterns.append({
+                'pattern': 'Data Processing Error',
+                'confidence': '0.0%',
+                'signal': 'NEUTRAL',
+                'timeframe': '1h',
+                'time_ago': 'Unknown',
+                'exact_timestamp': current_time.strftime('%Y-%m-%d %H:%M:%S'),
+                'detection_timestamp': current_time.strftime('%Y-%m-%d %H:%M:%S'),
+                'market_effect': 'UNKNOWN',
+                'strength': 'LOW',
+                'urgency': 'LOW',
+                'is_live': False,
+                'freshness_score': 0,
+                'data_source': 'Error Recovery',
+                'candle_data': {},
+                'price_at_detection': 0.0,
+                'description': 'Pattern data could not be processed'
+            })
     
     # Sort by urgency and freshness
-    formatted_patterns.sort(key=lambda x: (
-        x['urgency'] == 'HIGH',
-        x['freshness_score']
-    ), reverse=True)
+    try:
+        formatted_patterns.sort(key=lambda x: (
+            x['urgency'] == 'HIGH',
+            x['freshness_score']
+        ), reverse=True)
+    except Exception as e:
+        logger.error(f"Error sorting patterns: {e}")
     
     return formatted_patterns
 

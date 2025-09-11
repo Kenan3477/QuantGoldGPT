@@ -1843,19 +1843,24 @@ def get_learning_status():
 
 @app.route('/api/live/patterns')
 def get_live_patterns():
-    """Get REAL live candlestick patterns - NO SIMULATION"""
+    """Get REAL live candlestick patterns with comprehensive NaN/undefined protection"""
     try:
-        print("� PATTERN ENDPOINT CALLED!")
-        logger.info("� PATTERN ENDPOINT CALLED!")
+        print("🎯 PATTERN ENDPOINT CALLED!")
+        logger.info("🎯 PATTERN ENDPOINT CALLED!")
         
         # Get real-time patterns using the detection system
         from real_pattern_detection import get_real_candlestick_patterns, format_patterns_for_api
         
-        # Get current gold price
+        # Get current gold price with error handling
         try:
             gold_response = get_gold_price()
             gold_data = gold_response.get_json()
             current_price = gold_data.get('price', 3540.0)
+            
+            # Validate current_price to prevent NaN issues
+            if not isinstance(current_price, (int, float)) or pd.isna(current_price):
+                current_price = 3540.0
+                
         except Exception as e:
             logger.error(f"❌ Price fetching error: {e}")
             current_price = 3540.0
@@ -1865,21 +1870,65 @@ def get_live_patterns():
         real_patterns = get_real_candlestick_patterns()
         
         if real_patterns and len(real_patterns) > 0:
-            # Format patterns for API response
+            # Format patterns for API response with NaN protection
             formatted_patterns = format_patterns_for_api(real_patterns)
             
-            logger.info(f"✅ REAL PATTERNS DETECTED: {len(formatted_patterns)} patterns found")
+            # Validate all numeric values in response
+            live_count = 0
+            for pattern in formatted_patterns:
+                try:
+                    # Ensure freshness_score is valid
+                    if 'freshness_score' in pattern:
+                        score = pattern['freshness_score']
+                        if pd.isna(score) or not isinstance(score, (int, float)):
+                            pattern['freshness_score'] = 0
+                        else:
+                            pattern['freshness_score'] = max(0, min(100, float(score)))
+                    
+                    # Count live patterns safely
+                    if pattern.get('is_live', False):
+                        live_count += 1
+                        
+                except Exception as e:
+                    logger.error(f"❌ Pattern validation error: {e}")
+                    # Set safe defaults
+                    pattern['freshness_score'] = 0
+                    pattern['is_live'] = False
             
-            return jsonify({
+            # Create safe response with all values validated
+            response_data = {
                 'success': True,
                 'current_patterns': formatted_patterns,
                 'recent_patterns': formatted_patterns,
-                'current_price': current_price,
+                'current_price': float(current_price),
                 'total_patterns_detected': len(formatted_patterns),
+                'live_pattern_count': live_count,
                 'data_source': 'LIVE_YAHOO_FINANCE',
                 'last_updated': datetime.now().isoformat(),
-                'scan_status': 'ACTIVE'
-            })
+                'scan_status': 'ACTIVE',
+                'scan_quality': 'HIGH' if len(formatted_patterns) > 2 else 'MEDIUM'
+            }
+            
+            # Add most recent pattern info safely
+            if formatted_patterns:
+                try:
+                    most_recent = formatted_patterns[0]
+                    response_data['most_recent_pattern'] = {
+                        'pattern': str(most_recent.get('pattern', 'Unknown')),
+                        'confidence': str(most_recent.get('confidence', '0%')),
+                        'time_ago': str(most_recent.get('time_ago', 'Unknown'))
+                    }
+                except Exception as e:
+                    logger.error(f"❌ Most recent pattern error: {e}")
+                    response_data['most_recent_pattern'] = {
+                        'pattern': 'Data Error',
+                        'confidence': '0%',
+                        'time_ago': 'Unknown'
+                    }
+            
+            logger.info(f"✅ REAL PATTERNS DETECTED: {len(formatted_patterns)} patterns found")
+            
+            return jsonify(response_data)
         else:
             # If no real patterns found, return empty but valid response
             logger.info("📊 No patterns detected in current market scan")
@@ -1888,20 +1937,29 @@ def get_live_patterns():
                 'success': True,
                 'current_patterns': [],
                 'recent_patterns': [],
-                'current_price': current_price,
+                'current_price': float(current_price),
                 'total_patterns_detected': 0,
+                'live_pattern_count': 0,
                 'data_source': 'LIVE_YAHOO_FINANCE',
                 'last_updated': datetime.now().isoformat(),
-                'scan_status': 'NO_PATTERNS_DETECTED'
+                'scan_status': 'NO_PATTERNS_DETECTED',
+                'scan_quality': 'MEDIUM'
             })
         
     except Exception as e:
         logger.error(f"❌ Real pattern detection error: {e}")
+        # Return safe error response with no NaN values
         return jsonify({
             'success': False, 
             'error': str(e),
             'current_patterns': [],
-            'data_source': 'ERROR'
+            'recent_patterns': [],
+            'current_price': 3540.0,
+            'total_patterns_detected': 0,
+            'live_pattern_count': 0,
+            'data_source': 'ERROR',
+            'last_updated': datetime.now().isoformat(),
+            'scan_status': 'ERROR'
         })
 
 @app.route('/api/live/news')

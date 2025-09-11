@@ -2205,7 +2205,10 @@ Closed at: $${result.closed_price.toLocaleString()}`;
                 return;
             }
             
-            if (!predictions || !Array.isArray(predictions) || predictions.length === 0) {
+            // Sanitize predictions data to prevent NaN/undefined issues
+            const sanitizedPredictions = sanitizeMLPredictions(predictions);
+            
+            if (!sanitizedPredictions || sanitizedPredictions.length === 0) {
                 console.log('No predictions to display');
                 container.innerHTML = `
                     <div class="no-data">
@@ -2216,47 +2219,58 @@ Closed at: $${result.closed_price.toLocaleString()}`;
                 return;
             }
 
-            console.log('📊 Displaying', predictions.length, 'predictions');
+            console.log('📊 Displaying', sanitizedPredictions.length, 'sanitized predictions');
             
-            container.innerHTML = predictions.map(pred => {
-                const signal = pred.signal || pred.direction || 'NEUTRAL';
-                const confidence = pred.confidence || 0.5;
-                const timeframe = pred.timeframe || 'Unknown';
-                const prediction = pred.prediction || `${signal} Signal`;
-                const color = pred.color || '#66ccff';
-                const timestamp = pred.timestamp || new Date().toLocaleTimeString();
+            container.innerHTML = sanitizedPredictions.map(pred => {
+                const signal = validateString(pred.signal, 'NEUTRAL');
+                const confidence = validateNumber(pred.confidence, 0.5);
+                const timeframe = validateString(pred.timeframe, 'Unknown');
+                const prediction = validateString(pred.prediction, `${signal} Signal`);
+                const color = validateString(pred.color, '#66ccff');
+                const timestamp = validateString(pred.timestamp, new Date().toLocaleTimeString());
                 
-                // Enhanced display for price targets
+                // Enhanced display for price targets with null protection
                 let targetInfo = '';
-                if (pred.targets) {
+                if (pred.targets && typeof pred.targets === 'object') {
+                    const t1 = validateNumber(pred.targets.target_1);
+                    const t2 = validateNumber(pred.targets.target_2);
+                    const t3 = validateNumber(pred.targets.target_3);
+                    const stopLoss = validateNumber(pred.stop_loss);
+                    
                     targetInfo = `
                         <div class="prediction-targets" style="font-size: 0.9em; margin-top: 8px;">
-                            <div style="color: #00ff88;">🎯 T1: $${pred.targets.target_1?.toLocaleString() || 'N/A'}</div>
-                            <div style="color: #ffaa00;">🎯 T2: $${pred.targets.target_2?.toLocaleString() || 'N/A'}</div>
-                            <div style="color: #ff6600;">🎯 T3: $${pred.targets.target_3?.toLocaleString() || 'N/A'}</div>
-                            <div style="color: #ff4444;">🛑 Stop: $${pred.stop_loss?.toLocaleString() || 'N/A'}</div>
+                            <div style="color: #00ff88;">🎯 T1: ${t1 > 0 ? `$${t1.toLocaleString()}` : 'N/A'}</div>
+                            <div style="color: #ffaa00;">🎯 T2: ${t2 > 0 ? `$${t2.toLocaleString()}` : 'N/A'}</div>
+                            <div style="color: #ff6600;">🎯 T3: ${t3 > 0 ? `$${t3.toLocaleString()}` : 'N/A'}</div>
+                            <div style="color: #ff4444;">🛑 Stop: ${stopLoss > 0 ? `$${stopLoss.toLocaleString()}` : 'N/A'}</div>
                         </div>
                     `;
                 }
                 
-                // Price change indicator
+                // Price change indicator with NaN protection
                 let priceChangeInfo = '';
-                if (pred.price_change !== undefined) {
-                    const changeColor = pred.price_change > 0 ? '#00ff88' : pred.price_change < 0 ? '#ff4444' : '#ffaa00';
+                const priceChange = validateNumber(pred.price_change);
+                const priceChangePct = validateNumber(pred.price_change_pct);
+                
+                if (priceChange !== 0 || priceChangePct !== 0) {
+                    const changeColor = priceChange > 0 ? '#00ff88' : priceChange < 0 ? '#ff4444' : '#ffaa00';
                     priceChangeInfo = `
                         <div class="prediction-change" style="color: ${changeColor}; margin-top: 5px;">
-                            ${pred.price_change > 0 ? '+' : ''}${pred.price_change.toFixed(2)} 
-                            (${pred.price_change_pct > 0 ? '+' : ''}${pred.price_change_pct?.toFixed(2) || '0.00'}%)
+                            ${priceChange > 0 ? '+' : ''}${priceChange.toFixed(2)} 
+                            (${priceChangePct > 0 ? '+' : ''}${priceChangePct.toFixed(2)}%)
                         </div>
                     `;
                 }
                 
-                // Support/Resistance levels
+                // Support/Resistance levels with validation
                 let levelInfo = '';
-                if (pred.support && pred.resistance) {
+                const support = validateNumber(pred.support);
+                const resistance = validateNumber(pred.resistance);
+                
+                if (support > 0 && resistance > 0) {
                     levelInfo = `
                         <div class="prediction-levels" style="font-size: 0.85em; margin-top: 6px; color: #ccc;">
-                            📈 R: $${pred.resistance?.toLocaleString() || 'N/A'} | 📉 S: $${pred.support?.toLocaleString() || 'N/A'}
+                            📈 R: $${resistance.toLocaleString()} | 📉 S: $${support.toLocaleString()}
                         </div>
                     `;
                 }
@@ -2297,7 +2311,7 @@ Closed at: $${result.closed_price.toLocaleString()}`;
             }).join('');
         }
 
-        // Live Patterns Functions - Enhanced Real-Time Detection
+        // Live Patterns Functions - Enhanced Real-Time Detection with NaN/Undefined Protection
         function loadLivePatterns() {
             console.log('🔍 LIVE PATTERN SCAN: Starting real-time pattern detection...');
             console.log('📡 FETCH REQUEST: Calling /api/live/patterns endpoint');
@@ -2317,31 +2331,40 @@ Closed at: $${result.closed_price.toLocaleString()}`;
                 .then(data => {
                     console.log('📊 LIVE PATTERN DATA:', data);
                     
-                    if (data.success) {
-                        console.log(`✅ SCAN SUCCESS: ${data.pattern_count} patterns detected`);
-                        console.log(`🔴 LIVE COUNT: ${data.live_pattern_count || 0} live patterns`);
-                        console.log(`📈 DATA SOURCE: ${data.data_source}`);
-                        console.log(`⏰ SCAN TIME: ${data.scan_timestamp}`);
+                    // CRITICAL: Validate and sanitize all incoming data
+                    const sanitizedData = sanitizePatternData(data);
+                    
+                    if (sanitizedData.success) {
+                        const patternCount = validateNumber(sanitizedData.total_patterns_detected) || 0;
+                        const liveCount = validateNumber(sanitizedData.live_pattern_count) || 0;
                         
-                        displayLivePatterns(data);
-                        updatePatternsStatus(data.pattern_count, data.scan_status);
+                        console.log(`✅ SCAN SUCCESS: ${patternCount} patterns detected`);
+                        console.log(`🔴 LIVE COUNT: ${liveCount} live patterns`);
+                        console.log(`📈 DATA SOURCE: ${sanitizedData.data_source || 'Unknown'}`);
+                        console.log(`⏰ SCAN TIME: ${sanitizedData.last_updated || 'Unknown'}`);
+                        
+                        displayLivePatterns(sanitizedData);
+                        updatePatternsStatus(patternCount, sanitizedData.scan_status);
                         
                         // Show scan quality indicator
-                        if (data.scan_quality === 'HIGH') {
+                        if (sanitizedData.scan_quality === 'HIGH') {
                             console.log('🟢 HIGH QUALITY SCAN - Reliable data detected');
                         } else {
                             console.log('🟡 MEDIUM QUALITY SCAN - Limited data available');
                         }
                         
                         // Log most recent pattern for debugging
-                        if (data.most_recent_pattern) {
-                            console.log(`🎯 LATEST PATTERN: ${data.most_recent_pattern.pattern} (${data.most_recent_pattern.confidence}) - ${data.most_recent_pattern.time_ago}`);
+                        if (sanitizedData.most_recent_pattern && validateString(sanitizedData.most_recent_pattern.pattern)) {
+                            const pattern = sanitizedData.most_recent_pattern;
+                            const confidence = validateNumber(pattern.confidence) || 0;
+                            const timeAgo = validateString(pattern.time_ago) || 'Unknown time';
+                            console.log(`🎯 LATEST PATTERN: ${pattern.pattern} (${confidence.toFixed(1)}%) - ${timeAgo}`);
                         }
                         
                     } else {
-                        console.error('❌ SCAN FAILED:', data.error);
-                        console.error('📍 ERROR SOURCE:', data.data_source);
-                        displayPatternsError(data.error || 'Pattern scan failed');
+                        console.error('❌ SCAN FAILED:', sanitizedData.error);
+                        console.error('📍 ERROR SOURCE:', sanitizedData.data_source);
+                        displayPatternsError(sanitizedData.error || 'Pattern scan failed');
                     }
                 })
                 .catch(error => {
@@ -2352,12 +2375,144 @@ Closed at: $${result.closed_price.toLocaleString()}`;
                 });
         }
 
+        // Data Validation and Sanitization Functions - CRITICAL FOR NaN/UNDEFINED PROTECTION
+        function validateNumber(value, fallback = 0) {
+            if (value === null || value === undefined || value === '' || isNaN(value)) {
+                return fallback;
+            }
+            const num = parseFloat(value);
+            return isNaN(num) ? fallback : num;
+        }
+
+        function validateString(value, fallback = '') {
+            if (value === null || value === undefined || typeof value !== 'string') {
+                return fallback;
+            }
+            return value.toString().trim() || fallback;
+        }
+
+        function validateArray(value, fallback = []) {
+            if (!Array.isArray(value)) {
+                return fallback;
+            }
+            return value;
+        }
+
+        function validateObject(value, fallback = {}) {
+            if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+                return fallback;
+            }
+            return value;
+        }
+
+        function sanitizePatternData(data) {
+            if (!data || typeof data !== 'object') {
+                return {
+                    success: false,
+                    error: 'Invalid data received',
+                    current_patterns: [],
+                    recent_patterns: [],
+                    total_patterns_detected: 0
+                };
+            }
+
+            // Sanitize main properties
+            const sanitized = {
+                success: Boolean(data.success),
+                current_patterns: validateArray(data.current_patterns).map(sanitizePattern),
+                recent_patterns: validateArray(data.recent_patterns).map(sanitizePattern),
+                total_patterns_detected: validateNumber(data.total_patterns_detected),
+                live_pattern_count: validateNumber(data.live_pattern_count),
+                data_source: validateString(data.data_source, 'Unknown'),
+                last_updated: validateString(data.last_updated),
+                scan_status: validateString(data.scan_status, 'UNKNOWN'),
+                scan_quality: validateString(data.scan_quality, 'MEDIUM'),
+                error: validateString(data.error),
+                current_price: validateNumber(data.current_price)
+            };
+
+            // Sanitize most recent pattern if exists
+            if (data.most_recent_pattern && typeof data.most_recent_pattern === 'object') {
+                sanitized.most_recent_pattern = sanitizePattern(data.most_recent_pattern);
+            }
+
+            return sanitized;
+        }
+
+        function sanitizePattern(pattern) {
+            if (!pattern || typeof pattern !== 'object') {
+                return {
+                    pattern: 'Unknown Pattern',
+                    confidence: 0,
+                    signal: 'NEUTRAL',
+                    timestamp: new Date().toISOString(),
+                    description: 'Pattern data unavailable'
+                };
+            }
+
+            return {
+                pattern: validateString(pattern.pattern || pattern.name, 'Unknown Pattern'),
+                confidence: validateNumber(pattern.confidence, 0),
+                signal: validateString(pattern.signal, 'NEUTRAL').toUpperCase(),
+                timestamp: validateString(pattern.timestamp || pattern.exact_timestamp, new Date().toISOString()),
+                description: validateString(pattern.description, 'No description available'),
+                timeframe: validateString(pattern.timeframe, '1M'),
+                time_ago: validateString(pattern.time_ago, 'Unknown time'),
+                strength: validateString(pattern.strength, 'MEDIUM'),
+                market_effect: validateString(pattern.market_effect, 'NEUTRAL'),
+                urgency: validateString(pattern.urgency, 'LOW'),
+                is_live: Boolean(pattern.is_live),
+                freshness_score: validateNumber(pattern.freshness_score, 0),
+                data_source: validateString(pattern.data_source, 'Unknown'),
+                price_at_detection: validateNumber(pattern.price_at_detection),
+                candle_data: validateObject(pattern.candle_data)
+            };
+        }
+
+        function sanitizeMLPredictions(predictions) {
+            if (!Array.isArray(predictions)) {
+                return [];
+            }
+
+            return predictions.map(pred => {
+                const sanitized = {
+                    signal: validateString(pred.signal || pred.direction, 'NEUTRAL').toUpperCase(),
+                    confidence: validateNumber(pred.confidence, 0.5),
+                    timeframe: validateString(pred.timeframe, 'Unknown'),
+                    prediction: validateString(pred.prediction, 'No prediction available'),
+                    color: validateString(pred.color, '#66ccff'),
+                    timestamp: validateString(pred.timestamp, new Date().toLocaleTimeString()),
+                    current_price: validateNumber(pred.current_price),
+                    predicted_price: validateNumber(pred.predicted_price),
+                    price_change: validateNumber(pred.price_change),
+                    price_change_pct: validateNumber(pred.price_change_pct),
+                    stop_loss: validateNumber(pred.stop_loss),
+                    support: validateNumber(pred.support),
+                    resistance: validateNumber(pred.resistance),
+                    volatility: validateNumber(pred.volatility),
+                    targets: validateObject(pred.targets, {})
+                };
+
+                // Sanitize targets if they exist
+                if (pred.targets && typeof pred.targets === 'object') {
+                    sanitized.targets = {
+                        target_1: validateNumber(pred.targets.target_1),
+                        target_2: validateNumber(pred.targets.target_2),
+                        target_3: validateNumber(pred.targets.target_3)
+                    };
+                }
+
+                return sanitized;
+            });
+        }
+
         function displayLivePatterns(data) {
             const container = document.getElementById('live-patterns-content');
             if (!container) return;
 
-            const patterns = data.current_patterns || [];
-            const recentPatterns = data.recent_patterns || [];
+            // Use sanitized pattern arrays
+            const patterns = validateArray(data.current_patterns);
+            const recentPatterns = validateArray(data.recent_patterns);
             
             if (patterns.length === 0 && recentPatterns.length === 0) {
                 container.innerHTML = `
@@ -2371,15 +2526,16 @@ Closed at: $${result.closed_price.toLocaleString()}`;
 
             let html = '';
             
-            // Current patterns (high priority)
+            // Current patterns (high priority) - all already sanitized
             patterns.forEach(pattern => {
                 html += createPatternHTML(pattern, true);
             });
             
-            // Recent patterns
+            // Recent patterns - avoid duplicates
             recentPatterns.slice(0, 5).forEach(pattern => {
-                if (!patterns.find(p => p.pattern === pattern.pattern && 
-                    Math.abs(new Date(p.timestamp) - new Date(pattern.timestamp)) < 60000)) {
+                if (!patterns.find(p => 
+                    validateString(p.pattern) === validateString(pattern.pattern) && 
+                    Math.abs(new Date(validateString(p.timestamp)) - new Date(validateString(pattern.timestamp))) < 60000)) {
                     html += createPatternHTML(pattern, false);
                 }
             });
@@ -2388,19 +2544,25 @@ Closed at: $${result.closed_price.toLocaleString()}`;
         }
 
         function createPatternHTML(pattern, isCurrent) {
-            const timeAgo = getTimeAgo(pattern.timestamp);
+            // All values are already sanitized, but double-check for safety
+            const patternName = validateString(pattern.pattern, 'Unknown Pattern');
+            const confidence = validateNumber(pattern.confidence, 0);
+            const signal = validateString(pattern.signal, 'NEUTRAL').toLowerCase();
+            const description = validateString(pattern.description, 'No description available');
+            const timeAgo = validateString(pattern.time_ago, 'Unknown time');
+            
             const opacity = isCurrent ? '' : 'style="opacity: 0.7"';
             
             return `
                 <div class="pattern-item" ${opacity}>
                     <div class="pattern-header">
-                        <div class="pattern-name">${pattern.pattern}</div>
-                        <div class="pattern-signal ${pattern.signal}">${pattern.signal.toUpperCase()}</div>
+                        <div class="pattern-name">${patternName}</div>
+                        <div class="pattern-signal ${signal}">${signal.toUpperCase()}</div>
                     </div>
-                    <div class="pattern-description">${pattern.description}</div>
+                    <div class="pattern-description">${description}</div>
                     <div class="pattern-meta">
                         <div class="pattern-confidence">
-                            Confidence: ${(pattern.confidence * 100).toFixed(0)}%
+                            Confidence: ${confidence.toFixed(0)}%
                         </div>
                         <div class="pattern-time">${timeAgo}</div>
                     </div>
@@ -2408,12 +2570,15 @@ Closed at: $${result.closed_price.toLocaleString()}`;
             `;
         }
 
-        function updatePatternsStatus(totalDetected) {
+        function updatePatternsStatus(totalDetected, scanStatus) {
             const statusElement = document.getElementById('patterns-status');
             if (statusElement) {
+                const safeCount = validateNumber(totalDetected, 0);
+                const safeScanStatus = validateString(scanStatus, 'Unknown');
+                
                 statusElement.innerHTML = `
                     <div class="status-dot active"></div>
-                    <span>${totalDetected} detected</span>
+                    <span>${safeCount} detected</span>
                 `;
             }
         }
