@@ -1411,42 +1411,6 @@ def get_ml_predictions():
                 'error': str(e)
             }
         })
-                'color': {
-                    'BULLISH': '#00ff88',
-                    'BEARISH': '#ff4444', 
-                    'NEUTRAL': '#ffaa00'
-                }.get(analysis_summary['consensus'], '#66ccff'),
-                'timestamp': datetime.now().strftime('%H:%M:%S'),
-                'timeframe': 'CONSENSUS',
-                'type': 'consensus'
-            })
-        
-        logger.info(f"✅ ML Predictions generated: {len(formatted_predictions)} entries")
-        
-        return jsonify({
-            'success': True,
-            'predictions': formatted_predictions,
-            'model_status': 'ACTIVE',
-            'analysis_summary': analysis_summary,
-            'raw_predictions': predictions,
-            'timestamp': datetime.now().isoformat()
-        })
-        
-    except Exception as e:
-        logger.error(f"❌ ML predictions error: {e}")
-        # Fallback to basic predictions if ML fails
-        return jsonify({
-            'success': False,
-            'error': f"ML system temporarily unavailable: {str(e)}",
-            'predictions': [{
-                'signal': 'SYSTEM ERROR',
-                'confidence': 0.0,
-                'prediction': 'ML prediction system is initializing...',
-                'color': '#ff6600',
-                'timestamp': datetime.now().strftime('%H:%M:%S')
-            }],
-            'model_status': 'ERROR'
-        }), 500
 
 @app.route('/api/market-news')
 def get_news():
