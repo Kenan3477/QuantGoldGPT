@@ -664,7 +664,7 @@ def format_patterns_for_api(patterns: List[Dict] = None) -> List[Dict]:
             
             formatted_pattern = {
                 'pattern': str(pattern.get('name', pattern.get('pattern', 'Unknown'))),
-                'confidence': f"{confidence:.1f}%",
+                'confidence': float(confidence),  # Return numeric value, not string with %
                 'signal': str(pattern.get('signal', 'NEUTRAL')).upper(),
                 'timeframe': str(pattern.get('timeframe', '1h')),
                 'time_ago': time_ago,

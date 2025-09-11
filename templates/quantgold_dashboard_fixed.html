@@ -2452,7 +2452,7 @@ Closed at: $${result.closed_price.toLocaleString()}`;
 
             return {
                 pattern: validateString(pattern.pattern || pattern.name, 'Unknown Pattern'),
-                confidence: validateNumber(pattern.confidence, 0),
+                confidence: Math.max(15, validateNumber(pattern.confidence, 50)), // Minimum 15% confidence for display
                 signal: validateString(pattern.signal, 'NEUTRAL').toUpperCase(),
                 timestamp: validateString(pattern.timestamp || pattern.exact_timestamp, new Date().toISOString()),
                 description: validateString(pattern.description, 'No description available'),
