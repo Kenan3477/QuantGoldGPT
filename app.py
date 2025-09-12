@@ -997,10 +997,7 @@ def debug_info():
         'running_from': __file__ if '__file__' in globals() else 'unknown'
     })
 
-@app.route('/')
-def root():
-    """Root endpoint that redirects to dashboard"""
-    return redirect('/dashboard')
+# Duplicate route removed - using index() function above
 
 @app.route('/health')
 def health_check():
