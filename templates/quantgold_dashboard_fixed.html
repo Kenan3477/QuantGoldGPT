@@ -1863,14 +1863,41 @@
             }
         }
 
-        // Live price update function
+        // Live price update function with enhanced debugging
         function updateLiveGoldPrice() {
+            const startTime = Date.now();
+            console.log('🔄 Starting updateLiveGoldPrice...');
+            
+            // Add debugging element if it exists
+            const debugInfo = document.getElementById('debug-info');
+            if (debugInfo) {
+                debugInfo.innerHTML += '<br>🔄 Fetching live gold price...';
+            }
+            
             fetch('/api/live-gold-price')
-                .then(response => response.json())
+                .then(response => {
+                    const fetchTime = Date.now() - startTime;
+                    console.log(`📡 Price API response received in ${fetchTime}ms, status:`, response.status);
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+                    return response.json();
+                })
                 .then(data => {
+                    const totalTime = Date.now() - startTime;
+                    console.log(`📊 Price data parsed in total ${totalTime}ms:`, data);
+                    
+                    if (debugInfo) {
+                        debugInfo.innerHTML += `<br>✅ Price received: $${data.price} (${totalTime}ms)`;
+                    }
+                    
                     if (data.success && data.price) {
                         const priceElement = document.getElementById('live-gold-price');
                         const aiSignalElement = document.getElementById('ai-signal-status');
+                        
+                        console.log('🔍 Found price element:', priceElement);
+                        console.log('🔍 Found AI signal element:', aiSignalElement);
                         
                         if (priceElement) {
                             // Get old price for comparison
@@ -1884,10 +1911,13 @@
                             // Add visual feedback for price changes
                             if (newPrice > oldPrice) {
                                 priceElement.style.color = '#4CAF50'; // Green for up
+                                console.log(`📈 Price increased: $${oldPrice} → $${newPrice}`);
                             } else if (newPrice < oldPrice) {
                                 priceElement.style.color = '#f44336'; // Red for down  
+                                console.log(`📉 Price decreased: $${oldPrice} → $${newPrice}`);
                             } else {
                                 priceElement.style.color = '#d4af37'; // Gold for no change
+                                console.log(`➡️ Price unchanged: $${newPrice}`);
                             }
                             
                             // Reset color after 2 seconds
@@ -1895,13 +1925,25 @@
                                 priceElement.style.color = '#d4af37';
                             }, 2000);
                             
-                            console.log(`✅ Gold price updated: $${newPrice} (Source: ${data.source || 'API'})`);
+                            console.log(`✅ Gold price updated successfully: $${newPrice} (Source: ${data.source || 'API'})`);
+                            
+                            if (debugInfo) {
+                                debugInfo.innerHTML += `<br>✅ Price displayed: $${newPrice}`;
+                            }
+                        } else {
+                            console.error('❌ Price element not found in DOM!');
+                            if (debugInfo) {
+                                debugInfo.innerHTML += '<br>❌ Price element missing!';
+                            }
                         }
 
                         // Update AI signal status
                         if (aiSignalElement) {
                             aiSignalElement.textContent = 'Active';
                             aiSignalElement.style.color = '#4CAF50';
+                            console.log('✅ AI signal status updated');
+                        } else {
+                            console.log('ℹ️ AI signal element not found (optional)');
                         }
                     } else {
                         console.error('❌ Invalid price data received:', data);
@@ -1916,10 +1958,19 @@
                             aiSignalElement.textContent = 'Price Error';
                             aiSignalElement.style.color = '#f44336';
                         }
+                        
+                        if (debugInfo) {
+                            debugInfo.innerHTML += '<br>❌ Invalid price data';
+                        }
                     }
                 })
                 .catch(error => {
-                    console.error('❌ Error updating gold price:', error);
+                    const errorTime = Date.now() - startTime;
+                    console.error(`❌ Error updating gold price after ${errorTime}ms:`, error);
+                    
+                    if (debugInfo) {
+                        debugInfo.innerHTML += `<br>❌ Price error: ${error.message}`;
+                    }
                     
                     const priceElement = document.getElementById('live-gold-price');
                     const aiSignalElement = document.getElementById('ai-signal-status');
@@ -2154,28 +2205,82 @@ Closed at: $${result.closed_price.toLocaleString()}`;
 
         // Load predictions and news data - ENHANCED WITH REAL-TIME AI
         function loadMLPredictions() {
+            const startTime = Date.now();
             console.log('🔄 Loading Real-Time AI predictions...');
+            
+            const debugInfo = document.getElementById('debug-info');
+            if (debugInfo) {
+                debugInfo.innerHTML += '<br>🧠 Loading AI predictions...';
+            }
+            
+            // Add visual feedback
+            const container = document.getElementById('predictions-container');
+            if (!container) {
+                console.error('❌ predictions-container not found in DOM!');
+                if (debugInfo) {
+                    debugInfo.innerHTML += '<br>❌ predictions-container missing!';
+                }
+                return;
+            }
+            
+            container.innerHTML = `
+                <div style="text-align: center; padding: 20px; color: #00ff00;">
+                    <i class="fas fa-spinner fa-spin"></i> Loading AI Predictions...
+                </div>
+            `;
+            
             fetch('/api/ml-predictions')
                 .then(response => {
-                    console.log('📡 AI predictions response status:', response.status);
+                    const fetchTime = Date.now() - startTime;
+                    console.log(`📡 ML predictions response status: ${response.status} (${fetchTime}ms)`);
+                    
+                    if (debugInfo) {
+                        debugInfo.innerHTML += `<br>📡 ML API response: ${response.status}`;
+                    }
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
                     return response.json();
                 })
                 .then(data => {
-                    console.log('📊 Real-Time AI data received:', data);
+                    const totalTime = Date.now() - startTime;
+                    console.log(`📊 Real-Time AI data received (${totalTime}ms):`, data);
+                    
+                    if (debugInfo) {
+                        debugInfo.innerHTML += `<br>📊 ML data received (${totalTime}ms)`;
+                    }
+                    
                     if (data.success && data.predictions) {
+                        console.log(`✅ Processing ${data.predictions.length} AI predictions...`);
+                        
+                        if (debugInfo) {
+                            debugInfo.innerHTML += `<br>✅ Processing ${data.predictions.length} predictions`;
+                        }
+                        
                         // Display the real-time AI predictions
                         displayMLPredictions(data.predictions);
                         
                         // Also update AI recommendation panel if it exists
                         if (data.ai_analysis) {
+                            console.log('📈 Updating AI recommendation panel...');
                             updateAIRecommendationPanel(data.ai_analysis);
                         }
+                        
+                        if (debugInfo) {
+                            debugInfo.innerHTML += '<br>✅ ML predictions displayed';
+                        }
                     } else {
-                        console.log('No AI predictions available in response');
-                        document.getElementById('predictions-container').innerHTML = `
+                        console.log('⚠️ No AI predictions available in response');
+                        if (debugInfo) {
+                            debugInfo.innerHTML += '<br>⚠️ No predictions available';
+                        }
+                        
+                        container.innerHTML = `
                             <div class="no-data">
                                 <i class="fas fa-brain" style="font-size: 2em; color: #666; margin-bottom: 10px;"></i>
                                 <div>AI analysis temporarily unavailable</div>
+                                <div style="font-size: 0.8em; color: #888; margin-top: 5px;">Response: ${JSON.stringify(data).substring(0, 100)}...</div>
                             </div>
                         `;
                     }
@@ -3099,21 +3204,68 @@ Closed at: $${result.closed_price.toLocaleString()}`;
             });
         }
 
-        // Initialize everything
+        // Initialize everything with enhanced debugging
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM loaded, initializing dashboard with Real-Time AI...');
+            console.log('🚀 DOM loaded, initializing dashboard with Real-Time AI...');
+            
+            // Add visual debugging with more visibility
+            const debugInfo = document.createElement('div');
+            debugInfo.id = 'debug-info';
+            debugInfo.style.position = 'fixed';
+            debugInfo.style.top = '10px';
+            debugInfo.style.right = '10px';
+            debugInfo.style.background = 'rgba(0,0,0,0.9)';
+            debugInfo.style.color = '#00ff00';
+            debugInfo.style.padding = '15px';
+            debugInfo.style.fontSize = '12px';
+            debugInfo.style.zIndex = '99999';
+            debugInfo.style.borderRadius = '8px';
+            debugInfo.style.border = '2px solid #00ff00';
+            debugInfo.style.maxHeight = '300px';
+            debugInfo.style.overflow = 'auto';
+            debugInfo.style.minWidth = '350px';
+            debugInfo.innerHTML = '🔍 QuantGold Dashboard Loading...';
+            document.body.appendChild(debugInfo);
+            
+            let debugCount = 0;
+            function addDebug(message) {
+                debugCount++;
+                const timestamp = new Date().toLocaleTimeString();
+                const logMessage = `[${timestamp}] ${debugCount}. ${message}`;
+                console.log(logMessage);
+                debugInfo.innerHTML += `<br>${logMessage}`;
+                debugInfo.scrollTop = debugInfo.scrollHeight;
+            }
+            
+            addDebug('✅ DOM Ready');
+            
+            // Check if containers exist with detailed logging
+            const containers = ['predictions-container', 'live-patterns-content', 'news-container', 'live-gold-price'];
+            containers.forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    addDebug(`✅ Found ${id}`);
+                } else {
+                    addDebug(`❌ Missing ${id}`);
+                }
+            });
             
             // Start live price updates
+            addDebug('🔄 Starting price updates...');
             updateLiveGoldPrice();
             setInterval(updateLiveGoldPrice, 15000); // Update every 15 seconds
             
             // Load active signals if signals section exists
             if (document.querySelector('.signals-list')) {
+                addDebug('✅ Found signals section');
                 loadActiveSignals();
                 setInterval(loadActiveSignals, 15000); // Update every 15 seconds
+            } else {
+                addDebug('ℹ️ No signals section found');
             }
             
             // Load ML predictions (now includes real-time AI analysis)
+            addDebug('🔄 Loading ML predictions...');
             loadMLPredictions();
             setInterval(loadMLPredictions, 30000); // Update every 30 seconds
             
