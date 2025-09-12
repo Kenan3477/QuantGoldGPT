@@ -992,7 +992,7 @@ def debug_info():
         'python_version': sys.version,
         'active_signals_count': len(active_signals),
         'active_signals': active_signals,
-        'test_gold_price': get_gold_price().get_json(),
+        'test_gold_price': get_gold_price_alt().get_json(),
         'file_timestamp': datetime.now().isoformat(),
         'running_from': __file__ if '__file__' in globals() else 'unknown'
     })
@@ -1020,7 +1020,7 @@ def generate_signal():
     
     try:
         # Get REAL current gold price first
-        gold_response = get_gold_price()
+        gold_response = get_gold_price_alt()
         gold_data = gold_response.get_json()
         current_gold_price = gold_data.get('price', 3540.0)
         
@@ -1576,7 +1576,7 @@ def get_tracked_signals():
     
     try:
         # Get REAL current gold price for accurate P&L calculation
-        current_gold_response = get_gold_price()
+        current_gold_response = get_gold_price_alt()
         current_gold_data = current_gold_response.get_json()
         current_price = current_gold_data.get('price', 3540.0)
         
@@ -1884,7 +1884,7 @@ def get_live_patterns():
         
         # Get current gold price with error handling
         try:
-            gold_response = get_gold_price()
+            gold_response = get_gold_price_alt()
             gold_data = gold_response.get_json()
             current_price = gold_data.get('price', 3540.0)
             
@@ -2063,7 +2063,7 @@ def get_live_news():
         
         # Get current price
         try:
-            gold_response = get_gold_price()
+            gold_response = get_gold_price_alt()
             gold_data = gold_response.get_json()
             current_price = gold_data.get('price', 3540.0)
         except:
@@ -2103,7 +2103,7 @@ def get_live_dashboard_data():
     try:
         # Get current gold price
         try:
-            gold_response = get_gold_price()
+            gold_response = get_gold_price_alt()
             gold_data = gold_response.get_json()
             current_price = gold_data.get('price', 3540.0)
         except:
