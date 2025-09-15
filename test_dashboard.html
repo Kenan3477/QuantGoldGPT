@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuantGold Debug Test</title>
+</head>
+<body>
+    <h1>API Test</h1>
+    <div id="results"></div>
+
+    <script>
+        console.log('🔍 Starting API tests...');
+        
+        async function testAPIs() {
+            const results = document.getElementById('results');
+            const endpoints = [
+                '/api/live-gold-price',
+                '/api/ml-predictions', 
+                '/api/live/patterns',
+                '/api/market-news',
+                '/api/timeframe-predictions'
+            ];
+            
+            for (let endpoint of endpoints) {
+                try {
+                    console.log(`Testing ${endpoint}...`);
+                    const response = await fetch(endpoint);
+                    const data = await response.json();
+                    
+                    console.log(`✅ ${endpoint}:`, data);
+                    results.innerHTML += `<div><strong>${endpoint}</strong>: ✅ Status ${response.status}</div>`;
+                    
+                    if (endpoint === '/api/live-gold-price') {
+                        results.innerHTML += `<div>Price: $${data.price}</div>`;
+                    }
+                    
+                } catch (error) {
+                    console.error(`❌ ${endpoint}:`, error);
+                    results.innerHTML += `<div><strong>${endpoint}</strong>: ❌ ${error.message}</div>`;
+                }
+            }
+        }
+        
+        // Run tests when page loads
+        document.addEventListener('DOMContentLoaded', testAPIs);
+    </script>
+</body>
+</html>
