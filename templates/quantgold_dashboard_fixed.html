@@ -2320,8 +2320,8 @@ Closed at: $${result.closed_price.toLocaleString()}`;
                         timeframe: 'CONSENSUS',
                         signal: 'NEUTRAL',
                         confidence: 0.72,
-                        current_price: 2650.0,
-                        predicted_price: 2665.0,
+                        current_price: 3520.0,
+                        predicted_price: 3535.0,
                         color: '#ffaa00',
                         prediction: 'AI Consensus: NEUTRAL trend with moderate volatility expected'
                     },
@@ -2329,8 +2329,8 @@ Closed at: $${result.closed_price.toLocaleString()}`;
                         timeframe: '1H',
                         signal: 'BULLISH',
                         confidence: 0.68,
-                        current_price: 2650.0,
-                        predicted_price: 2672.0,
+                        current_price: 3520.0,
+                        predicted_price: 3542.0,
                         color: '#4CAF50',
                         prediction: '1H Analysis: BULLISH momentum detected'
                     },
@@ -2338,8 +2338,8 @@ Closed at: $${result.closed_price.toLocaleString()}`;
                         timeframe: '4H',
                         signal: 'BEARISH',
                         confidence: 0.65,
-                        current_price: 2650.0,
-                        predicted_price: 2628.0,
+                        current_price: 3520.0,
+                        predicted_price: 3498.0,
                         color: '#f44336',
                         prediction: '4H Analysis: BEARISH pressure building'
                     }
@@ -3329,8 +3329,8 @@ Closed at: $${result.closed_price.toLocaleString()}`;
             setTimeout(() => {
                 const priceElement = document.getElementById('live-gold-price');
                 if (priceElement && (priceElement.textContent === 'Loading...' || priceElement.textContent === 'Updating...')) {
-                    console.log('⚠️ API seems to be down, showing demo price');
-                    priceElement.textContent = '$2,650.00';
+                    console.log('⚠️ API seems to be down, showing realistic demo price');
+                    priceElement.textContent = '$3,520.00';
                     priceElement.style.color = '#ffaa00';
                     priceElement.title = 'Demo price - API unavailable';
                     addDebug('⚠️ Using demo price data');
@@ -3344,8 +3344,8 @@ Closed at: $${result.closed_price.toLocaleString()}`;
                 setTimeout(() => {
                     const priceElement = document.getElementById('live-gold-price');
                     if (priceElement && priceElement.textContent.includes('Error')) {
-                        // Generate a slight price variation for demo
-                        const basePrice = 2650 + (Math.random() - 0.5) * 10;
+                        // Generate a slight price variation for demo around realistic gold price
+                        const basePrice = 3520 + (Math.random() - 0.5) * 20;
                         priceElement.textContent = `$${basePrice.toFixed(2)}`;
                         priceElement.style.color = '#ffaa00';
                         priceElement.title = 'Demo price - API unavailable';

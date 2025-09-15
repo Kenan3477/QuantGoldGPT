@@ -353,7 +353,7 @@ class RealTimeAIEngine:
     def _get_fallback_market_data(self) -> Dict:
         """Fallback market data when live data unavailable"""
         return {
-            'current_price': 2650.0,
+            'current_price': 3520.0,  # Realistic current gold price
             'momentum_1h': 0.1,
             'momentum_24h': -0.3,
             'rsi': 45,
