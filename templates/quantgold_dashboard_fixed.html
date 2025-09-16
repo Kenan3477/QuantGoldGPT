@@ -1780,30 +1780,52 @@
             document.getElementById('current-time').textContent = now.toLocaleTimeString();
         }
 
-        // Initialize TradingView Chart
+        // Initialize TradingView Chart with enhanced diagnostics
         function initTradingView() {
-            console.log('Initializing TradingView widget...');
+            console.log('🔄 Initializing TradingView widget...');
             
+            const debugInfo = document.getElementById('debug-info');
+            if (debugInfo) {
+                debugInfo.innerHTML += '<br>🔄 Initializing TradingView...';
+            }
+            
+            // Check if TradingView script is loaded
             if (typeof TradingView === 'undefined') {
-                console.log('TradingView not loaded, retrying in 2 seconds...');
+                console.log('⚠️ TradingView not loaded yet, retrying in 2 seconds...');
+                if (debugInfo) {
+                    debugInfo.innerHTML += '<br>⚠️ TradingView script loading...';
+                }
                 setTimeout(initTradingView, 2000);
                 return;
             }
 
+            console.log('✅ TradingView script loaded');
+            if (debugInfo) {
+                debugInfo.innerHTML += '<br>✅ TradingView script available';
+            }
+
             try {
-                // Clear loading message
+                // Find and prepare the container
                 const container = document.getElementById('tradingview-chart');
                 if (!container) {
-                    console.error('TradingView container not found');
+                    console.error('❌ TradingView container not found');
+                    if (debugInfo) {
+                        debugInfo.innerHTML += '<br>❌ Chart container missing';
+                    }
                     return;
                 }
                 
+                console.log('✅ TradingView container found, creating widget...');
+                if (debugInfo) {
+                    debugInfo.innerHTML += '<br>✅ Creating TradingView widget...';
+                }
+                
+                // Clear any existing content
                 container.innerHTML = '';
 
-                // Create TradingView widget with enhanced configuration
+                // Create TradingView widget with minimal configuration
                 const widget = new TradingView.widget({
-                    width: "100%",
-                    height: "100%",
+                    autosize: true,
                     symbol: "OANDA:XAUUSD",
                     interval: "15",
                     timezone: "Etc/UTC",
@@ -1813,40 +1835,42 @@
                     toolbar_bg: "#141414",
                     enable_publishing: false,
                     hide_top_toolbar: false,
-                    hide_legend: false,
                     save_image: false,
                     container_id: "tradingview-chart",
-                    studies: [
-                        "RSI@tv-basicstudies",
-                        "MACD@tv-basicstudies",
-                        "Volume@tv-basicstudies"
-                    ],
-                    overrides: {
-                        "paneProperties.background": "#141414",
-                        "paneProperties.backgroundType": "solid",
-                        "paneProperties.vertGridProperties.color": "#2a2a2a",
-                        "paneProperties.horzGridProperties.color": "#2a2a2a",
-                        "scalesProperties.textColor": "#ffffff",
-                        "mainSeriesProperties.candleStyle.upColor": "#4CAF50",
-                        "mainSeriesProperties.candleStyle.downColor": "#f44336",
-                        "mainSeriesProperties.candleStyle.wickUpColor": "#4CAF50",
-                        "mainSeriesProperties.candleStyle.wickDownColor": "#f44336"
-                    },
+                    studies: ["RSI", "MACD"],
                     onChartReady: function() {
                         console.log('✅ TradingView chart loaded successfully!');
-                        
-                        // Try to access the chart for additional customization
-                        widget.onChartReady(() => {
-                            console.log('✅ TradingView chart fully ready for interaction');
-                        });
+                        if (debugInfo) {
+                            debugInfo.innerHTML += '<br>✅ TradingView chart ready!';
+                        }
                     }
                 });
 
                 // Store widget reference globally for debugging
                 window.tradingViewWidget = widget;
+                console.log('✅ TradingView widget created successfully');
+
+                // Set a timeout to check if chart loaded
+                setTimeout(() => {
+                    if (container.querySelector('iframe')) {
+                        console.log('✅ TradingView iframe detected');
+                        if (debugInfo) {
+                            debugInfo.innerHTML += '<br>✅ TradingView iframe loaded';
+                        }
+                    } else {
+                        console.log('⚠️ TradingView iframe not detected, may still be loading...');
+                        if (debugInfo) {
+                            debugInfo.innerHTML += '<br>⚠️ TradingView iframe not found';
+                        }
+                    }
+                }, 5000);
 
             } catch (error) {
-                console.error('Error loading TradingView:', error);
+                console.error('❌ Error loading TradingView:', error);
+                if (debugInfo) {
+                    debugInfo.innerHTML += `<br>❌ TradingView error: ${error.message}`;
+                }
+                
                 const container = document.getElementById('tradingview-chart');
                 if (container) {
                     container.innerHTML = `
@@ -2357,17 +2381,52 @@ Closed at: $${result.closed_price.toLocaleString()}`;
             
             console.log('✅ Demo ML predictions loaded');
         }
-                    console.error('❌ Error loading AI predictions:', error);
-                    document.getElementById('predictions-container').innerHTML = `
-                        <div class="no-data">
-                            <i class="fas fa-exclamation-triangle" style="color: #f44336; font-size: 2em; margin-bottom: 10px;"></i>
-                            <div>Failed to load AI predictions</div>
-                            <div style="font-size: 0.8em; color: #888; margin-top: 5px;">Check console for details</div>
+
+        // Update AI recommendation panel
+        function updateAIRecommendationPanel(aiData) {
+            console.log('🤖 Updating AI recommendation panel with:', aiData);
+            
+            // Find the AI recommendation container
+            const container = document.querySelector('.ai-recommendation-panel') || 
+                            document.querySelector('[data-component="ai-recommendation"]') ||
+                            document.getElementById('ai-recommendation');
+            
+            if (!container) {
+                console.log('❌ AI recommendation panel not found');
+                return;
+            }
+            
+            try {
+                const recommendation = aiData.recommendation || 'NEUTRAL';
+                const confidence = aiData.confidence || 50;
+                const reasoning = aiData.reasoning || 'Analysis in progress...';
+                
+                container.innerHTML = `
+                    <div class="ai-header">
+                        <h3>🤖 AI Recommendation</h3>
+                        <div class="confidence">${confidence}% Confidence</div>
+                    </div>
+                    <div class="recommendation ${recommendation.toLowerCase()}">
+                        <div class="direction-indicator">
+                            ${recommendation === 'BULLISH' ? '↗️' : recommendation === 'BEARISH' ? '↘️' : '↔️'} 
+                            ${recommendation}
                         </div>
-                    `;
-                });
+                    </div>
+                    <div class="ai-reasoning">${reasoning}</div>
+                `;
+                
+                console.log('✅ AI recommendation panel updated');
+            } catch (error) {
+                console.error('❌ Error updating AI recommendation panel:', error);
+                container.innerHTML = `
+                    <div class="error-message">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        Error loading AI recommendation
+                    </div>
+                `;
+            }
         }
-        
+
         // NEW: Update AI Recommendation Panel with real-time data
         function updateAIRecommendationPanel(aiAnalysis) {
             console.log('🤖 Updating AI Recommendation Panel with real-time data');
@@ -2511,7 +2570,6 @@ Closed at: $${result.closed_price.toLocaleString()}`;
             });
             
             console.log('✅ AI Recommendation displayed with real-time data');
-        }
         }
 
         function displayMLPredictions(predictions) {
@@ -3320,11 +3378,36 @@ Closed at: $${result.closed_price.toLocaleString()}`;
                 }
             });
             
-            // Start live price updates with fallback
-            addDebug('🔄 Starting price updates...');
+            // Initialize everything in proper sequence
+            addDebug('🚀 Starting dashboard initialization...');
+            
+            // Start price updates first
             updateLiveGoldPrice();
             
-            // Also set up demo price if API fails completely
+            // Initialize TradingView with a small delay
+            setTimeout(() => {
+                addDebug('� Starting TradingView initialization...');
+                initTradingView();
+            }, 500);
+            
+            // Load AI predictions
+            setTimeout(() => {
+                addDebug('🤖 Loading AI predictions...');
+                loadMLPredictions();
+            }, 1000);
+            
+            // Set up intervals
+            setInterval(updateLiveGoldPrice, 15000);
+            setInterval(loadMLPredictions, 30000);
+            setInterval(updateDateTime, 1000);
+            
+            // Show completion
+            setTimeout(() => {
+                addDebug('✅ Dashboard initialization complete!');
+                console.log('✅ Full dashboard initialization complete');
+            }, 3000);
+            
+            // API fallback check
             setTimeout(() => {
                 const priceElement = document.getElementById('live-gold-price');
                 if (priceElement && (priceElement.textContent === 'Loading...' || priceElement.textContent === 'Updating...')) {
@@ -3334,8 +3417,9 @@ Closed at: $${result.closed_price.toLocaleString()}`;
                     priceElement.title = 'Demo price - API unavailable';
                     addDebug('⚠️ Using demo price data');
                 }
-            }, 8000); // Wait 8 seconds for API
+            }, 5000);
             
+            // Price update with fallback
             setInterval(() => {
                 updateLiveGoldPrice();
                 
@@ -3343,14 +3427,13 @@ Closed at: $${result.closed_price.toLocaleString()}`;
                 setTimeout(() => {
                     const priceElement = document.getElementById('live-gold-price');
                     if (priceElement && priceElement.textContent.includes('Error')) {
-                        // Generate a slight price variation for demo around realistic gold price
                         const basePrice = 3520 + (Math.random() - 0.5) * 20;
                         priceElement.textContent = `$${basePrice.toFixed(2)}`;
                         priceElement.style.color = '#ffaa00';
                         priceElement.title = 'Demo price - API unavailable';
                     }
-                }, 7000);
-            }, 15000); // Update every 15 seconds
+                }, 5000);
+            }, 15000);
             
             // Load active signals if signals section exists
             if (document.querySelector('.signals-list')) {
