@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuantGold Test</title>
+    <style>
+        body { background: #0a0a0a; color: #ffffff; font-family: Arial, sans-serif; padding: 20px; }
+        .test-box { background: #1a1a1a; border: 1px solid #333; padding: 20px; margin: 10px 0; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h1>QuantGold Simple Test Page</h1>
+    
+    <div class="test-box">
+        <h2>🧪 Basic Loading Test</h2>
+        <p>If you can see this, HTML is loading correctly.</p>
+        <p id="time">Time will appear here...</p>
+    </div>
+    
+    <div class="test-box">
+        <h2>📊 API Test</h2>
+        <p>Gold Price: <span id="price">Loading...</span></p>
+        <button onclick="testAPI()">Test API</button>
+    </div>
+    
+    <div class="test-box">
+        <h2>🔍 Debug Console</h2>
+        <div id="debug" style="background: #000; padding: 10px; font-family: monospace; font-size: 12px; max-height: 200px; overflow: auto;"></div>
+    </div>
+
+    <script>
+        console.log('🚀 Simple test page loaded');
+        
+        function log(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            const logMessage = `[${timestamp}] ${message}`;
+            console.log(logMessage);
+            document.getElementById('debug').innerHTML += logMessage + '<br>';
+            document.getElementById('debug').scrollTop = document.getElementById('debug').scrollHeight;
+        }
+        
+        function updateTime() {
+            document.getElementById('time').textContent = new Date().toLocaleTimeString();
+        }
+        
+        function testAPI() {
+            log('Testing API...');
+            fetch('/api/gold-price')
+                .then(response => {
+                    log(`API Response status: ${response.status}`);
+                    return response.json();
+                })
+                .then(data => {
+                    log(`API Data: ${JSON.stringify(data)}`);
+                    document.getElementById('price').textContent = data.price || 'No price data';
+                })
+                .catch(error => {
+                    log(`API Error: ${error.message}`);
+                    document.getElementById('price').textContent = 'Error loading';
+                });
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            log('✅ DOM Ready - Simple test page');
+            updateTime();
+            setInterval(updateTime, 1000);
+            
+            // Auto-test API after 2 seconds
+            setTimeout(testAPI, 2000);
+        });
+    </script>
+</body>
+</html>

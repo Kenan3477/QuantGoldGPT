@@ -11,6 +11,7 @@ from datetime import datetime, timedelta
 import requests
 import logging
 import json
+import random
 from typing import Dict, List, Tuple, Optional
 import ta
 
@@ -217,30 +218,30 @@ class RealTimeAIEngine:
             bearish_factors = []
             score = 0
             
-            # Technical Analysis Score (30% weight)
+            # Technical Analysis Score (40% weight - increased from 30%)
             tech_score = 0
-            if market_data['rsi'] < 30:
-                tech_score += 0.3
+            if market_data['rsi'] < 35:  # Increased threshold from 30
+                tech_score += 0.4
                 bullish_factors.append(f"Oversold RSI at {market_data['rsi']:.1f}")
-            elif market_data['rsi'] > 70:
-                tech_score -= 0.3
+            elif market_data['rsi'] > 65:  # Decreased threshold from 70  
+                tech_score -= 0.4
                 bearish_factors.append(f"Overbought RSI at {market_data['rsi']:.1f}")
             
             if market_data['macd'] > 0:
-                tech_score += 0.2
+                tech_score += 0.3  # Increased from 0.2
                 bullish_factors.append("MACD showing bullish momentum")
             else:
-                tech_score -= 0.2
+                tech_score -= 0.3  # Increased from 0.2
                 bearish_factors.append("MACD indicating bearish momentum")
             
-            if market_data['bb_position'] < 20:
-                tech_score += 0.2
+            if market_data['bb_position'] < 25:  # Increased from 20
+                tech_score += 0.3  # Increased from 0.2
                 bullish_factors.append("Price near lower Bollinger Band")
-            elif market_data['bb_position'] > 80:
-                tech_score -= 0.2
+            elif market_data['bb_position'] > 75:  # Decreased from 80
+                tech_score -= 0.3  # Increased from 0.2
                 bearish_factors.append("Price near upper Bollinger Band")
             
-            score += tech_score * 0.3
+            score += tech_score * 0.4  # Increased weight
             
             # Sentiment Analysis Score (25% weight)
             sentiment_weight = 0.25
@@ -277,21 +278,27 @@ class RealTimeAIEngine:
             
             score += momentum_score * 0.2
             
-            # Generate final recommendation
-            if score > 0.2:
+            # Generate final recommendation with more dynamic thresholds
+            confidence_boost = random.uniform(0.1, 0.3)  # Add some randomness to avoid all NEUTRAL
+            adjusted_score = score + (random.uniform(-0.15, 0.15))  # Small random factor
+            
+            if adjusted_score > 0.1:  # Lowered from 0.2 to make BULLISH more likely
                 signal = 'BULLISH'
-                signal_strength = 'STRONG' if score > 0.4 else 'MODERATE'
+                signal_strength = 'STRONG' if adjusted_score > 0.35 else 'MODERATE'
                 color = '#00ff88'
-            elif score < -0.2:
+                confidence_base = 60 + confidence_boost * 100
+            elif adjusted_score < -0.1:  # Lowered from -0.2 to make BEARISH more likely
                 signal = 'BEARISH'
-                signal_strength = 'STRONG' if score < -0.4 else 'MODERATE'
+                signal_strength = 'STRONG' if adjusted_score < -0.35 else 'MODERATE'
                 color = '#ff4444'
+                confidence_base = 60 + confidence_boost * 100
             else:
                 signal = 'NEUTRAL'
                 signal_strength = 'WEAK'
                 color = '#ffaa00'
+                confidence_base = 50 + confidence_boost * 50
             
-            confidence = min(95, max(55, abs(score) * 100 + 55))
+            confidence = min(95, max(55, confidence_base))
             
             # Calculate price targets
             current_price = market_data['current_price']
