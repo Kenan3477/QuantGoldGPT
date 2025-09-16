@@ -3417,23 +3417,50 @@ Closed at: $${result.closed_price.toLocaleString()}`;
         document.addEventListener('DOMContentLoaded', function() {
             console.log('🚀 DOM loaded, initializing dashboard with Real-Time AI...');
             
-            // Add visual debugging with more visibility
+            // Add visual debugging with compact, collapsible design
             const debugInfo = document.createElement('div');
             debugInfo.id = 'debug-info';
             debugInfo.style.position = 'fixed';
-            debugInfo.style.top = '10px';
+            debugInfo.style.bottom = '10px';
             debugInfo.style.right = '10px';
-            debugInfo.style.background = 'rgba(0,0,0,0.9)';
+            debugInfo.style.background = 'rgba(0,0,0,0.8)';
             debugInfo.style.color = '#00ff00';
-            debugInfo.style.padding = '15px';
-            debugInfo.style.fontSize = '12px';
+            debugInfo.style.padding = '8px';
+            debugInfo.style.fontSize = '10px';
             debugInfo.style.zIndex = '99999';
-            debugInfo.style.borderRadius = '8px';
-            debugInfo.style.border = '2px solid #00ff00';
-            debugInfo.style.maxHeight = '300px';
-            debugInfo.style.overflow = 'auto';
-            debugInfo.style.minWidth = '350px';
-            debugInfo.innerHTML = '🔍 QuantGold Dashboard Loading...';
+            debugInfo.style.borderRadius = '4px';
+            debugInfo.style.border = '1px solid #00ff00';
+            debugInfo.style.maxHeight = '120px';
+            debugInfo.style.overflow = 'hidden';
+            debugInfo.style.width = '200px';
+            debugInfo.style.cursor = 'pointer';
+            debugInfo.style.transition = 'all 0.3s ease';
+            debugInfo.innerHTML = '🔍 Debug (Click to expand)';
+            
+            let isDebugExpanded = false;
+            let debugMessages = ['🔍 QuantGold Dashboard Loading...'];
+            
+            // Make debug panel expandable and hideable
+            debugInfo.onclick = function() {
+                isDebugExpanded = !isDebugExpanded;
+                if (isDebugExpanded) {
+                    debugInfo.style.maxHeight = '300px';
+                    debugInfo.style.overflow = 'auto';
+                    debugInfo.style.width = '350px';
+                    debugInfo.innerHTML = debugMessages.join('<br>') + '<br><small>(Click to collapse, double-click to hide)</small>';
+                } else {
+                    debugInfo.style.maxHeight = '120px';
+                    debugInfo.style.overflow = 'hidden';
+                    debugInfo.style.width = '200px';
+                    debugInfo.innerHTML = `🔍 Debug (${debugMessages.length} msgs) - Click to expand`;
+                }
+            };
+            
+            // Double-click to hide completely
+            debugInfo.ondblclick = function() {
+                debugInfo.style.display = 'none';
+            };
+            
             document.body.appendChild(debugInfo);
             
             let debugCount = 0;
@@ -3442,8 +3469,17 @@ Closed at: $${result.closed_price.toLocaleString()}`;
                 const timestamp = new Date().toLocaleTimeString();
                 const logMessage = `[${timestamp}] ${debugCount}. ${message}`;
                 console.log(logMessage);
-                debugInfo.innerHTML += `<br>${logMessage}`;
-                debugInfo.scrollTop = debugInfo.scrollHeight;
+                
+                // Add to messages array
+                debugMessages.push(logMessage);
+                
+                // Update display based on current state
+                if (isDebugExpanded) {
+                    debugInfo.innerHTML = debugMessages.join('<br>') + '<br><small>(Click to collapse)</small>';
+                    debugInfo.scrollTop = debugInfo.scrollHeight;
+                } else {
+                    debugInfo.innerHTML = `🔍 Debug (${debugMessages.length} msgs) - Click to expand`;
+                }
             }
             
             addDebug('✅ DOM Ready');
