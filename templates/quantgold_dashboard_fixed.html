@@ -2745,7 +2745,57 @@ Closed at: $${result.closed_price.toLocaleString()}`;
                     console.error('❌ FETCH ERROR:', error);
                     console.error('📍 ERROR TYPE:', error.name);
                     console.error('📍 ERROR MESSAGE:', error.message);
-                    displayPatternsError(`Connection failed: ${error.message}`);
+                    console.log('🔄 Loading demo pattern data...');
+                    
+                    // Show demo pattern data as fallback
+                    const demoPatterns = {
+                        success: true,
+                        total_patterns_detected: 3,
+                        live_pattern_count: 3,
+                        scan_status: 'Active',
+                        scan_quality: 'DEMO',
+                        patterns: [
+                            {
+                                pattern: 'Bullish Engulfing',
+                                confidence: 78.5,
+                                time_ago: '15 minutes ago',
+                                timeframe: '15M',
+                                strength: 'Strong',
+                                signal: 'BULLISH'
+                            },
+                            {
+                                pattern: 'Doji',
+                                confidence: 65.2,
+                                time_ago: '32 minutes ago', 
+                                timeframe: '30M',
+                                strength: 'Moderate',
+                                signal: 'NEUTRAL'
+                            },
+                            {
+                                pattern: 'Hammer',
+                                confidence: 71.8,
+                                time_ago: '1 hour ago',
+                                timeframe: '1H',
+                                strength: 'Strong',
+                                signal: 'BULLISH'
+                            }
+                        ]
+                    };
+                    
+                    displayLivePatterns(demoPatterns);
+                    updatePatternsStatus(3, 'Demo Mode');
+                    
+                    // Add demo notice
+                    setTimeout(() => {
+                        const container = document.getElementById('live-patterns-content');
+                        if (container) {
+                            container.innerHTML += `
+                                <div style="text-align: center; padding: 10px; color: #ffaa00; font-size: 0.9em; border-top: 1px solid #333; margin-top: 10px;">
+                                    <i class="fas fa-info-circle"></i> Demo patterns - Live scan temporarily unavailable
+                                </div>
+                            `;
+                        }
+                    }, 500);
                 });
         }
 
@@ -3221,13 +3271,44 @@ Closed at: $${result.closed_price.toLocaleString()}`;
                 })
                 .catch(error => {
                     console.error('❌ Error loading market news:', error);
-                    document.getElementById('news-container').innerHTML = `
-                        <div class="no-data">
-                            <i class="fas fa-exclamation-triangle" style="color: #f44336; font-size: 2em; margin-bottom: 10px;"></i>
-                            <div>Failed to load news</div>
-                            <div style="font-size: 0.8em; color: #888; margin-top: 5px;">Check console for details</div>
-                        </div>
-                    `;
+                    console.log('🔄 Loading demo news data...');
+                    
+                    // Show demo news data as fallback
+                    const demoNews = [
+                        {
+                            headline: "Gold Prices Show Volatility Amid Economic Uncertainty",
+                            time: "2 hours ago",
+                            source: "Financial Markets",
+                            impact: "high",
+                            summary: "Gold futures fluctuate as investors monitor Federal Reserve policy signals and global economic indicators."
+                        },
+                        {
+                            headline: "Central Bank Gold Reserves Hit Multi-Year Highs",
+                            time: "4 hours ago", 
+                            source: "Reuters",
+                            impact: "medium",
+                            summary: "Major central banks continue accumulating gold reserves as a hedge against currency volatility."
+                        },
+                        {
+                            headline: "Technical Analysis: XAU/USD Testing Key Support Levels",
+                            time: "6 hours ago",
+                            source: "Trading View",
+                            impact: "medium", 
+                            summary: "Gold prices approaching critical technical support zones, analysts watch for potential breakout signals."
+                        }
+                    ];
+                    
+                    displayMarketNews(demoNews);
+                    
+                    // Add demo notice
+                    const container = document.getElementById('news-container');
+                    if (container) {
+                        container.innerHTML += `
+                            <div style="text-align: center; padding: 10px; color: #ffaa00; font-size: 0.9em; border-top: 1px solid #333; margin-top: 10px;">
+                                <i class="fas fa-info-circle"></i> Demo news - Live feed temporarily unavailable
+                            </div>
+                        `;
+                    }
                 });
         }
 
@@ -3396,9 +3477,30 @@ Closed at: $${result.closed_price.toLocaleString()}`;
                 loadMLPredictions();
             }, 1000);
             
+            // Load Live Patterns
+            setTimeout(() => {
+                addDebug('📈 Loading live candlestick patterns...');
+                loadLivePatterns();
+            }, 1500);
+            
+            // Load Market News
+            setTimeout(() => {
+                addDebug('📰 Loading market news...');
+                loadMarketNews();
+            }, 2000);
+            
+            // Start Timeframe Predictions
+            setTimeout(() => {
+                addDebug('⏱️ Loading timeframe predictions...');
+                updateTimeframePredictionsDemo();
+            }, 2500);
+            
             // Set up intervals
             setInterval(updateLiveGoldPrice, 15000);
             setInterval(loadMLPredictions, 30000);
+            setInterval(loadLivePatterns, 30000); // Update patterns every 30 seconds
+            setInterval(loadMarketNews, 60000); // Update news every minute
+            setInterval(updateTimeframePredictionsDemo, 45000); // Update timeframes every 45 seconds
             setInterval(updateDateTime, 1000);
             
             // Show completion
