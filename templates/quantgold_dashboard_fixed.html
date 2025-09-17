@@ -1826,7 +1826,7 @@
                 // Create TradingView widget with minimal configuration
                 const widget = new TradingView.widget({
                     autosize: true,
-                    symbol: "OANDA:XAUUSD",
+                    symbol: "COMEX:GC1!",  // Changed to more stable gold futures symbol
                     interval: "15",
                     timezone: "Etc/UTC",
                     theme: "dark",
@@ -1836,8 +1836,13 @@
                     enable_publishing: false,
                     hide_top_toolbar: false,
                     save_image: false,
+                    withdateranges: false,
+                    hide_side_toolbar: false,
+                    allow_symbol_change: true,
                     container_id: "tradingview-chart",
-                    studies: ["RSI", "MACD"],
+                    // Remove studies that cause 404 errors - users can add them manually
+                    // studies: ["RSI", "MACD"], 
+                    studies: [],
                     onChartReady: function() {
                         console.log('✅ TradingView chart loaded successfully!');
                         if (debugInfo) {
