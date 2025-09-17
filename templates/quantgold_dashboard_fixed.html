@@ -1498,6 +1498,22 @@
                         <div>Loading TradingView Chart...</div>
                     </div>
                 </div>
+                
+                <!-- Chart Symbol Fix Button -->
+                <div style="text-align: center; margin-top: 10px;">
+                    <button onclick="forceGoldSymbol()" style="
+                        padding: 5px 12px; 
+                        background: #d4af37; 
+                        color: #000; 
+                        border: none; 
+                        border-radius: 4px; 
+                        cursor: pointer; 
+                        font-size: 12px;
+                        font-weight: bold;
+                    ">
+                        🔄 Fix Chart (Show Gold)
+                    </button>
+                </div>
             </div>
 
             <!-- Live Alerts and Patterns Section -->
@@ -1823,10 +1839,10 @@
                 // Clear any existing content
                 container.innerHTML = '';
 
-                // Create TradingView widget with minimal configuration
+                // Create TradingView widget with explicit gold configuration
                 const widget = new TradingView.widget({
                     autosize: true,
-                    symbol: "COMEX:GC1!",  // Changed to more stable gold futures symbol
+                    symbol: "OANDA:XAUUSD",  // Back to reliable XAU/USD gold spot
                     interval: "15",
                     timezone: "Etc/UTC",
                     theme: "dark",
@@ -1840,14 +1856,30 @@
                     hide_side_toolbar: false,
                     allow_symbol_change: true,
                     container_id: "tradingview-chart",
+                    // Force specific chart settings for gold
+                    loading_screen: { backgroundColor: "#131722" },
+                    disabled_features: ["use_localstorage_for_settings"],
+                    enabled_features: ["study_templates"],
                     // Remove studies that cause 404 errors - users can add them manually
                     // studies: ["RSI", "MACD"], 
                     studies: [],
                     onChartReady: function() {
-                        console.log('✅ TradingView chart loaded successfully!');
+                        console.log('✅ TradingView chart loaded successfully with gold symbol!');
                         if (debugInfo) {
-                            debugInfo.innerHTML += '<br>✅ TradingView chart ready!';
+                            debugInfo.innerHTML += '<br>✅ TradingView chart ready with XAUUSD!';
                         }
+                        
+                        // Force symbol change after chart is ready
+                        setTimeout(() => {
+                            try {
+                                if (widget && widget.chart) {
+                                    widget.chart().setSymbol("OANDA:XAUUSD");
+                                    console.log('🔄 Forced symbol change to XAUUSD');
+                                }
+                            } catch (e) {
+                                console.log('⚠️ Could not force symbol change:', e.message);
+                            }
+                        }, 1000);
                     }
                 });
 
@@ -1855,13 +1887,32 @@
                 window.tradingViewWidget = widget;
                 console.log('✅ TradingView widget created successfully');
 
-                // Set a timeout to check if chart loaded
+                // Set a timeout to check if chart loaded with correct symbol
                 setTimeout(() => {
                     if (container.querySelector('iframe')) {
                         console.log('✅ TradingView iframe detected');
                         if (debugInfo) {
                             debugInfo.innerHTML += '<br>✅ TradingView iframe loaded';
                         }
+                        
+                        // Additional check to ensure gold symbol is loaded
+                        setTimeout(() => {
+                            try {
+                                if (widget && widget.chart) {
+                                    // Get current symbol and verify it's gold-related
+                                    console.log('🔍 Verifying chart symbol...');
+                                    widget.chart().onSymbolChanged().subscribe(null, (symbolInfo) => {
+                                        console.log('📈 Current symbol:', symbolInfo);
+                                        if (!symbolInfo.ticker.includes('XAU') && !symbolInfo.ticker.includes('GC') && !symbolInfo.ticker.includes('GOLD')) {
+                                            console.log('🔄 Wrong symbol detected, forcing gold...');
+                                            widget.chart().setSymbol("OANDA:XAUUSD");
+                                        }
+                                    });
+                                }
+                            } catch (e) {
+                                console.log('⚠️ Could not verify symbol:', e.message);
+                            }
+                        }, 3000);
                     } else {
                         console.log('⚠️ TradingView iframe not detected, may still be loading...');
                         if (debugInfo) {
@@ -1891,6 +1942,24 @@
                 }
             }
         }
+
+        // Manual function to force gold symbol on TradingView chart
+        function forceGoldSymbol() {
+            console.log('🔄 Manually forcing gold symbol...');
+            try {
+                if (window.tradingViewWidget && window.tradingViewWidget.chart) {
+                    window.tradingViewWidget.chart().setSymbol("OANDA:XAUUSD");
+                    console.log('✅ Successfully forced gold symbol (XAUUSD)');
+                } else {
+                    console.log('⚠️ TradingView widget not available for symbol change');
+                }
+            } catch (error) {
+                console.error('❌ Error forcing gold symbol:', error);
+            }
+        }
+
+        // Make function available globally for debugging
+        window.forceGoldSymbol = forceGoldSymbol;
 
         // Live price update function with enhanced debugging and fallback
         function updateLiveGoldPrice() {
