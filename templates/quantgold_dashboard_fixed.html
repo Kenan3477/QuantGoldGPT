@@ -3256,11 +3256,16 @@ Closed at: $${result.closed_price.toLocaleString()}`;
                 })
                 .then(data => {
                     console.log('📰 Market news data received:', data);
-                    if (data.success && (data.news || data.data)) {
-                        const newsData = data.news || data.data;
-                        displayMarketNews(newsData);
+                    console.log('📰 Data.success:', data.success);
+                    console.log('📰 Data.news:', data.news);
+                    console.log('📰 Data.news length:', data.news ? data.news.length : 'undefined');
+                    
+                    if (data.success && data.news && Array.isArray(data.news) && data.news.length > 0) {
+                        console.log('📰 Calling displayMarketNews with', data.news.length, 'items');
+                        displayMarketNews(data.news);
                     } else {
-                        console.log('No market news available in response');
+                        console.log('❌ No market news available in response or invalid format');
+                        console.log('📰 Raw response structure:', JSON.stringify(data, null, 2));
                         document.getElementById('news-container').innerHTML = `
                             <div class="no-data">
                                 <i class="fas fa-newspaper" style="font-size: 2em; color: #666; margin-bottom: 10px;"></i>
@@ -3334,9 +3339,10 @@ Closed at: $${result.closed_price.toLocaleString()}`;
             
             container.innerHTML = news.slice(0, 5).map(item => `
                 <div class="news-item">
-                    <div class="news-time">${formatNewsTime(item.timestamp || item.time || Date.now())}</div>
+                    <div class="news-time">${item.time || 'Unknown time'}</div>
                     <div class="news-title">${item.title || item.headline || 'Untitled'}</div>
                     ${item.impact ? `<div class="news-impact ${item.impact.toLowerCase()}">${item.impact}</div>` : ''}
+                    ${item.source ? `<div class="news-source">${item.source}</div>` : ''}
                 </div>
             `).join('');
         }
