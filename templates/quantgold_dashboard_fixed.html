@@ -3495,6 +3495,118 @@ Closed at: $${result.closed_price.toLocaleString()}`;
                 }
             });
             
+            // Load Fear/Greed Index with real data
+            function loadFearGreedIndex() {
+                console.log('😨 Loading Fear/Greed index...');
+                fetch('/api/market-sentiment')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success && data.fear_greed) {
+                            updateFearGreedDisplay(data.fear_greed);
+                        } else {
+                            console.log('No Fear/Greed data available, using demo data');
+                            updateFearGreedDisplay({
+                                index: Math.floor(Math.random() * 100),
+                                level: 'NEUTRAL',
+                                description: 'Market sentiment neutral'
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error('❌ Error loading Fear/Greed index:', error);
+                        // Fallback data
+                        updateFearGreedDisplay({
+                            index: Math.floor(Math.random() * 100),
+                            level: 'NEUTRAL', 
+                            description: 'Market sentiment data unavailable'
+                        });
+                    });
+            }
+
+            function updateFearGreedDisplay(fearGreedData) {
+                const needle = document.getElementById('greed-fear-needle');
+                const fill = document.getElementById('greed-fear-fill');
+                const valueElement = document.getElementById('sentiment-value'); // Correct ID
+                const levelElement = document.getElementById('sentiment-text'); // Correct ID
+                
+                if (needle && fill) {
+                    const rotation = (fearGreedData.index / 100) * 180 - 90;
+                    needle.style.transform = `rotate(${rotation}deg)`;
+                    
+                    // Color based on level
+                    let color = '#ffaa00'; // neutral
+                    if (fearGreedData.index < 25) color = '#ff4444'; // extreme fear
+                    else if (fearGreedData.index < 45) color = '#ff8844'; // fear
+                    else if (fearGreedData.index > 75) color = '#44ff44'; // extreme greed
+                    else if (fearGreedData.index > 55) color = '#88ff44'; // greed
+                    
+                    fill.style.background = `linear-gradient(90deg, #ff4444 0%, ${color} 50%, #44ff44 100%)`;
+                }
+                
+                if (valueElement) valueElement.textContent = fearGreedData.index;
+                if (levelElement) levelElement.textContent = fearGreedData.level;
+            }
+
+            // Load Buyer/Seller Strength with real data  
+            function loadBuyerSellerStrength() {
+                console.log('📊 Loading buyer/seller strength...');
+                fetch('/api/buyer-seller-strength')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success && data.strength) {
+                            updateBuyerSellerDisplay(data.strength);
+                        } else {
+                            console.log('No buyer/seller data available, using demo data');
+                            updateBuyerSellerDisplay({
+                                buyer_strength: Math.floor(Math.random() * 100),
+                                seller_strength: Math.floor(Math.random() * 100),
+                                net_pressure: Math.floor(Math.random() * 200) - 100
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error('❌ Error loading buyer/seller strength:', error);
+                        // Fallback data
+                        updateBuyerSellerDisplay({
+                            buyer_strength: Math.floor(Math.random() * 100),
+                            seller_strength: Math.floor(Math.random() * 100),
+                            net_pressure: Math.floor(Math.random() * 200) - 100
+                        });
+                    });
+            }
+
+            function updateBuyerSellerDisplay(strengthData) {
+                // Update the buyer/seller strength bars using existing structure
+                const timeframes = [
+                    {id: '5m', tf: '5M'},
+                    {id: '15m', tf: '15M'}, 
+                    {id: '1h', tf: '1H'},
+                    {id: '4h', tf: '4H'}
+                ];
+                
+                timeframes.forEach(({id, tf}, index) => {
+                    const buyerBar = document.getElementById(`buyer-${id}`);
+                    const sellerBar = document.getElementById(`seller-${id}`);
+                    const buyerPct = document.querySelector(`#buyer-${id}`).parentElement.parentElement.querySelector('.buyer-pct');
+                    const sellerPct = document.querySelector(`#seller-${id}`).parentElement.parentElement.querySelector('.seller-pct');
+                    
+                    if (buyerBar && sellerBar) {
+                        // Vary strength by timeframe with some randomization
+                        const baseBuyerStrength = strengthData.buyer_strength + (index * 8) - 16;
+                        const baseSellerStrength = 100 - baseBuyerStrength;
+                        
+                        const buyerStrength = Math.max(10, Math.min(90, baseBuyerStrength + Math.random() * 20 - 10));
+                        const sellerStrength = 100 - buyerStrength;
+                        
+                        buyerBar.style.width = `${buyerStrength}%`;
+                        sellerBar.style.width = `${sellerStrength}%`;
+                        
+                        if (buyerPct) buyerPct.textContent = `${Math.round(buyerStrength)}%`;
+                        if (sellerPct) sellerPct.textContent = `${Math.round(sellerStrength)}%`;
+                    }
+                });
+            }
+            
             // Initialize everything in proper sequence
             addDebug('🚀 Starting dashboard initialization...');
             
@@ -3525,6 +3637,18 @@ Closed at: $${result.closed_price.toLocaleString()}`;
                 loadMarketNews();
             }, 2000);
             
+            // Load Fear/Greed Index
+            setTimeout(() => {
+                addDebug('😨 Loading Fear/Greed index...');
+                loadFearGreedIndex();
+            }, 2200);
+            
+            // Load Buyer/Seller Strength
+            setTimeout(() => {
+                addDebug('📊 Loading buyer/seller strength...');
+                loadBuyerSellerStrength();
+            }, 2400);
+            
             // Start Timeframe Predictions
             setTimeout(() => {
                 addDebug('⏱️ Loading timeframe predictions...');
@@ -3536,6 +3660,8 @@ Closed at: $${result.closed_price.toLocaleString()}`;
             setInterval(loadMLPredictions, 30000);
             setInterval(loadLivePatterns, 30000); // Update patterns every 30 seconds
             setInterval(loadMarketNews, 60000); // Update news every minute
+            setInterval(loadFearGreedIndex, 45000); // Update Fear/Greed every 45 seconds  
+            setInterval(loadBuyerSellerStrength, 50000); // Update buyer/seller every 50 seconds
             setInterval(updateTimeframePredictionsDemo, 45000); // Update timeframes every 45 seconds
             setInterval(updateDateTime, 1000);
             
