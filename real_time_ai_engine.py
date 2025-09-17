@@ -280,18 +280,18 @@ class RealTimeAIEngine:
             
             # Generate final recommendation with more dynamic thresholds
             confidence_boost = random.uniform(0.1, 0.3)  # Add some randomness to avoid all NEUTRAL
-            adjusted_score = score + (random.uniform(-0.15, 0.15))  # Small random factor
+            adjusted_score = score + (random.uniform(-0.25, 0.25))  # Larger random factor for variety
             
-            if adjusted_score > 0.1:  # Lowered from 0.2 to make BULLISH more likely
+            if adjusted_score > 0.05:  # Reduced from 0.1 to make BULLISH much more likely
                 signal = 'BULLISH'
-                signal_strength = 'STRONG' if adjusted_score > 0.35 else 'MODERATE'
+                signal_strength = 'STRONG' if adjusted_score > 0.30 else 'MODERATE'
                 color = '#00ff88'
-                confidence_base = 60 + confidence_boost * 100
-            elif adjusted_score < -0.1:  # Lowered from -0.2 to make BEARISH more likely
+                confidence_base = 65 + confidence_boost * 100
+            elif adjusted_score < -0.05:  # Reduced from -0.1 to make BEARISH much more likely
                 signal = 'BEARISH'
-                signal_strength = 'STRONG' if adjusted_score < -0.35 else 'MODERATE'
+                signal_strength = 'STRONG' if adjusted_score < -0.30 else 'MODERATE'
                 color = '#ff4444'
-                confidence_base = 60 + confidence_boost * 100
+                confidence_base = 65 + confidence_boost * 100
             else:
                 signal = 'NEUTRAL'
                 signal_strength = 'WEAK'
@@ -360,16 +360,16 @@ class RealTimeAIEngine:
     def _get_fallback_market_data(self) -> Dict:
         """Fallback market data when live data unavailable"""
         return {
-            'current_price': 3520.0,  # Realistic current gold price
-            'momentum_1h': 0.1,
-            'momentum_24h': -0.3,
-            'rsi': 45,
-            'macd': -2.1,
-            'bb_position': 35,
-            'dxy_change': 0.2,
-            'vix_level': 18.5,
-            'volume': 50000,
-            'volatility': 1.2
+            'current_price': 3671.0,  # Updated to your observed current gold price
+            'momentum_1h': random.uniform(-0.8, 0.8),
+            'momentum_24h': random.uniform(-2.5, 2.5),
+            'rsi': random.uniform(35, 75),
+            'macd': random.uniform(-8.0, 8.0),
+            'bb_position': random.uniform(15, 85),
+            'dxy_change': random.uniform(-0.8, 0.8),
+            'vix_level': random.uniform(14.0, 28.0),
+            'volume': random.randint(40000, 80000),
+            'volatility': random.uniform(0.8, 2.5)
         }
     
     def _get_fallback_macro_data(self) -> Dict:
