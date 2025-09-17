@@ -3507,8 +3507,13 @@ Closed at: $${result.closed_price.toLocaleString()}`;
                 fetch('/api/market-sentiment')
                     .then(response => response.json())
                     .then(data => {
-                        if (data.success && data.fear_greed) {
-                            updateFearGreedDisplay(data.fear_greed);
+                        console.log('😨 Fear/Greed data received:', data);
+                        if (data.success && data.fear_greed_index !== undefined) {
+                            updateFearGreedDisplay({
+                                index: data.fear_greed_index,
+                                level: data.sentiment_label || data.market_mood || 'NEUTRAL',
+                                description: data.description || 'Market sentiment data'
+                            });
                         } else {
                             console.log('No Fear/Greed data available, using demo data');
                             updateFearGreedDisplay({
@@ -3559,8 +3564,13 @@ Closed at: $${result.closed_price.toLocaleString()}`;
                 fetch('/api/buyer-seller-strength')
                     .then(response => response.json())
                     .then(data => {
-                        if (data.success && data.strength) {
-                            updateBuyerSellerDisplay(data.strength);
+                        console.log('📊 Buyer/Seller data received:', data);
+                        if (data.success && data.buyer_strength !== undefined) {
+                            updateBuyerSellerDisplay({
+                                buyer_strength: data.buyer_strength,
+                                seller_strength: data.seller_strength,
+                                net_pressure: data.buyer_strength - data.seller_strength
+                            });
                         } else {
                             console.log('No buyer/seller data available, using demo data');
                             updateBuyerSellerDisplay({
@@ -3611,6 +3621,31 @@ Closed at: $${result.closed_price.toLocaleString()}`;
                         if (sellerPct) sellerPct.textContent = `${Math.round(sellerStrength)}%`;
                     }
                 });
+            }
+            
+            // Update date and time display
+            function updateDateTime() {
+                const now = new Date();
+                const dateElement = document.getElementById('current-date');
+                const timeElement = document.getElementById('current-time');
+                
+                if (dateElement) {
+                    dateElement.textContent = now.toLocaleDateString('en-US', {
+                        weekday: 'short',
+                        year: 'numeric',
+                        month: 'short', 
+                        day: 'numeric'
+                    });
+                }
+                
+                if (timeElement) {
+                    timeElement.textContent = now.toLocaleTimeString('en-US', {
+                        hour12: false,
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit'
+                    });
+                }
             }
             
             // Initialize everything in proper sequence
