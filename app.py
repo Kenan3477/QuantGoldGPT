@@ -1028,16 +1028,26 @@ def generate_signal():
     global advanced_learning, learning_data
     
     try:
-        # Get REAL current gold price first
-        gold_response = get_gold_price_alt()
-        gold_data = gold_response.get_json()
-        current_gold_price = gold_data.get('price', 3540.0)
+        # Get REAL current gold price using the working yfinance method
+        import yfinance as yf
+        logger.info("🥇 Fetching REAL live gold price from Yahoo Finance...")
         
-        logger.info(f"🥇 Using REAL gold price for signal: ${current_gold_price}")
+        gold_ticker = yf.Ticker("GC=F")  # Gold futures
+        gold_data = gold_ticker.history(period="1d", interval="1h")
+        
+        if not gold_data.empty:
+            current_gold_price = float(gold_data['Close'].iloc[-1])
+            logger.info(f"✅ REAL live gold price: ${current_gold_price:.2f}")
+        else:
+            # If yfinance fails, use a more current realistic price
+            current_gold_price = 3671.0  # Your observed current price
+            logger.warning(f"⚠️ Using fallback current price: ${current_gold_price:.2f}")
         
     except Exception as e:
-        logger.error(f"Failed to get real gold price: {e}")
-        current_gold_price = 3540.0  # Fallback
+        logger.error(f"❌ Failed to get real gold price: {e}")
+        # Use your observed current price as fallback instead of old 3540
+        current_gold_price = 3671.0  # Updated realistic current price
+        logger.warning(f"⚠️ Using updated fallback price: ${current_gold_price:.2f}")
     
     # ADVANCED LEARNING: Use learned strategy weights to influence signal generation
     strategy_weights = learning_data.get('ensemble_weights', advanced_learning.strategy_weights)
@@ -1259,6 +1269,58 @@ def get_gold_price_alt():
         'timestamp': datetime.now().isoformat(),
         'source': 'Market-realistic'
     })
+
+@app.route('/api/clear-signals', methods=['POST'])
+def clear_all_signals():
+    """Clear all generated signals - FOR FIXING FICTIONAL PRICE ISSUES"""
+    try:
+        # Clear signals from memory system
+        cleared = signal_memory.clear_all_signals()
+        
+        if cleared:
+            logger.info("🗑️ All signals cleared successfully")
+            return jsonify({
+                'success': True,
+                'message': 'All signals cleared successfully',
+                'timestamp': datetime.now().isoformat()
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'message': 'Failed to clear signals',
+                'timestamp': datetime.now().isoformat()
+            })
+            
+    except Exception as e:
+        logger.error(f"❌ Error clearing signals: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'timestamp': datetime.now().isoformat()
+        })
+
+@app.route('/api/signals-status')
+def get_signals_status():
+    """Get current status of stored signals"""
+    try:
+        count = signal_memory.get_signals_count()
+        active_signals = signal_memory.get_active_signals()
+        
+        return jsonify({
+            'success': True,
+            'total_signals': count,
+            'active_signals': len(active_signals),
+            'signals': active_signals[:5] if active_signals else [],  # Show last 5
+            'timestamp': datetime.now().isoformat()
+        })
+        
+    except Exception as e:
+        logger.error(f"❌ Error getting signals status: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'timestamp': datetime.now().isoformat()
+        })
 
 @app.route('/api/ml-predictions')
 def get_ml_predictions():

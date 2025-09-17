@@ -332,6 +332,33 @@ class SignalMemorySystem:
             self.logger.error(f"❌ Error getting active signals: {e}")
             return []
     
+    def clear_all_signals(self) -> bool:
+        """Clear all signals from the database - USE WITH CAUTION"""
+        try:
+            with sqlite3.connect(self.db_path) as conn:
+                cursor = conn.cursor()
+                cursor.execute("DELETE FROM signal_memory")
+                conn.commit()
+                
+                self.logger.info("🗑️ All signals cleared from database")
+                return True
+                
+        except Exception as e:
+            self.logger.error(f"❌ Error clearing signals: {e}")
+            return False
+
+    def get_signals_count(self) -> int:
+        """Get total number of signals in database"""
+        try:
+            with sqlite3.connect(self.db_path) as conn:
+                cursor = conn.cursor()
+                cursor.execute("SELECT COUNT(*) FROM signal_memory")
+                result = cursor.fetchone()
+                return result[0] if result else 0
+        except Exception as e:
+            self.logger.error(f"❌ Error counting signals: {e}")
+            return 0
+
     def get_learning_insights(self) -> Dict[str, Any]:
         """Get comprehensive learning insights from stored signals"""
         try:
