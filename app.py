@@ -2478,19 +2478,47 @@ def get_live_patterns():
         logger.info("📊 Scanning for REAL candlestick patterns...")
         
         try:
-            # Add timeout protection for pattern detection
-            import signal
-            def timeout_handler(signum, frame):
-                raise TimeoutError("Pattern detection timeout")
+            # Import the detector directly for better control
+            from real_pattern_detection import RealCandlestickDetector
             
-            signal.signal(signal.SIGALRM, timeout_handler)
-            signal.alarm(10)  # 10-second timeout
+            # Create detector and get patterns with timeout
+            detector = RealCandlestickDetector()
             
-            real_patterns = get_real_candlestick_patterns()
+            # Use threading for timeout on Windows (signal doesn't work on Windows)
+            import threading
+            import queue
             
-            signal.alarm(0)  # Cancel the alarm
+            def run_detection(q):
+                try:
+                    patterns = detector.detect_all_patterns()
+                    q.put(('success', patterns))
+                except Exception as e:
+                    q.put(('error', str(e)))
             
-        except (TimeoutError, Exception) as e:
+            # Run pattern detection with timeout
+            q = queue.Queue()
+            thread = threading.Thread(target=run_detection, args=(q,))
+            thread.daemon = True
+            thread.start()
+            
+            # Wait for result with timeout
+            thread.join(timeout=15)  # 15 second timeout
+            
+            if thread.is_alive():
+                logger.error("❌ Pattern detection timed out")
+                real_patterns = []
+            else:
+                try:
+                    result_type, result = q.get_nowait()
+                    if result_type == 'success':
+                        real_patterns = result
+                    else:
+                        logger.error(f"❌ Pattern detection error: {result}")
+                        real_patterns = []
+                except:
+                    real_patterns = []
+            
+        except Exception as e:
             logger.error(f"❌ Pattern detection failed: {e}")
             real_patterns = []
         

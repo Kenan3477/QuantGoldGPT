@@ -57,22 +57,42 @@ class RealCandlestickDetector:
         return self.create_realistic_ohlc_from_current_price()
     
     def _get_yahoo_data(self, symbol, period, interval):
-        """Get data from Yahoo Finance with enhanced error handling"""
-        ticker = yf.Ticker(symbol)
-        data = ticker.history(period=period, interval=interval)
-        
-        if len(data) == 0:
-            # Try different intervals if main one fails
-            for backup_interval in ["2m", "5m", "15m"]:
+        """Get data from Yahoo Finance with enhanced error handling and timeout"""
+        try:
+            # Add timeout to prevent hanging
+            import concurrent.futures
+            
+            def fetch_data():
+                ticker = yf.Ticker(symbol)
+                return ticker.history(period=period, interval=interval)
+            
+            # Use ThreadPoolExecutor with timeout
+            with concurrent.futures.ThreadPoolExecutor() as executor:
+                future = executor.submit(fetch_data)
                 try:
-                    data = ticker.history(period="1d", interval=backup_interval)
-                    if len(data) > 0:
-                        logger.info(f"✅ Yahoo backup interval {backup_interval} worked")
-                        break
-                except:
-                    continue
-        
-        return data
+                    data = future.result(timeout=10)  # 10 second timeout
+                except concurrent.futures.TimeoutError:
+                    logger.warning(f"⏰ Yahoo Finance timeout for {symbol}")
+                    return pd.DataFrame()
+                
+            if len(data) == 0:
+                # Try different intervals if main one fails
+                for backup_interval in ["2m", "5m", "15m"]:
+                    try:
+                        with concurrent.futures.ThreadPoolExecutor() as executor:
+                            future = executor.submit(lambda: yf.Ticker(symbol).history(period="1d", interval=backup_interval))
+                            data = future.result(timeout=5)
+                            if len(data) > 0:
+                                logger.info(f"✅ Yahoo backup interval {backup_interval} worked")
+                                break
+                    except:
+                        continue
+            
+            return data
+            
+        except Exception as e:
+            logger.warning(f"❌ Yahoo Finance error: {e}")
+            return pd.DataFrame()
     
     def _get_gold_api_data(self):
         """Get live gold price and create minute-by-minute data"""
