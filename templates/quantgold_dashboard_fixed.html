@@ -7,6 +7,7 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <title>QuantGold - Professional Trading Platform</title>
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
     <script src="https://s3.tradingview.com/tv.js"></script>
     <style>
@@ -1840,48 +1841,58 @@
                 container.innerHTML = '';
 
                 // Create TradingView widget with explicit gold configuration
-                const widget = new TradingView.widget({
-                    autosize: true,
-                    symbol: "OANDA:XAUUSD",  // Back to reliable XAU/USD gold spot
-                    interval: "15",
-                    timezone: "Etc/UTC",
-                    theme: "dark",
-                    style: "1",
-                    locale: "en",
-                    toolbar_bg: "#141414",
-                    enable_publishing: false,
-                    hide_top_toolbar: false,
-                    save_image: false,
-                    withdateranges: false,
-                    hide_side_toolbar: false,
-                    allow_symbol_change: true,
-                    container_id: "tradingview-chart",
-                    // Force specific chart settings for gold
-                    loading_screen: { backgroundColor: "#131722" },
-                    disabled_features: ["use_localstorage_for_settings"],
-                    enabled_features: ["study_templates"],
-                    // Remove studies that cause 404 errors - users can add them manually
-                    // studies: ["RSI", "MACD"], 
-                    studies: [],
-                    onChartReady: function() {
-                        console.log('✅ TradingView chart loaded successfully with gold symbol!');
-                        if (debugInfo) {
-                            debugInfo.innerHTML += '<br>✅ TradingView chart ready with XAUUSD!';
-                        }
-                        
-                        // Force symbol change after chart is ready
-                        setTimeout(() => {
-                            try {
-                                if (widget && widget.chart) {
-                                    widget.chart().setSymbol("OANDA:XAUUSD");
-                                    console.log('🔄 Forced symbol change to XAUUSD');
-                                }
-                            } catch (e) {
-                                console.log('⚠️ Could not force symbol change:', e.message);
+                let widget;
+                try {
+                    widget = new TradingView.widget({
+                        autosize: true,
+                        symbol: "OANDA:XAUUSD",  // Back to reliable XAU/USD gold spot
+                        interval: "15",
+                        timezone: "Etc/UTC",
+                        theme: "dark",
+                        style: "1",
+                        locale: "en",
+                        toolbar_bg: "#141414",
+                        enable_publishing: false,
+                        hide_top_toolbar: false,
+                        save_image: false,
+                        withdateranges: false,
+                        hide_side_toolbar: false,
+                        allow_symbol_change: true,
+                        container_id: "tradingview-chart",
+                        // Force specific chart settings for gold
+                        loading_screen: { backgroundColor: "#131722" },
+                        disabled_features: ["use_localstorage_for_settings", "header_symbol_search"],
+                        enabled_features: ["study_templates"],
+                        // Remove studies that cause errors - users can add them manually
+                        studies: [],
+                        // Add error handling for widget creation
+                        debug: false,
+                        onChartReady: function() {
+                            console.log('✅ TradingView chart loaded successfully with gold symbol!');
+                            if (debugInfo) {
+                                debugInfo.innerHTML += '<br>✅ TradingView chart ready with XAUUSD!';
                             }
-                        }, 1000);
+                            
+                            // Force symbol change after chart is ready with error handling
+                            setTimeout(() => {
+                                try {
+                                    if (widget && widget.chart && typeof widget.chart === 'function') {
+                                        widget.chart().setSymbol("OANDA:XAUUSD");
+                                        console.log('🔄 Forced symbol change to XAUUSD');
+                                    }
+                                } catch (e) {
+                                    console.log('⚠️ Could not force symbol change:', e.message);
+                                }
+                            }, 1000);
+                        }
+                    });
+                } catch (widgetError) {
+                    console.error('❌ TradingView widget creation failed:', widgetError);
+                    if (debugInfo) {
+                        debugInfo.innerHTML += '<br>❌ Widget creation failed: ' + widgetError.message;
                     }
-                });
+                    return;
+                }
 
                 // Store widget reference globally for debugging
                 window.tradingViewWidget = widget;
@@ -3866,10 +3877,29 @@ Closed at: $${result.closed_price.toLocaleString()}`;
             console.log('✅ Dashboard initialized with Real-Time AI System');
         });
 
-        // Global error handler
+        // Global error handler for TradingView and other JS issues
         window.addEventListener('error', function(e) {
+            // Suppress TradingView schema validation errors
+            if (e.error && e.error.message && 
+                (e.error.message.includes('data type: unknown does not match a schema') ||
+                 e.error.message.includes('data type: object does not match a schema') ||
+                 e.error.message.includes("Cannot read properties of undefined (reading 'list')"))) {
+                console.log('🔇 Suppressed TradingView schema validation error');
+                return;
+            }
             console.error('Global error:', e.error);
         });
+
+        // Suppress console warnings for TradingView
+        const originalWarn = console.warn;
+        console.warn = function(...args) {
+            const message = args.join(' ');
+            if (message.includes('Property:The state with a data type:') ||
+                message.includes('does not match a schema')) {
+                return; // Suppress TradingView schema warnings
+            }
+            originalWarn.apply(console, args);
+        };
     </script>
 </body>
 </html>
