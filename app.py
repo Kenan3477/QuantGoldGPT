@@ -1602,6 +1602,7 @@ def generate_signal():
         
         signal = {
             'signal_id': signal_data.signal_id,
+            'id': signal_data.signal_id,  # Frontend expects 'id' field
             'signal_type': signal_type,
             'entry_price': round(entry, 2),
             'take_profit': round(tp, 2),
@@ -1614,6 +1615,10 @@ def generate_signal():
             'status': 'active',
             'pnl': 0.0,
             'base_pnl': 0.0,
+            'live_pnl': 0.0,  # Frontend expects live_pnl
+            'live_pnl_pct': 0.0,  # Frontend expects live_pnl_pct
+            'current_price': round(current_gold_price, 2),  # Frontend expects current_price
+            'pnl_status': 'neutral',  # Frontend expects pnl_status
             'entry_time': datetime.now().isoformat(),
             'timestamp': datetime.now().isoformat(),
             'auto_close': True,
@@ -1651,53 +1656,6 @@ def generate_signal():
         import traceback
         traceback.print_exc()
         return jsonify({'success': False, 'error': str(e)})
-    pattern_success_rate = learning_data['successful_patterns'].get(candlestick_patterns, 1) / \
-                          max(1, learning_data['successful_patterns'].get(candlestick_patterns, 1) + 
-                              learning_data['failed_patterns'].get(candlestick_patterns, 1))
-    
-    # Apply strategy weights to confidence
-    weighted_confidence = (
-        strategy_weights.get('pattern', 0.25) * pattern_success_rate +
-        strategy_weights.get('technical', 0.25) * 0.75 +  # Base technical confidence
-        strategy_weights.get('macro', 0.25) * 0.7 +       # Base macro confidence  
-        strategy_weights.get('sentiment', 0.25) * 0.65    # Base sentiment confidence
-    )
-    
-    final_confidence = min(0.95, max(0.6, weighted_confidence * time_modifier))
-    
-    # Use EXACT current gold price as entry (real market entry)
-    entry = current_gold_price  # Use exact current price, no spread
-    
-    if signal_type == 'BUY':
-        tp = entry + random.uniform(20, 50)  # Realistic TP: $20-50 profit
-        sl = entry - random.uniform(15, 25)  # Realistic SL: $15-25 loss
-    else:  # SELL
-        tp = entry - random.uniform(20, 50)  # Realistic TP: $20-50 profit
-        sl = entry + random.uniform(15, 25)  # Realistic SL: $15-25 loss
-    
-    # Prepare data for Signal Memory System
-    patterns_data = [{"name": candlestick_patterns, "confidence": pattern_success_rate * 100, "timeframe": "1H"}]
-    
-    macro_data = {
-        "indicators": macro_indicators,
-        "DXY": random.uniform(-1.0, 1.0),
-        "INFLATION": random.uniform(2.0, 3.5),
-        "FED_SENTIMENT": random.choice(["HAWKISH", "DOVISH", "NEUTRAL"])
-    }
-    
-    news_data = [
-        {"headline": f"Gold analysis: {random.choice(['Fed policy shift', 'Economic data', 'Geopolitical tensions'])}", 
-         "sentiment": signal_type.replace('BUY', 'BULLISH').replace('SELL', 'BEARISH'), 
-         "impact": round(random.uniform(6.0, 9.0), 1)}
-    ]
-    
-    technical_data = {
-        "indicators": technical_indicators,
-        "RSI": random.uniform(30, 70),
-        "MACD": random.choice(["BULLISH_CROSSOVER", "BEARISH_CROSSOVER", "NEUTRAL"]),
-        "SUPPORT": sl if signal_type == 'BUY' else tp,
-        "RESISTANCE": tp if signal_type == 'BUY' else sl
-    }
     
     sentiment_data = {
         "fear_greed": get_real_fear_greed_index(),
@@ -2676,6 +2634,7 @@ def get_tracked_signals():
                 # Convert signal format from memory to active format
                 converted_signal = {
                     'signal_id': memory_signal.get('signal_id', ''),
+                    'id': memory_signal.get('signal_id', ''),  # Frontend expects 'id'
                     'signal_type': memory_signal.get('signal_type', 'BUY').replace('BULLISH', 'BUY').replace('BEARISH', 'SELL'),
                     'entry_price': memory_signal.get('entry_price', 0),
                     'take_profit': memory_signal.get('take_profit', 0),
@@ -2706,10 +2665,9 @@ def get_tracked_signals():
     logger.info(f"📊 Found {len(all_signals)} active signals to track")
     
     try:
-        # Get REAL current gold price for accurate P&L calculation
-        current_gold_response = get_gold_price_alt()
-        current_gold_data = current_gold_response.get_json()
-        current_price = current_gold_data.get('price', 3540.0)
+        # Get REAL current gold price for accurate P&L calculation  
+        gold_price_data = get_current_gold_price_from_api()
+        current_price = gold_price_data['price']
         
         logger.info(f"🥇 Calculating P&L using current gold price: ${current_price}")
         
