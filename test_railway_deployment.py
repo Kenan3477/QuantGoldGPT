@@ -14,8 +14,8 @@ def test_railway_signals():
     print("🚂 Testing Railway Signal Generation")
     print("=" * 40)
     
-    # Replace with your actual Railway URL
-    railway_url = "https://goldgpt-production.up.railway.app"  # Update this!
+    # Your actual Railway URL
+    railway_url = "https://web-production-41882.up.railway.app"
     
     endpoints = [
         "/api/signals/generate",

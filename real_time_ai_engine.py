@@ -33,9 +33,11 @@ class RealTimeAIEngine:
             gold_hist = gold.history(period="5d", interval="1h")
             
             if gold_hist.empty:
+                logger.warning("No gold data available from yfinance - using fallback")
                 raise Exception("No gold data available")
                 
             current_price = float(gold_hist['Close'].iloc[-1])
+            logger.info(f"Live gold price fetched: ${current_price:,.2f}")
             
             # Calculate technical indicators
             gold_hist['RSI'] = ta.momentum.RSIIndicator(gold_hist['Close']).rsi()
@@ -73,6 +75,7 @@ class RealTimeAIEngine:
             
         except Exception as e:
             logger.error(f"Error fetching market data: {e}")
+            logger.warning("Using fallback market data")
             return self._get_fallback_market_data()
     
     def _calculate_bb_position(self, current_price: float, hist_data: pd.DataFrame) -> float:
@@ -300,28 +303,56 @@ class RealTimeAIEngine:
             
             confidence = min(95, max(55, confidence_base))
             
-            # Calculate price targets
+            # Calculate price targets with proper validation
             current_price = market_data['current_price']
             volatility_factor = market_data['volatility'] * 10
             
             if signal == 'BULLISH':
-                target_1 = current_price * (1 + 0.015 + volatility_factor/1000)
-                target_2 = current_price * (1 + 0.025 + volatility_factor/800)
-                stop_loss = current_price * (1 - 0.010 - volatility_factor/1200)
-                resistance = target_1
-                support = stop_loss
+                # For bullish signals, targets MUST be above current price
+                target_1 = current_price * (1 + max(0.008, 0.015 + volatility_factor/1000))
+                target_2 = current_price * (1 + max(0.015, 0.025 + volatility_factor/800))
+                stop_loss = current_price * (1 - max(0.005, 0.010 + volatility_factor/1200))
+                resistance = max(target_1, current_price * 1.008)  # Ensure resistance is above current
+                support = min(stop_loss, current_price * 0.992)   # Ensure support is below current
             elif signal == 'BEARISH':
-                target_1 = current_price * (1 - 0.015 - volatility_factor/1000)
-                target_2 = current_price * (1 - 0.025 - volatility_factor/800)
-                stop_loss = current_price * (1 + 0.010 + volatility_factor/1200)
-                support = target_1
-                resistance = stop_loss
+                # For bearish signals, targets MUST be below current price
+                target_1 = current_price * (1 - max(0.008, 0.015 + volatility_factor/1000))
+                target_2 = current_price * (1 - max(0.015, 0.025 + volatility_factor/800))
+                stop_loss = current_price * (1 + max(0.005, 0.010 + volatility_factor/1200))
+                support = min(target_1, current_price * 0.992)    # Ensure support is below current
+                resistance = max(stop_loss, current_price * 1.008)  # Ensure resistance is above current
             else:
+                # For neutral signals, provide balanced targets
                 target_1 = current_price * (1 + 0.005)
                 target_2 = current_price * (1 - 0.005)
                 stop_loss = current_price * (1 + 0.008)
                 support = current_price * (1 - 0.008)
                 resistance = current_price * (1 + 0.008)
+            
+            # CRITICAL VALIDATION: Ensure logic consistency
+            if signal == 'BULLISH':
+                if target_1 <= current_price:
+                    logger.warning(f"Bullish target_1 ({target_1:.2f}) was <= current_price ({current_price:.2f}), correcting")
+                    target_1 = current_price * 1.008  # Force target above current
+                if target_2 <= current_price:
+                    logger.warning(f"Bullish target_2 ({target_2:.2f}) was <= current_price ({current_price:.2f}), correcting")
+                    target_2 = current_price * 1.015  # Force target above current
+                if stop_loss >= current_price:
+                    logger.warning(f"Bullish stop_loss ({stop_loss:.2f}) was >= current_price ({current_price:.2f}), correcting")
+                    stop_loss = current_price * 0.992  # Force stop loss below current
+                    
+            elif signal == 'BEARISH':
+                if target_1 >= current_price:
+                    logger.warning(f"Bearish target_1 ({target_1:.2f}) was >= current_price ({current_price:.2f}), correcting")
+                    target_1 = current_price * 0.992  # Force target below current
+                if target_2 >= current_price:
+                    logger.warning(f"Bearish target_2 ({target_2:.2f}) was >= current_price ({current_price:.2f}), correcting")
+                    target_2 = current_price * 0.985  # Force target below current  
+                if stop_loss <= current_price:
+                    logger.warning(f"Bearish stop_loss ({stop_loss:.2f}) was <= current_price ({current_price:.2f}), correcting")
+                    stop_loss = current_price * 1.008  # Force stop loss above current
+            
+            logger.info(f"Final recommendation: {signal} | Price: ${current_price:.2f} | Target1: ${target_1:.2f} | StopLoss: ${stop_loss:.2f}")
             
             return {
                 'signal': signal,
@@ -360,7 +391,7 @@ class RealTimeAIEngine:
     def _get_fallback_market_data(self) -> Dict:
         """Fallback market data when live data unavailable"""
         return {
-            'current_price': 3671.0,  # Updated to your observed current gold price
+            'current_price': 3749.0,  # Updated to current observed gold price
             'momentum_1h': random.uniform(-0.8, 0.8),
             'momentum_24h': random.uniform(-2.5, 2.5),
             'rsi': random.uniform(35, 75),
@@ -383,16 +414,17 @@ class RealTimeAIEngine:
     
     def _get_fallback_recommendation(self) -> Dict:
         """Fallback recommendation when analysis fails"""
+        current_price = 3749.0  # Current gold price
         return {
             'signal': 'NEUTRAL',
             'signal_strength': 'MODERATE',
             'confidence': 60,
             'color': '#ffaa00',
-            'current_price': 2650.0,
-            'targets': {'target_1': 2665, 'target_2': 2680},
-            'stop_loss': 2635,
-            'support': 2635,
-            'resistance': 2665,
+            'current_price': current_price,
+            'targets': {'target_1': current_price + 15, 'target_2': current_price + 25},  # Logical targets above current
+            'stop_loss': current_price - 12,  # Stop loss below current
+            'support': current_price - 20,
+            'resistance': current_price + 20,
             'bullish_factors': ['Market analysis temporarily limited'],
             'bearish_factors': ['Real-time data processing delayed'],
             'update_time': datetime.now().isoformat(),

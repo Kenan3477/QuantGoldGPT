@@ -1,41 +1,36 @@
 #!/usr/bin/env python3
-"""
-Test Real Technical Analysis System
-"""
+"""Test script for the new technical analysis functions"""
 
-from real_technical_analysis import technical_analyzer
-import json
-
-def test_technical_analysis():
-    """Test the technical analysis system"""
-    print("🔧 Testing Real Technical Analysis System...")
-    print("=" * 60)
+try:
+    from app import determine_market_bias, get_current_gold_price_from_api
+    print('✅ Imported functions successfully')
     
-    try:
-        # Test multiple analysis calls to see signal variation
-        for i in range(5):
-            print(f"\n📊 Test {i+1}:")
-            analysis = technical_analyzer.generate_comprehensive_analysis('XAUUSD')
-            
-            signal = analysis['signal']
-            confidence = analysis['confidence']
-            rsi = analysis['technical_indicators']['rsi']
-            macd_status = analysis['technical_indicators']['macd']['signal_status']
-            trend = analysis['technical_indicators']['trend']
-            
-            print(f"  🎯 Signal: {signal}")
-            print(f"  📈 Confidence: {confidence:.3f}")
-            print(f"  💹 RSI: {rsi:.2f}")
-            print(f"  📉 MACD: {macd_status}")
-            print(f"  📊 Trend: {trend}")
-            
-        print("\n" + "=" * 60)
-        print("✅ Technical Analysis Test Complete!")
-        print("🔍 You should see varied signals (BULLISH/BEARISH/NEUTRAL)")
-        print("📊 Dashboard will now show realistic technical analysis instead of all NEUTRAL")
-        
-    except Exception as e:
-        print(f"❌ Test failed: {e}")
-
-if __name__ == "__main__":
-    test_technical_analysis()
+    # Test gold price fetching
+    print("\n� Testing gold price fetching...")
+    price_data = get_current_gold_price_from_api()
+    print(f'💰 Gold Price: ${price_data["price"]:.2f} from {price_data["source"]}')
+    
+    # Test technical analysis
+    print("\n📊 Testing technical analysis...")
+    analysis = determine_market_bias(price_data['price'], {})
+    print(f'Analysis Result: {analysis["bias"]} with {analysis["confidence"]:.1%} confidence')
+    print(f'Key factors: {", ".join(analysis["reasoning"][:3])}')
+    
+    # Show technical data
+    technical_data = analysis["technical_data"]
+    print(f"\n🔧 Technical Data:")
+    if 'rsi' in technical_data:
+        print(f'  RSI: {technical_data["rsi"]:.1f}')
+    if 'macd' in technical_data:
+        print(f'  MACD: {technical_data["macd"]:.4f}')
+    if 'sma_20' in technical_data:
+        print(f'  SMA-20: ${technical_data["sma_20"]:.2f}')
+    if 'volatility' in technical_data:
+        print(f'  Volatility: ${technical_data["volatility"]:.2f}')
+    
+    print(f"\n✅ Technical analysis working properly!")
+    
+except Exception as e:
+    print(f'❌ Error: {e}')
+    import traceback
+    traceback.print_exc()

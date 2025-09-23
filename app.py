@@ -3718,7 +3718,7 @@ def get_ai_recommendation():
             'recommendation_summary': _generate_recommendation_summary(ai_data)
         }
         
-        return jsonify({
+        response = jsonify({
             'success': True,
             'recommendation': recommendation,
             'meta': {
@@ -3728,6 +3728,13 @@ def get_ai_recommendation():
                 'last_updated': ai_data.get('update_time', datetime.now().isoformat())
             }
         })
+        
+        # Add cache-busting headers to ensure fresh data
+        response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+        response.headers['Pragma'] = 'no-cache'
+        response.headers['Expires'] = '0'
+        
+        return response
         
     except ImportError as e:
         logger.error(f"❌ Real-time AI engine import error: {e}")
