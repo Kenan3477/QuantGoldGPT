@@ -1467,6 +1467,16 @@ def generate_signal():
                 sl_range *= 0.8  # Tighter SL for high confidence
             sl = entry - sl_range
             
+            # CRITICAL FIX: Validate TP/SL against current price to prevent immediate auto-close
+            # For BUY signals: SL must be below current price, TP must be above current price
+            min_buffer = volatility * 0.3  # Minimum buffer to prevent immediate closure
+            if sl >= current_gold_price:
+                sl = current_gold_price - min_buffer
+                logger.warning(f"Adjusted BUY SL from {entry - sl_range:.2f} to {sl:.2f} to prevent immediate closure")
+            if tp <= current_gold_price:
+                tp = current_gold_price + min_buffer * 2
+                logger.warning(f"Adjusted BUY TP from {entry + tp_range:.2f} to {tp:.2f} to ensure valid target")
+            
         else:  # SELL
             # Take Profit based on volatility and confidence
             tp_range = volatility * position_multiplier * random.uniform(1.2, 2.0)
@@ -1477,6 +1487,16 @@ def generate_signal():
             if base_confidence > 0.8:
                 sl_range *= 0.8  # Tighter SL for high confidence
             sl = entry + sl_range
+            
+            # CRITICAL FIX: Validate TP/SL against current price to prevent immediate auto-close
+            # For SELL signals: SL must be above current price, TP must be below current price
+            min_buffer = volatility * 0.3  # Minimum buffer to prevent immediate closure
+            if sl <= current_gold_price:
+                sl = current_gold_price + min_buffer
+                logger.warning(f"Adjusted SELL SL from {entry + sl_range:.2f} to {sl:.2f} to prevent immediate closure")
+            if tp >= current_gold_price:
+                tp = current_gold_price - min_buffer * 2
+                logger.warning(f"Adjusted SELL TP from {entry - tp_range:.2f} to {tp:.2f} to ensure valid target")
         
         # ADVANCED LEARNING: Select best performing patterns
         all_patterns = ['Doji', 'Hammer', 'Shooting Star', 'Engulfing', 'Harami',
@@ -1633,11 +1653,36 @@ def generate_signal():
             'memory_stored': memory_stored
         }
         
+        # FINAL VALIDATION: Check if signal would be immediately auto-closed
+        if signal_type == 'BUY':
+            tp_hit_immediate = current_gold_price >= tp
+            sl_hit_immediate = current_gold_price <= sl
+        else:  # SELL
+            tp_hit_immediate = current_gold_price <= tp
+            sl_hit_immediate = current_gold_price >= sl
+        
+        if tp_hit_immediate or sl_hit_immediate:
+            close_reason = "TP already hit" if tp_hit_immediate else "SL already hit"
+            logger.error(f"🚨 SIGNAL VALIDATION FAILED: {close_reason} at current price ${current_gold_price:.2f}")
+            logger.error(f"   Signal: {signal_type} | Entry: ${entry:.2f} | TP: ${tp:.2f} | SL: ${sl:.2f}")
+            return jsonify({
+                'success': False, 
+                'error': f'Signal would be immediately closed - {close_reason}',
+                'debug_info': {
+                    'current_price': current_gold_price,
+                    'entry': entry,
+                    'tp': tp,
+                    'sl': sl,
+                    'signal_type': signal_type
+                }
+            })
+        
         # Add to active signals list
         active_signals.append(signal)
         
         logger.info(f"✅ Generated {signal_type} signal: Entry ${entry:.2f}, TP ${tp:.2f}, SL ${sl:.2f}")
         logger.info(f"🎯 Confidence: {final_confidence:.1%} | Volatility: ${volatility:.2f}")
+        logger.info(f"🔒 Validation passed - Signal will remain active")
         
         return jsonify({
             'success': True,
@@ -2672,9 +2717,16 @@ def get_tracked_signals():
         logger.info(f"🥇 Calculating P&L using current gold price: ${current_price}")
         
         # Auto-close any signals that hit TP/SL
+        signals_before_close = len(all_signals)
         closed_count = auto_close_signals(current_price)
+        signals_after_close = len(active_signals)  # Global list after auto-close
+        
         if closed_count > 0:
             logger.info(f"🔒 Auto-closed {closed_count} signals")
+            logger.info(f"📊 Signals before close: {signals_before_close}, after close: {signals_after_close}")
+        
+        # Update all_signals list after auto-close (remove closed signals)
+        all_signals = [s for s in all_signals if s.get('signal_id') in [sig.get('signal_id') for sig in active_signals]]
         
     except Exception as e:
         logger.error(f"Failed to get current gold price for P&L: {e}")
