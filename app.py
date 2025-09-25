@@ -1469,12 +1469,12 @@ def generate_signal():
             
             # CRITICAL FIX: Validate TP/SL against current price to prevent immediate auto-close
             # For BUY signals: SL must be below current price, TP must be above current price
-            min_buffer = volatility * 0.3  # Minimum buffer to prevent immediate closure
+            min_buffer = max(volatility * 0.5, 5.0)  # Minimum buffer increased for safety
             if sl >= current_gold_price:
                 sl = current_gold_price - min_buffer
                 logger.warning(f"Adjusted BUY SL from {entry - sl_range:.2f} to {sl:.2f} to prevent immediate closure")
             if tp <= current_gold_price:
-                tp = current_gold_price + min_buffer * 2
+                tp = current_gold_price + min_buffer
                 logger.warning(f"Adjusted BUY TP from {entry + tp_range:.2f} to {tp:.2f} to ensure valid target")
             
         else:  # SELL
@@ -1490,12 +1490,12 @@ def generate_signal():
             
             # CRITICAL FIX: Validate TP/SL against current price to prevent immediate auto-close
             # For SELL signals: SL must be above current price, TP must be below current price
-            min_buffer = volatility * 0.3  # Minimum buffer to prevent immediate closure
+            min_buffer = max(volatility * 0.5, 5.0)  # Minimum buffer increased for safety
             if sl <= current_gold_price:
                 sl = current_gold_price + min_buffer
                 logger.warning(f"Adjusted SELL SL from {entry + sl_range:.2f} to {sl:.2f} to prevent immediate closure")
             if tp >= current_gold_price:
-                tp = current_gold_price - min_buffer * 2
+                tp = current_gold_price - min_buffer
                 logger.warning(f"Adjusted SELL TP from {entry - tp_range:.2f} to {tp:.2f} to ensure valid target")
         
         # ADVANCED LEARNING: Select best performing patterns
