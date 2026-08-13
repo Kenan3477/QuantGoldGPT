@@ -40,6 +40,18 @@ def get_source(name: str = "yfinance", **kwargs) -> MarketDataSource:
         from quantgold.data.ingest.mt5_source import MT5Source
 
         return MT5Source(**kwargs)
+    if name == "dukascopy":
+        from quantgold.data.ingest.dukascopy_source import DukascopyCsvSource
+
+        return DukascopyCsvSource()
+    if name == "alphavantage":
+        from quantgold.data.ingest.alphavantage_source import AlphaVantageSource
+
+        return AlphaVantageSource(api_key=kwargs.get("api_key"))
+    if name == "fred":
+        from quantgold.data.ingest.fred_source import FredSource
+
+        return FredSource(api_key=kwargs.get("api_key"))
     raise ValueError(f"Unknown source: {name}")
 
 

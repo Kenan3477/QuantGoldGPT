@@ -24,9 +24,14 @@ ml = [
   "xgboost>=2.1",
   "lightgbm>=4.0",
   "catboost>=1.2",
+  "optuna>=3.0",
 ]
 mt5 = [
   "MetaTrader5>=5.0.5572",
+]
+free-data = [
+  "requests>=2.31",
+  "requests-cache>=1.0",
 ]
 dev = [
   "pytest>=8.0",
