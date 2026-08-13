@@ -1,0 +1,61 @@
+{
+  "walk_forward_summary": {
+    "n_folds": 3,
+    "n_predictions": 7239,
+    "n_trades": 736,
+    "mean_coverage": 0.10784676251171378,
+    "mean_precision_trades": 0.6985981639446986,
+    "mean_brier": 0.2320155763311489,
+    "mean_ece": 0.062006162963509893,
+    "note": "Research metrics only \u2014 not production performance claims. Costs applied in backtester."
+  },
+  "fold_metrics": [
+    {
+      "fold_id": 0,
+      "n_train": 6435,
+      "n_val": 2145,
+      "n_test": 2145,
+      "precision": 0.5925155925155925,
+      "coverage": 0.22424242424242424,
+      "brier": 0.23420433988180805,
+      "ece": 0.07909848355885708,
+      "n_trades": 481
+    },
+    {
+      "fold_id": 1,
+      "n_train": 7239,
+      "n_val": 2413,
+      "n_test": 2413,
+      "precision": 0.801980198019802,
+      "coverage": 0.04185661002900953,
+      "brier": 0.2295514149993601,
+      "ece": 0.060443872930941334,
+      "n_trades": 101
+    },
+    {
+      "fold_id": 2,
+      "n_train": 8043,
+      "n_val": 2681,
+      "n_test": 2681,
+      "precision": 0.7012987012987013,
+      "coverage": 0.057441253263707574,
+      "brier": 0.23229097411227848,
+      "ece": 0.04647613240073127,
+      "n_trades": 154
+    }
+  ],
+  "backtest_metrics": {
+    "n_trades": 736,
+    "win_rate": 0.5190217391304348,
+    "expectancy": 0.1238523798403339,
+    "profit_factor": 1.5072744133981073,
+    "sharpe": 0.1755966420577324,
+    "max_drawdown": -38.036513148721696,
+    "avg_hold_bars": 5.044836956521739,
+    "timeout_rate": 0.09782608695652174
+  },
+  "models": [
+    "xgboost"
+  ],
+  "disclaimer": "Research results only. Not production performance claims."
+}
