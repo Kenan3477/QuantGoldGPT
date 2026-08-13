@@ -6,6 +6,25 @@ ENV/
 env.bak/
 venv.bak/
 
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.coverage
+htmlcov/
+dist/
+build/
+
+# QuantGold artifacts (keep directory placeholders)
+artifacts/datasets/**
+!artifacts/datasets/.gitkeep
+artifacts/models/**
+!artifacts/models/.gitkeep
+!artifacts/models/registry.json
+experiments/**
+!experiments/.gitkeep
+
 # IDEs
 .vscode/
 .idea/
