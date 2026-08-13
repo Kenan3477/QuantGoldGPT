@@ -88,5 +88,77 @@
       "note": "Research metrics only \u2014 not production performance claims. Costs applied in backtester."
     },
     "artifact_path": "artifacts/reports/wf_XAUUSD_M15.json"
+  },
+  {
+    "model_id": "XAUUSD_M15_xgboost",
+    "stage": "candidate",
+    "created_at": "2026-08-13T11:28:00.658862+00:00",
+    "git_commit": null,
+    "dataset_version": "XAUUSD_M15_4495",
+    "metrics": {
+      "n_folds": 3,
+      "n_predictions": 2429,
+      "n_trades": 606,
+      "mean_coverage": 0.25672598039888855,
+      "mean_precision_trades": 0.6321622049663748,
+      "mean_brier": 0.22599268232863343,
+      "mean_ece": 0.08811612099417775,
+      "note": "Research metrics only \u2014 not production performance claims. Costs applied in backtester."
+    },
+    "artifact_path": "artifacts/reports/wf_XAUUSD_M15.json"
+  },
+  {
+    "model_id": "XAUUSD_M15_xgboost",
+    "stage": "candidate",
+    "created_at": "2026-08-13T11:30:20.561646+00:00",
+    "git_commit": null,
+    "dataset_version": "XAUUSD_M15_4481",
+    "metrics": {
+      "n_folds": 3,
+      "n_predictions": 2421,
+      "n_trades": 212,
+      "mean_coverage": 0.08848165006610335,
+      "mean_precision_trades": 0.7816171775223499,
+      "mean_brier": 0.22509676961268876,
+      "mean_ece": 0.077207354308174,
+      "note": "Research metrics only \u2014 not production performance claims. Costs applied in backtester."
+    },
+    "artifact_path": "artifacts/reports/wf_XAUUSD_M15.json"
+  },
+  {
+    "model_id": "XAUUSD_M15_xgboost",
+    "stage": "candidate",
+    "created_at": "2026-08-13T11:30:57.023340+00:00",
+    "git_commit": null,
+    "dataset_version": "XAUUSD_M15_4495",
+    "metrics": {
+      "n_folds": 3,
+      "n_predictions": 2429,
+      "n_trades": 301,
+      "mean_coverage": 0.1288181427008519,
+      "mean_precision_trades": 0.7531429189657038,
+      "mean_brier": 0.2259837186168632,
+      "mean_ece": 0.0881065725930789,
+      "note": "Research metrics only \u2014 not production performance claims. Costs applied in backtester."
+    },
+    "artifact_path": "artifacts/reports/wf_XAUUSD_M15.json"
+  },
+  {
+    "model_id": "XAUUSD_M15_xgboost",
+    "stage": "candidate",
+    "created_at": "2026-08-13T11:31:23.424907+00:00",
+    "git_commit": null,
+    "dataset_version": "XAUUSD_M15_4481",
+    "metrics": {
+      "n_folds": 3,
+      "n_predictions": 2421,
+      "n_trades": 375,
+      "mean_coverage": 0.15443255180983026,
+      "mean_precision_trades": 0.6689698605488079,
+      "mean_brier": 0.2246983226670164,
+      "mean_ece": 0.08108446958812719,
+      "note": "Research metrics only \u2014 not production performance claims. Costs applied in backtester."
+    },
+    "artifact_path": "artifacts/reports/wf_XAUUSD_M15.json"
   }
 ]

@@ -56,7 +56,7 @@ class ValidationConfig:
 class DecisionConfig:
     """Selective trading thresholds — coverage vs precision is researched, not hard-coded as truth."""
 
-    min_calibrated_probability: float = 0.65
+    min_calibrated_probability: float = 0.78  # Sprint 2 final: 8.8% coverage, 75% win rate, Sharpe 0.717, PF 4.57
     max_model_disagreement: float = 0.20
     enable_meta_label: bool = True
     allow_no_trade: bool = True
