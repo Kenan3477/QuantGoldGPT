@@ -21,7 +21,7 @@ class FeatureBundleConfig:
     use_sessions: bool = True
     use_structure: bool = True
     use_intermarket: bool = True
-    use_macro: bool = True
+    use_macro: bool = False  # Deferred for Sprint 1
 
 
 @dataclass
