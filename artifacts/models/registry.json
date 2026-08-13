@@ -1,0 +1,38 @@
+[
+  {
+    "model_id": "XAUUSD_D1_xgboost",
+    "stage": "candidate",
+    "created_at": "2026-08-13T09:28:42.115199+00:00",
+    "git_commit": null,
+    "dataset_version": "XAUUSD_D1_5450",
+    "metrics": {
+      "n_folds": 22,
+      "n_predictions": 4839,
+      "n_trades": 441,
+      "mean_coverage": 0.08951140444308468,
+      "mean_precision_trades": 0.4831912741982115,
+      "mean_brier": 0.29621947797299786,
+      "mean_ece": 0.20641598419729468,
+      "note": "Research metrics only \u2014 not production performance claims. Costs applied in backtester."
+    },
+    "artifact_path": "artifacts/reports/wf_XAUUSD_D1.json"
+  },
+  {
+    "model_id": "XAGUSD_D1_xgboost",
+    "stage": "candidate",
+    "created_at": "2026-08-13T09:29:09.639928+00:00",
+    "git_commit": null,
+    "dataset_version": "XAGUSD_D1_4724",
+    "metrics": {
+      "n_folds": 22,
+      "n_predictions": 4188,
+      "n_trades": 268,
+      "mean_coverage": 0.06421053194898087,
+      "mean_precision_trades": 0.5694611911374097,
+      "mean_brier": 0.2892980785633705,
+      "mean_ece": 0.20225675539191423,
+      "note": "Research metrics only \u2014 not production performance claims. Costs applied in backtester."
+    },
+    "artifact_path": "artifacts/reports/wf_XAGUSD_D1.json"
+  }
+]

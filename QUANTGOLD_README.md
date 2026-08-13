@@ -26,18 +26,38 @@ See `docs/audit/XAUBOT_PHASE1_AUDIT.md`.
 ## Quick start
 
 ```bash
-python -m pip install -e ".[dev]"
+python -m pip install -e ".[dev,ml]"
 pytest tests/unit tests/leakage -q
+
+# Build canonical datasets (Yahoo research source)
+python -m quantgold.cli build-datasets --source yfinance --timeframes D1,H1
+
+# Walk-forward + costed backtest + experiment log
+python -m quantgold.cli walk-forward --symbol XAUUSD --timeframe D1
+
+# Paper smoke (logs NO_TRADE/BUY/SELL decision)
+python -m quantgold.cli paper-once --symbol XAUUSD --timeframe D1
+
+# Full chain
+python -m quantgold.cli run-all --symbol XAUUSD --timeframe D1
 ```
 
 ## Milestone status
 
 | Milestone | Status |
 |-----------|--------|
-| M0 Audit + scaffold | In progress (this branch) |
-| M1 Canonical datasets + baseline features | Next |
-| M2 Triple-barrier + walk-forward baseline | Planned |
-| … | See audit §8 |
+| M0 Audit + scaffold | Done |
+| M1 Canonical datasets | Done |
+| M2 Triple-barrier + walk-forward baseline | Done |
+| M3 Session/structure/intermarket/macro features | Done |
+| M4 Fold-local regimes + routing stubs | Done |
+| M5 Calibration + meta + selective NO_TRADE | Done |
+| M6 Realistic backtester | Done |
+| M7 Experiment tracking + registry + drift | Done |
+| M8 Paper runner | Done |
+| M9 CLI + docs + baseline report | Done |
+
+Baseline research results (honest, currently **no costed edge**): `docs/audit/BASELINE_RESULTS.md`
 
 ## Legacy note
 

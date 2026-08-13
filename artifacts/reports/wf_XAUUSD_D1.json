@@ -1,0 +1,270 @@
+{
+  "walk_forward_summary": {
+    "n_folds": 22,
+    "n_predictions": 4839,
+    "n_trades": 441,
+    "mean_coverage": 0.08951140444308468,
+    "mean_precision_trades": 0.4831912741982115,
+    "mean_brier": 0.29621947797299786,
+    "mean_ece": 0.20641598419729468,
+    "note": "Research metrics only \u2014 not production performance claims. Costs applied in backtester."
+  },
+  "fold_metrics": [
+    {
+      "fold_id": 0,
+      "n_train": 320,
+      "n_val": 140,
+      "n_test": 134,
+      "precision": 1.0,
+      "coverage": 0.007462686567164179,
+      "brier": 0.25097990643295914,
+      "ece": 0.13739191368222237,
+      "n_trades": 1
+    },
+    {
+      "fold_id": 1,
+      "n_train": 423,
+      "n_val": 134,
+      "n_test": 126,
+      "precision": 0.5,
+      "coverage": 0.20634920634920634,
+      "brier": 0.2758497180702154,
+      "ece": 0.17058005609682625,
+      "n_trades": 26
+    },
+    {
+      "fold_id": 2,
+      "n_train": 429,
+      "n_val": 126,
+      "n_test": 130,
+      "precision": 0.25,
+      "coverage": 0.03076923076923077,
+      "brier": 0.3395404005165377,
+      "ece": 0.30038593878539716,
+      "n_trades": 4
+    },
+    {
+      "fold_id": 3,
+      "n_train": 400,
+      "n_val": 130,
+      "n_test": 162,
+      "precision": 0.5,
+      "coverage": 0.012345679012345678,
+      "brier": 0.2998716704028689,
+      "ece": 0.1951760051794994,
+      "n_trades": 2
+    },
+    {
+      "fold_id": 4,
+      "n_train": 390,
+      "n_val": 162,
+      "n_test": 237,
+      "precision": 0.42105263157894735,
+      "coverage": 0.16033755274261605,
+      "brier": 0.3013328933535447,
+      "ece": 0.21365865027602712,
+      "n_trades": 38
+    },
+    {
+      "fold_id": 5,
+      "n_train": 418,
+      "n_val": 237,
+      "n_test": 246,
+      "precision": 0.6875,
+      "coverage": 0.06504065040650407,
+      "brier": 0.2987839959633697,
+      "ece": 0.2217920070620087,
+      "n_trades": 16
+    },
+    {
+      "fold_id": 6,
+      "n_train": 529,
+      "n_val": 246,
+      "n_test": 213,
+      "precision": 0.4,
+      "coverage": 0.09389671361502347,
+      "brier": 0.3192539259140581,
+      "ece": 0.2244299271017173,
+      "n_trades": 20
+    },
+    {
+      "fold_id": 7,
+      "n_train": 645,
+      "n_val": 213,
+      "n_test": 246,
+      "precision": 0.8333333333333334,
+      "coverage": 0.024390243902439025,
+      "brier": 0.26562088089762803,
+      "ece": 0.14446159771726869,
+      "n_trades": 6
+    },
+    {
+      "fold_id": 8,
+      "n_train": 696,
+      "n_val": 246,
+      "n_test": 248,
+      "precision": 0.0,
+      "coverage": 0.004032258064516129,
+      "brier": 0.3085149105926163,
+      "ece": 0.25557610792137925,
+      "n_trades": 1
+    },
+    {
+      "fold_id": 9,
+      "n_train": 705,
+      "n_val": 248,
+      "n_test": 248,
+      "precision": 0.6956521739130435,
+      "coverage": 0.09274193548387097,
+      "brier": 0.2639563496445427,
+      "ece": 0.23809381063667037,
+      "n_trades": 23
+    },
+    {
+      "fold_id": 10,
+      "n_train": 707,
+      "n_val": 248,
+      "n_test": 234,
+      "precision": 0.5116279069767442,
+      "coverage": 0.18376068376068377,
+      "brier": 0.2543060867076989,
+      "ece": 0.11446538593015103,
+      "n_trades": 43
+    },
+    {
+      "fold_id": 11,
+      "n_train": 742,
+      "n_val": 234,
+      "n_test": 251,
+      "precision": 0.8461538461538461,
+      "coverage": 0.05179282868525897,
+      "brier": 0.2358296047589062,
+      "ece": 0.09705498755215645,
+      "n_trades": 13
+    },
+    {
+      "fold_id": 12,
+      "n_train": 730,
+      "n_val": 251,
+      "n_test": 245,
+      "precision": 0.46153846153846156,
+      "coverage": 0.2653061224489796,
+      "brier": 0.30755963122565355,
+      "ece": 0.20837620594063588,
+      "n_trades": 65
+    },
+    {
+      "fold_id": 13,
+      "n_train": 733,
+      "n_val": 245,
+      "n_test": 240,
+      "precision": NaN,
+      "coverage": 0.0,
+      "brier": 0.32313978756223444,
+      "ece": 0.26288896064894895,
+      "n_trades": 0
+    },
+    {
+      "fold_id": 14,
+      "n_train": 730,
+      "n_val": 240,
+      "n_test": 214,
+      "precision": 0.0,
+      "coverage": 0.009345794392523364,
+      "brier": 0.2514885008618038,
+      "ece": 0.12433755425649268,
+      "n_trades": 2
+    },
+    {
+      "fold_id": 15,
+      "n_train": 736,
+      "n_val": 214,
+      "n_test": 222,
+      "precision": 0.4444444444444444,
+      "coverage": 0.08108108108108109,
+      "brier": 0.26404839468729574,
+      "ece": 0.1071648787002306,
+      "n_trades": 18
+    },
+    {
+      "fold_id": 16,
+      "n_train": 699,
+      "n_val": 222,
+      "n_test": 247,
+      "precision": 0.5263157894736842,
+      "coverage": 0.15384615384615385,
+      "brier": 0.32287042241328956,
+      "ece": 0.2644625681976558,
+      "n_trades": 38
+    },
+    {
+      "fold_id": 17,
+      "n_train": 676,
+      "n_val": 247,
+      "n_test": 241,
+      "precision": 0.0,
+      "coverage": 0.008298755186721992,
+      "brier": 0.32216790720101335,
+      "ece": 0.2391383509109129,
+      "n_trades": 2
+    },
+    {
+      "fold_id": 18,
+      "n_train": 683,
+      "n_val": 241,
+      "n_test": 237,
+      "precision": 0.33620689655172414,
+      "coverage": 0.48945147679324896,
+      "brier": 0.3792877092178296,
+      "ece": 0.33244642854239864,
+      "n_trades": 116
+    },
+    {
+      "fold_id": 19,
+      "n_train": 710,
+      "n_val": 237,
+      "n_test": 234,
+      "precision": NaN,
+      "coverage": 0.0,
+      "brier": 0.299581428949688,
+      "ece": 0.23116364629350156,
+      "n_trades": 0
+    },
+    {
+      "fold_id": 20,
+      "n_train": 725,
+      "n_val": 234,
+      "n_test": 238,
+      "precision": 0.25,
+      "coverage": 0.01680672268907563,
+      "brier": 0.266463411440958,
+      "ece": 0.09977091153880127,
+      "n_trades": 4
+    },
+    {
+      "fold_id": 21,
+      "n_train": 712,
+      "n_val": 238,
+      "n_test": 246,
+      "precision": 1.0,
+      "coverage": 0.012195121951219513,
+      "brier": 0.3663809785912409,
+      "ece": 0.3583357593695808,
+      "n_trades": 3
+    }
+  ],
+  "backtest_metrics": {
+    "n_trades": 441,
+    "win_rate": 0.37188208616780044,
+    "expectancy": -0.17436177339297051,
+    "profit_factor": 0.8437097928800475,
+    "sharpe": -0.07721195532700731,
+    "max_drawdown": -93.27711574009409,
+    "avg_hold_bars": 3.562358276643991,
+    "timeout_rate": 0.034013605442176874
+  },
+  "models": [
+    "xgboost"
+  ],
+  "disclaimer": "Research results only. Not production performance claims."
+}
