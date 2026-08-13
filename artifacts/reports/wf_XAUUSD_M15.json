@@ -2,11 +2,11 @@
   "walk_forward_summary": {
     "n_folds": 3,
     "n_predictions": 2433,
-    "n_trades": 75,
-    "mean_coverage": 0.030251244037994337,
-    "mean_precision_trades": 0.8517441860465116,
-    "mean_brier": 0.25115976507973536,
-    "mean_ece": 0.1319992726074439,
+    "n_trades": 38,
+    "mean_coverage": 0.015618464001381593,
+    "mean_precision_trades": 0.6916666666666665,
+    "mean_brier": 0.24030305100007907,
+    "mean_ece": 0.09572855003801188,
     "note": "Research metrics only \u2014 not production performance claims. Costs applied in backtester."
   },
   "fold_metrics": [
@@ -15,10 +15,10 @@
       "n_train": 2161,
       "n_val": 721,
       "n_test": 721,
-      "precision": 1.0,
+      "precision": 0.875,
       "coverage": 0.011095700416088766,
-      "brier": 0.25172336320431715,
-      "ece": 0.13829822604507,
+      "brier": 0.23985049404787798,
+      "ece": 0.09945840058867053,
       "n_trades": 8
     },
     {
@@ -26,36 +26,36 @@
       "n_train": 2431,
       "n_val": 811,
       "n_test": 811,
-      "precision": 0.9302325581395349,
-      "coverage": 0.0530209617755857,
-      "brier": 0.25956686995242,
-      "ece": 0.1452504776914302,
-      "n_trades": 43
+      "precision": 0.9,
+      "coverage": 0.02466091245376079,
+      "brier": 0.24362089186749003,
+      "ece": 0.10348255299741413,
+      "n_trades": 20
     },
     {
       "fold_id": 2,
       "n_train": 2701,
       "n_val": 901,
       "n_test": 901,
-      "precision": 0.625,
-      "coverage": 0.026637069922308545,
-      "brier": 0.2421890620824689,
-      "ece": 0.11244911408583148,
-      "n_trades": 24
+      "precision": 0.3,
+      "coverage": 0.011098779134295227,
+      "brier": 0.23743776708486913,
+      "ece": 0.08424469652795095,
+      "n_trades": 10
     }
   ],
   "backtest_metrics": {
-    "n_trades": 75,
-    "win_rate": 0.9333333333333333,
-    "expectancy": 1.0681824381510165,
-    "profit_factor": 30.729750387406142,
-    "sharpe": 1.8204199390556195,
-    "max_drawdown": -2.064633440290251,
-    "avg_hold_bars": 4.826666666666667,
-    "timeout_rate": 0.14666666666666667
+    "n_trades": 38,
+    "win_rate": 0.9473684210526315,
+    "expectancy": 1.2935962602428652,
+    "profit_factor": 137.53145730324457,
+    "sharpe": 2.2903454928227682,
+    "max_drawdown": -0.20003906250003922,
+    "avg_hold_bars": 5.815789473684211,
+    "timeout_rate": 0.2631578947368421
   },
   "models": [
-    "xgboost"
+    "ensemble"
   ],
   "disclaimer": "Research results only. Not production performance claims."
 }
