@@ -2,60 +2,60 @@
   "walk_forward_summary": {
     "n_folds": 3,
     "n_predictions": 2420,
-    "n_trades": 653,
-    "mean_coverage": 0.27426529073350264,
-    "mean_precision_trades": 0.6371140371140371,
-    "mean_brier": 0.22206385676226822,
-    "mean_ece": 0.07546723058089255,
+    "n_trades": 510,
+    "mean_coverage": 0.2201357097521364,
+    "mean_precision_trades": 0.6332580575024189,
+    "mean_brier": 0.22167439712593792,
+    "mean_ece": 0.05760881960832567,
     "note": "Research metrics only \u2014 not production performance claims. Costs applied in backtester."
   },
   "fold_metrics": [
     {
       "fold_id": 0,
-      "n_train": 2150,
+      "n_train": 2151,
       "n_val": 717,
       "n_test": 717,
-      "precision": 0.6452991452991453,
-      "coverage": 0.3263598326359833,
-      "brier": 0.23168940549890613,
-      "ece": 0.10621609282387601,
-      "n_trades": 234
+      "precision": 0.5891472868217055,
+      "coverage": 0.3598326359832636,
+      "brier": 0.22211340380534147,
+      "ece": 0.08019738515717062,
+      "n_trades": 258
     },
     {
       "fold_id": 1,
-      "n_train": 2418,
+      "n_train": 2419,
       "n_val": 806,
       "n_test": 807,
-      "precision": 0.6282051282051282,
-      "coverage": 0.2899628252788104,
-      "brier": 0.21628600540960222,
-      "ece": 0.05845303185367231,
-      "n_trades": 234
+      "precision": 0.6369426751592356,
+      "coverage": 0.19454770755885997,
+      "brier": 0.21921508482630714,
+      "ece": 0.0343564443642733,
+      "n_trades": 157
     },
     {
       "fold_id": 2,
-      "n_train": 2686,
+      "n_train": 2687,
       "n_val": 896,
       "n_test": 896,
-      "precision": 0.6378378378378379,
-      "coverage": 0.20647321428571427,
-      "brier": 0.2182161593782963,
-      "ece": 0.06173256706512933,
-      "n_trades": 185
+      "precision": 0.6736842105263158,
+      "coverage": 0.10602678571428571,
+      "brier": 0.22369470274616512,
+      "ece": 0.0582726293035331,
+      "n_trades": 95
     }
   ],
   "backtest_metrics": {
-    "n_trades": 653,
-    "win_rate": 0.5298621745788668,
-    "expectancy": 0.16940159188658416,
-    "profit_factor": 1.4446738291092984,
-    "sharpe": 0.16524497859589274,
-    "max_drawdown": -20.88925885881745,
-    "avg_hold_bars": 5.091883614088821,
-    "timeout_rate": 0.11944869831546708
+    "n_trades": 510,
+    "win_rate": 0.515686274509804,
+    "expectancy": 0.1356487554982723,
+    "profit_factor": 1.3393433247738427,
+    "sharpe": 0.13190832832572263,
+    "max_drawdown": -27.838311244421227,
+    "avg_hold_bars": 4.754901960784314,
+    "timeout_rate": 0.10392156862745099
   },
   "models": [
-    "xgboost"
+    "ensemble"
   ],
   "disclaimer": "Research results only. Not production performance claims."
 }

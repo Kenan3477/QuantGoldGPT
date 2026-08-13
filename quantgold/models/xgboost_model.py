@@ -68,6 +68,21 @@ def available_model_backends() -> list[str]:
         backends.append("lightgbm")
     except ImportError:
         pass
+    
+    # Add ensemble if all required models are available
+    has_xgb = "xgboost" in backends
+    has_lgbm = "lightgbm" in backends
+    try:
+        import catboost  # noqa: F401
+        has_catboost = True
+    except ImportError:
+        has_catboost = False
+    
+    # Ensemble requires at least XGB, LGBM, CatBoost, RF, ExtraTrees
+    # RF and ExtraTrees are always available (sklearn)
+    if has_xgb and has_lgbm and has_catboost:
+        backends.append("ensemble")
+    
     return backends
 
 
@@ -82,4 +97,23 @@ def make_model(name: str, random_state: int = 42) -> ProbabilisticModel:
         from quantgold.models.lightgbm_model import LightGBMModel
 
         return LightGBMModel(random_state=random_state)
+    if name == "ensemble":
+        from quantgold.models.ensemble_multi import MultiModelEnsemble, EnsembleMember
+        from quantgold.models.lightgbm_model import LightGBMModel
+        from quantgold.models.catboost_model import CatBoostModel
+        from quantgold.models.sklearn_ensemble import RandomForestModel, ExtraTreesModel
+        
+        # Create 5-model ensemble with equal weights (simple average for now)
+        models = [
+            EnsembleMember("xgb", XGBoostModel(random_state=random_state, n_estimators=100)),
+            EnsembleMember("lgbm", LightGBMModel(random_state=random_state, n_estimators=100)),
+            EnsembleMember("cat", CatBoostModel(random_seed=random_state, iterations=100, verbose=False)),  # CatBoost uses random_seed
+            EnsembleMember("rf", RandomForestModel(random_state=random_state, n_estimators=100)),
+            EnsembleMember("et", ExtraTreesModel(random_state=random_state, n_estimators=100)),
+        ]
+        
+        return MultiModelEnsemble(
+            models=models,
+            strategy="simple_average",  # Equal weights
+        )
     raise ValueError(f"Unknown model: {name}")

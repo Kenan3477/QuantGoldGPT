@@ -87,13 +87,18 @@ class RandomForestModel(ProbabilisticModel):
         
         Args:
             X: Training features
-            y: Training labels (0/1)
+            y: Training labels (-1/0/1, will be converted to binary 0/1)
             **kwargs: Ignored (for API compatibility)
             
         Returns:
             self
         """
-        self.model.fit(X, y)
+        # Convert labels to binary (same as XGBoost)
+        # -1 (DOWN) and 0 (TIMEOUT) → 0, 1 (UP) → 1
+        y_arr = y.values if isinstance(y, pd.Series) else y
+        y_bin = (y_arr.astype(float) == 1).astype(int)
+        
+        self.model.fit(X, y_bin)
         return self
     
     def predict_proba(self, X: pd.DataFrame | np.ndarray) -> np.ndarray:
@@ -232,13 +237,18 @@ class ExtraTreesModel(ProbabilisticModel):
         
         Args:
             X: Training features
-            y: Training labels (0/1)
+            y: Training labels (-1/0/1, will be converted to binary 0/1)
             **kwargs: Ignored (for API compatibility)
             
         Returns:
             self
         """
-        self.model.fit(X, y)
+        # Convert labels to binary (same as XGBoost)
+        # -1 (DOWN) and 0 (TIMEOUT) → 0, 1 (UP) → 1
+        y_arr = y.values if isinstance(y, pd.Series) else y
+        y_bin = (y_arr.astype(float) == 1).astype(int)
+        
+        self.model.fit(X, y_bin)
         return self
     
     def predict_proba(self, X: pd.DataFrame | np.ndarray) -> np.ndarray:

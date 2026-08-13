@@ -85,7 +85,7 @@ class CatBoostModel(ProbabilisticModel):
         
         Args:
             X: Training features
-            y: Training labels (0/1)
+            y: Training labels (-1/0/1, will be converted to binary 0/1)
             X_val: Validation features (for early stopping)
             y_val: Validation labels
             categorical_features: List of categorical feature names
@@ -96,15 +96,22 @@ class CatBoostModel(ProbabilisticModel):
         # Store categorical features for later
         self.categorical_features_ = categorical_features
         
+        # Convert labels to binary (same as XGBoost)
+        # -1 (DOWN) and 0 (TIMEOUT) → 0, 1 (UP) → 1
+        y_arr = y.values if isinstance(y, pd.Series) else y
+        y_bin = (y_arr.astype(float) == 1).astype(int)
+        
         # Prepare eval set if validation data provided
         eval_set = None
         if X_val is not None and y_val is not None:
-            eval_set = (X_val, y_val)
+            y_val_arr = y_val.values if isinstance(y_val, pd.Series) else y_val
+            y_val_bin = (y_val_arr.astype(float) == 1).astype(int)
+            eval_set = (X_val, y_val_bin)
         
         # Fit model
         self.model.fit(
             X,
-            y,
+            y_bin,
             cat_features=categorical_features,
             eval_set=eval_set,
             early_stopping_rounds=50 if eval_set else None,
