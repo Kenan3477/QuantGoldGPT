@@ -268,5 +268,59 @@
       "note": "Research metrics only \u2014 not production performance claims. Costs applied in backtester."
     },
     "artifact_path": "artifacts/reports/wf_XAUUSD_M15.json"
+  },
+  {
+    "model_id": "XAUUSD_H1_ensemble",
+    "stage": "candidate",
+    "created_at": "2026-08-13T12:21:05.722215+00:00",
+    "git_commit": null,
+    "dataset_version": "XAUUSD_H1_13607",
+    "metrics": {
+      "n_folds": 3,
+      "n_predictions": 7350,
+      "n_trades": 1669,
+      "mean_coverage": 0.22684553007157662,
+      "mean_precision_trades": 0.7177606412665384,
+      "mean_brier": 0.2113665942526319,
+      "mean_ece": 0.16392410387598236,
+      "note": "Research metrics only \u2014 not production performance claims. Costs applied in backtester."
+    },
+    "artifact_path": "artifacts/reports/wf_XAUUSD_H1.json"
+  },
+  {
+    "model_id": "XAUUSD_H4_ensemble",
+    "stage": "candidate",
+    "created_at": "2026-08-13T12:21:43.364268+00:00",
+    "git_commit": null,
+    "dataset_version": "XAUUSD_H4_3667",
+    "metrics": {
+      "n_folds": 3,
+      "n_predictions": 1982,
+      "n_trades": 88,
+      "mean_coverage": 0.043752712617966455,
+      "mean_precision_trades": 0.8651298357180711,
+      "mean_brier": 0.22073720589577606,
+      "mean_ece": 0.106803067139798,
+      "note": "Research metrics only \u2014 not production performance claims. Costs applied in backtester."
+    },
+    "artifact_path": "artifacts/reports/wf_XAUUSD_H4.json"
+  },
+  {
+    "model_id": "XAUUSD_D1_ensemble",
+    "stage": "candidate",
+    "created_at": "2026-08-13T12:22:16.423926+00:00",
+    "git_commit": null,
+    "dataset_version": "XAUUSD_D1_5459",
+    "metrics": {
+      "n_folds": 22,
+      "n_predictions": 4847,
+      "n_trades": 33,
+      "mean_coverage": 0.006183065220853035,
+      "mean_precision_trades": 0.5438095238095239,
+      "mean_brier": 0.2801410656738383,
+      "mean_ece": 0.17274058816193205,
+      "note": "Research metrics only \u2014 not production performance claims. Costs applied in backtester."
+    },
+    "artifact_path": "artifacts/reports/wf_XAUUSD_D1.json"
   }
 ]
