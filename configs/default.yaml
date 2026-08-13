@@ -19,8 +19,8 @@ timeframes:
   - {name: D1, minutes: 1440}
 
 triple_barrier:
-  upper_atr_mult: 1.5
-  lower_atr_mult: 1.0
+  upper_atr_mult: 1.5  # Symmetric: both profit and stop at 1.5x ATR
+  lower_atr_mult: 1.5  # This should create more balanced BUY/SELL labels
   max_holding_bars: 12
   atr_period: 14
   # When both barriers are touched in the same bar, do not invent a winner.
@@ -38,7 +38,7 @@ validation:
   final_holdout_start: null
 
 decision:
-  min_calibrated_probability: 0.78  # Sprint 2 final: M15 optimal (8.8% coverage, 75% win rate, Sharpe 0.717, PF 4.57)
+  min_calibrated_probability: 0.82  # Testing higher threshold for max accuracy
   max_model_disagreement: 0.20
   enable_meta_label: true
   allow_no_trade: true
