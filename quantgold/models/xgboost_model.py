@@ -22,13 +22,17 @@ class XGBoostModel(ProbabilisticModel):
 
     def fit(
         self,
-        X: pd.DataFrame,
-        y: pd.Series,
+        X: pd.DataFrame | np.ndarray,
+        y: pd.Series | np.ndarray,
         sample_weight: Optional[np.ndarray] = None,
     ) -> "XGBoostModel":
         from xgboost import XGBClassifier
 
-        y_bin = (y.astype(float) == 1).astype(int)
+        # Convert to numpy if needed
+        X_arr = X.values if isinstance(X, pd.DataFrame) else X
+        y_arr = y.values if isinstance(y, pd.Series) else y
+        
+        y_bin = (y_arr.astype(float) == 1).astype(int)
         self._model = XGBClassifier(
             n_estimators=self.n_estimators,
             max_depth=self.max_depth,
@@ -39,14 +43,15 @@ class XGBoostModel(ProbabilisticModel):
             eval_metric="logloss",
             n_jobs=2,
         )
-        self._model.fit(X.values, y_bin.values, sample_weight=sample_weight)
+        self._model.fit(X_arr, y_bin, sample_weight=sample_weight)
         self._fitted = True
         return self
 
-    def predict_proba(self, X: pd.DataFrame) -> np.ndarray:
+    def predict_proba(self, X: pd.DataFrame | np.ndarray) -> np.ndarray:
         if not self._fitted:
             raise RuntimeError("Model not fitted")
-        return self._model.predict_proba(X.values)
+        X_arr = X.values if isinstance(X, pd.DataFrame) else X
+        return self._model.predict_proba(X_arr)
 
 
 def available_model_backends() -> list[str]:
