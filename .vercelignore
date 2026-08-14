@@ -1,0 +1,26 @@
+# Ignore everything except dashboard
+/*
+!/dashboard/
+
+# But keep necessary files
+!.gitignore
+!README.md
+
+# Python dependencies
+*.pyc
+__pycache__/
+*.py
+*.txt
+pyproject.toml
+requirements*.txt
+
+# QuantGold system
+quantgold/
+tests/
+data/
+artifacts/
+paper_trading/
+scaffold/
+
+# Docs
+docs/
