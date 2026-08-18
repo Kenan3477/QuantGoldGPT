@@ -14,11 +14,12 @@ COPY dashboard/ ./dashboard/
 # Copy paper trading data if it exists (won't fail if directory is missing)
 COPY --chown=root:root paper_trading ./paper_trading
 
-# Make startup script executable
-RUN chmod +x /app/dashboard/startup.sh
+# Copy entrypoint script
+COPY dashboard/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
 # Expose port (Railway will set $PORT)
 EXPOSE 8080
 
-# Use startup script for better logging
-CMD ["/bin/bash", "/app/dashboard/startup.sh"]
+# Use entrypoint script
+ENTRYPOINT ["/entrypoint.sh"]
