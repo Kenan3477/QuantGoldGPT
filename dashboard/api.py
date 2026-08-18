@@ -27,18 +27,28 @@ app.add_middleware(
 
 def get_latest_predictions_file() -> Optional[str]:
     """Get the most recent predictions parquet file."""
-    files = glob.glob("/workspace/paper_trading/predictions_*.parquet")
-    if not files:
-        return None
-    return max(files, key=lambda x: Path(x).stat().st_mtime)
+    # Support both /workspace (local) and /app (Docker/Railway)
+    base_paths = ["/app/paper_trading", "/workspace/paper_trading", "paper_trading"]
+    
+    for base_path in base_paths:
+        files = glob.glob(f"{base_path}/predictions_*.parquet")
+        if files:
+            return max(files, key=lambda x: Path(x).stat().st_mtime)
+    
+    return None
 
 
 def get_latest_summary_file() -> Optional[str]:
     """Get the most recent summary JSON file."""
-    files = glob.glob("/workspace/paper_trading/summary_*.json")
-    if not files:
-        return None
-    return max(files, key=lambda x: Path(x).stat().st_mtime)
+    # Support both /workspace (local) and /app (Docker/Railway)
+    base_paths = ["/app/paper_trading", "/workspace/paper_trading", "paper_trading"]
+    
+    for base_path in base_paths:
+        files = glob.glob(f"{base_path}/summary_*.json")
+        if files:
+            return max(files, key=lambda x: Path(x).stat().st_mtime)
+    
+    return None
 
 
 @app.get("/")

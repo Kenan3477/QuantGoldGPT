@@ -8,12 +8,17 @@ COPY requirements-dashboard.txt .
 # Install dependencies
 RUN pip install --no-cache-dir -r requirements-dashboard.txt
 
-# Copy dashboard code and paper trading data
+# Copy dashboard code
 COPY dashboard/ ./dashboard/
-COPY paper_trading/ ./paper_trading/
+
+# Copy paper trading data if it exists (won't fail if directory is missing)
+COPY --chown=root:root paper_trading ./paper_trading
+
+# Make startup script executable
+RUN chmod +x /app/dashboard/startup.sh
 
 # Expose port (Railway will set $PORT)
 EXPOSE 8080
 
-# Start the FastAPI dashboard API
-CMD uvicorn dashboard.api:app --host 0.0.0.0 --port ${PORT:-8080}
+# Use startup script for better logging
+CMD ["/bin/bash", "/app/dashboard/startup.sh"]
