@@ -1,11 +1,8 @@
 [phases.setup]
-nixPkgs = ["python310", "python310Packages.pip", "nodejs"]
+nixPkgs = ["python312"]
 
 [phases.install]
-cmd = "pip install -r requirements.txt"
-
-[phases.build]
-cmd = "echo 'Build phase completed'"
+cmds = ["pip install -r requirements-dashboard.txt"]
 
 [start]
-cmd = "python railway_start.py"
+cmd = "uvicorn dashboard.api:app --host 0.0.0.0 --port $PORT"
