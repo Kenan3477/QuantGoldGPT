@@ -51,6 +51,16 @@ def read_root():
     }
 
 
+@app.get("/api/live-gold-price")
+def legacy_healthcheck():
+    """Legacy healthcheck endpoint for Railway compatibility."""
+    return {
+        "status": "ok",
+        "price": 0,
+        "message": "Legacy endpoint - use /api/status instead"
+    }
+
+
 @app.get("/api/status")
 def get_status():
     """Get overall system status."""
