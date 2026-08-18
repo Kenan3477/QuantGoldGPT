@@ -1,0 +1,63 @@
+project_name: QuantGold
+random_seed: 42
+primary_timeframe: M15
+
+instruments:
+  - symbol: XAUUSD
+    asset_class: precious_metal
+    enabled: true
+  - symbol: XAGUSD
+    asset_class: precious_metal
+    enabled: true
+
+timeframes:
+  - {name: M1, minutes: 1}
+  - {name: M5, minutes: 5}
+  - {name: M15, minutes: 15}
+  - {name: H1, minutes: 60}
+  - {name: H4, minutes: 240}
+  - {name: D1, minutes: 1440}
+
+triple_barrier:
+  upper_atr_mult: 1.5  # Symmetric: both profit and stop at 1.5x ATR
+  lower_atr_mult: 1.5  # This should create more balanced BUY/SELL labels
+  max_holding_bars: 12
+  atr_period: 14
+  # When both barriers are touched in the same bar, do not invent a winner.
+  same_bar_policy: ambiguous
+  min_move_atr: 0.0
+
+validation:
+  train_years: 3
+  validation_years: 1
+  test_years: 1
+  step_years: 1
+  embargo_bars: 12
+  purge_label_horizon_bars: 12
+  # Set explicitly before any model selection; never tune against this window.
+  final_holdout_start: null
+
+decision:
+  min_calibrated_probability: 0.82  # Testing higher threshold for max accuracy
+  max_model_disagreement: 0.20
+  enable_meta_label: true
+  allow_no_trade: true
+
+risk:
+  risk_per_trade_pct: 0.5
+  max_daily_loss_pct: 2.0
+  max_weekly_loss_pct: 5.0
+  max_positions: 2
+  max_portfolio_heat_pct: 3.0
+  max_confidence_size_multiplier: 1.25
+
+costs:
+  spread_points: 25.0
+  commission_per_lot: 0.0
+  slippage_points: 5.0
+  latency_ms: 150
+  reject_probability: 0.0
+
+data_root: artifacts/datasets
+model_registry_root: artifacts/models
+experiment_root: experiments

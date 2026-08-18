@@ -1,0 +1,54 @@
+{
+  "symbol": "XAUUSD",
+  "timeframe": "H4",
+  "model_names": [
+    "xgboost"
+  ],
+  "folds": [
+    {
+      "fold_id": 0,
+      "n_train": 1761,
+      "n_val": 587,
+      "n_test": 587,
+      "test_precision_trades": 0.6197183098591549,
+      "test_coverage": 0.12095400340715502,
+      "test_brier": 0.2177856979560896,
+      "test_ece": 0.07239262326866439,
+      "n_trades": 71,
+      "metrics": {
+        "calibration_method": "raw"
+      }
+    },
+    {
+      "fold_id": 1,
+      "n_train": 1980,
+      "n_val": 660,
+      "n_test": 661,
+      "test_precision_trades": 0.9484536082474226,
+      "test_coverage": 0.14674735249621784,
+      "test_brier": 0.20062130659623237,
+      "test_ece": 0.062267096845627555,
+      "n_trades": 97,
+      "metrics": {
+        "calibration_method": "raw"
+      }
+    },
+    {
+      "fold_id": 2,
+      "n_train": 2200,
+      "n_val": 733,
+      "n_test": 734,
+      "test_precision_trades": 0.9545454545454546,
+      "test_coverage": 0.14986376021798364,
+      "test_brier": 0.19390764119752565,
+      "test_ece": 0.08429449840324452,
+      "n_trades": 110,
+      "metrics": {
+        "calibration_method": "raw"
+      }
+    }
+  ],
+  "predictions": [
+    {
+      "fold_id": 0,
+      "timestamp": 

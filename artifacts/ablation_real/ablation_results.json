@@ -1,0 +1,287 @@
+[
+  {
+    "feature_set": "base",
+    "feature_families": [
+      "base"
+    ],
+    "n_features": 26,
+    "accuracy": 0.6174103877103145,
+    "precision": 0.5,
+    "recall": 0.3938814531548757,
+    "f1": 0.4406417112299465,
+    "coverage": 1.0,
+    "top_features": [
+      [
+        "session_ny",
+        0.07915225625038147
+      ],
+      [
+        "dist_session_low",
+        0.07001877576112747
+      ],
+      [
+        "dist_session_high",
+        0.058592867106199265
+      ],
+      [
+        "session_london",
+        0.049518171697854996
+      ],
+      [
+        "session_asia",
+        0.04951293766498566
+      ],
+      [
+        "session_range_pct",
+        0.04683540016412735
+      ],
+      [
+        "hour_utc",
+        0.046518679708242416
+      ],
+      [
+        "prev_day_low_dist",
+        0.04524214193224907
+      ],
+      [
+        "weekday",
+        0.04409722238779068
+      ],
+      [
+        "prev_session_return",
+        0.04379790276288986
+      ]
+    ],
+    "train_time_seconds": 0.12842822074890137
+  },
+  {
+    "feature_set": "base+micro",
+    "feature_families": [
+      "base",
+      "micro"
+    ],
+    "n_features": 30,
+    "accuracy": 0.6444769568397952,
+    "precision": 0.5445783132530121,
+    "recall": 0.4321223709369025,
+    "f1": 0.48187633262260127,
+    "coverage": 1.0,
+    "top_features": [
+      [
+        "session_asia",
+        0.07300398498773575
+      ],
+      [
+        "session_ny",
+        0.0677167996764183
+      ],
+      [
+        "dist_session_low",
+        0.06170268356800079
+      ],
+      [
+        "dist_session_high",
+        0.055842380970716476
+      ],
+      [
+        "session_london",
+        0.04623665288090706
+      ],
+      [
+        "session_range_pct",
+        0.04249991476535797
+      ],
+      [
+        "session_london_ny_overlap",
+        0.03782834857702255
+      ],
+      [
+        "prev_day_low_dist",
+        0.037636078894138336
+      ],
+      [
+        "rolling_high_20_dist",
+        0.03587273135781288
+      ],
+      [
+        "hour_utc",
+        0.03586893528699875
+      ]
+    ],
+    "train_time_seconds": 0.14370346069335938
+  },
+  {
+    "feature_set": "base+micro+mtf",
+    "feature_families": [
+      "base",
+      "micro",
+      "mtf"
+    ],
+    "n_features": 30,
+    "accuracy": 0.6444769568397952,
+    "precision": 0.5445783132530121,
+    "recall": 0.4321223709369025,
+    "f1": 0.48187633262260127,
+    "coverage": 1.0,
+    "top_features": [
+      [
+        "session_asia",
+        0.07300398498773575
+      ],
+      [
+        "session_ny",
+        0.0677167996764183
+      ],
+      [
+        "dist_session_low",
+        0.06170268356800079
+      ],
+      [
+        "dist_session_high",
+        0.055842380970716476
+      ],
+      [
+        "session_london",
+        0.04623665288090706
+      ],
+      [
+        "session_range_pct",
+        0.04249991476535797
+      ],
+      [
+        "session_london_ny_overlap",
+        0.03782834857702255
+      ],
+      [
+        "prev_day_low_dist",
+        0.037636078894138336
+      ],
+      [
+        "rolling_high_20_dist",
+        0.03587273135781288
+      ],
+      [
+        "hour_utc",
+        0.03586893528699875
+      ]
+    ],
+    "train_time_seconds": 0.13355612754821777
+  },
+  {
+    "feature_set": "base+micro+mtf+smc",
+    "feature_families": [
+      "base",
+      "micro",
+      "mtf",
+      "smc"
+    ],
+    "n_features": 36,
+    "accuracy": 0.6327724945135332,
+    "precision": 0.5260545905707196,
+    "recall": 0.40535372848948376,
+    "f1": 0.45788336933045354,
+    "coverage": 1.0,
+    "top_features": [
+      [
+        "dist_session_low",
+        0.05577903985977173
+      ],
+      [
+        "dist_session_high",
+        0.051495183259248734
+      ],
+      [
+        "session_ny",
+        0.04754669964313507
+      ],
+      [
+        "bos_bear_recent",
+        0.0374462753534317
+      ],
+      [
+        "session_london",
+        0.036644987761974335
+      ],
+      [
+        "session_asia",
+        0.035979367792606354
+      ],
+      [
+        "session_range_pct",
+        0.035940300673246384
+      ],
+      [
+        "prev_day_low_dist",
+        0.03514041006565094
+      ],
+      [
+        "swing_high_dist",
+        0.0347910039126873
+      ],
+      [
+        "session_london_ny_overlap",
+        0.032669857144355774
+      ]
+    ],
+    "train_time_seconds": 0.13952946662902832
+  },
+  {
+    "feature_set": "base+micro+mtf+smc+intermarket",
+    "feature_families": [
+      "base",
+      "micro",
+      "mtf",
+      "smc",
+      "intermarket"
+    ],
+    "n_features": 54,
+    "accuracy": 0.6320409656181419,
+    "precision": 0.5242718446601942,
+    "recall": 0.4130019120458891,
+    "f1": 0.46203208556149733,
+    "coverage": 1.0,
+    "top_features": [
+      [
+        "session_ny",
+        0.057299092411994934
+      ],
+      [
+        "session_asia",
+        0.051692649722099304
+      ],
+      [
+        "dist_session_low",
+        0.051555462181568146
+      ],
+      [
+        "dist_session_high",
+        0.05080724507570267
+      ],
+      [
+        "session_range_pct",
+        0.04057208448648453
+      ],
+      [
+        "session_london_ny_overlap",
+        0.03867253288626671
+      ],
+      [
+        "rolling_high_20_dist",
+        0.03426581621170044
+      ],
+      [
+        "weekday",
+        0.03353722020983696
+      ],
+      [
+        "prev_day_low_dist",
+        0.03315321356058121
+      ],
+      [
+        "swing_high_dist",
+        0.03297486528754234
+      ]
+    ],
+    "train_time_seconds": 0.14897418022155762
+  }
+]

@@ -1,2 +1,1 @@
-web: python app.py
-# 🔥 FIXED: Auto-close learning system with correct app.py 🔥
+web: uvicorn dashboard.api:app --host 0.0.0.0 --port $PORT
